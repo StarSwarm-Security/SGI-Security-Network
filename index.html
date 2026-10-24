@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>StarSwarm SGI Security Network</title>
+<meta name="description" content="StarSwarm SGI Security Network: offline Analyze, Threat Index, BTC/ETH liquidation war map, Hive, free VPN and Protect tools.">
+<meta name="theme-color" content="#05071a">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="cover" aria-hidden="true"></div>
+<div class="veil" aria-hidden="true"></div>
+<div class="matrix" aria-hidden="true"></div>
+<div class="shell">
+  <header class="top glass">
+    <div class="brand">
+      <p class="parent">StarSwarm</p>
+      <h1>SGI Security Network</h1>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="SGI tabs">
+      <button role="tab" class="on" data-tab="home" aria-selected="true">Home</button>
+      <button role="tab" data-tab="analyze" aria-selected="false">Analyze</button>
+      <button role="tab" data-tab="threats" aria-selected="false">Threat Index</button>
+      <button role="tab" data-tab="hive" aria-selected="false">Hive</button>
+      <button role="tab" data-tab="qhm" aria-selected="false">Quantum Helium</button>
+      <button role="tab" data-tab="vpn" aria-selected="false">VPN</button>
+      <button role="tab" data-tab="protect" aria-selected="false">Protect</button>
+    </nav>
+    <a class="pill" href="https://github.com/sponsors/StarSwarm-Security" target="_blank" rel="noopener">Sponsor</a>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <section id="tab-home" class="panel glass home-desk pinable" role="tabpanel">
+      <h2 class="hero-title">Dense security desk</h2>
+      <p class="lede">Offline network analysis, a merged threat index, BTC/ETH liquidation war map, defender hive, free VPN picks and protect tools. Wallet tracker removed.</p>
+      <div class="hub">
+        <button data-go="analyze"><b>Analyze</b><span>Paste Cisco / symptoms. Study cards as overlays.</span></button>
+        <button data-go="threats"><b>Threat Index</b><span>A–Z threats, bots, restricted wallets.</span></button>
+        <button data-go="hive"><b>Hive</b><span>Defender swarm on a CCNA map.</span></button>
+        <button data-go="qhm"><b>Quantum Helium</b><span>Bubbles + BTC/ETH liquidation war map.</span></button>
+        <button data-go="vpn"><b>VPN</b><span>Free tiers + affiliate slots (signup needed).</span></button>
+        <button data-go="protect"><b>Protect</b><span>VirusTotal, Malwarebytes, Defender tips.</span></button>
+      </div>
+      <p class="fine">Click a glass panel to pin opaque. Hover chips for secondary facts. No trackers. No invented live numbers.</p>
+    </section>
+
+    <!-- ANALYZE -->
+    <section id="tab-analyze" class="panel glass pinable" role="tabpanel" hidden>
+      <div class="row-head">
+        <h2>Analyze</h2>
+        <div class="chiprow">
+          <button type="button" class="chip" id="study-open">Study cards</button>
+          <button type="button" class="chip" id="sample-paste">Sample paste</button>
+        </div>
+      </div>
+      <label class="lbl" for="paste">Cisco output or symptoms</label>
+      <textarea id="paste" rows="7" spellcheck="false" placeholder="Paste show run, show ip int brief, logs, or a symptom…"></textarea>
+      <div class="row">
+        <select id="device"><option value="auto">Auto device</option><option value="router">Router</option><option value="switch">Switch</option><option value="wlc">WLC</option><option value="asa">ASA/FTD</option></select>
+        <button class="cta" id="run-analyze">Run offline</button>
+      </div>
+      <div id="analyze-out" class="out"></div>
+    </section>
+
+    <!-- THREAT INDEX -->
+    <section id="tab-threats" class="panel glass pinable" role="tabpanel" hidden>
+      <div class="row-head">
+        <h2>Threat Index</h2>
+        <input id="ti-q" type="search" placeholder="Filter…" autocomplete="off">
+      </div>
+      <div class="type-filters" id="ti-types">
+        <button class="chip on" data-type="all">All</button>
+        <button class="chip" data-type="threat">Threat</button>
+        <button class="chip" data-type="bot">Bot</button>
+        <button class="chip" data-type="wallet">Wallet</button>
+        <button class="chip" data-type="ip">IP</button>
+      </div>
+      <div class="az" id="ti-az"></div>
+      <div id="ti-list" class="ti-list"></div>
+      <p class="fine" id="ti-meta"></p>
+    </section>
+
+
+    <!-- HIVE -->
+    <section id="tab-hive" class="panel glass hive-panel pinable" role="tabpanel" hidden>
+      <div class="row-head">
+        <h2>Defender hive</h2>
+        <span class="badge" title="Simulated training map">SIM</span>
+      </div>
+      <p class="lede">CCNA-shaped defender swarm. Click a node for watches, CCNA notes, and defense tips.</p>
+      <svg id="hive-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hive network map"></svg>
+      <aside id="hive-detail" class="glass" hidden></aside>
+    </section>
+
+    <!-- QUANTUM HELIUM -->
+    <section id="tab-qhm" class="panel glass qhm-panel pinable" role="tabpanel" hidden>
+      <div class="qhm-grid">
+        <div id="qhm-root"></div>
+        <aside class="liq-dock glass" id="liq-dock">
+          <div class="row-head">
+            <h3>Liq war map</h3>
+            <div class="chiprow">
+              <button type="button" class="chip on" data-sym="BTC">BTC</button>
+              <button type="button" class="chip" data-sym="ETH">ETH</button>
+              <span class="badge" id="liq-badge">…</span>
+            </div>
+          </div>
+          <div class="liq-stats" id="liq-stats"></div>
+          <canvas id="liq-canvas"></canvas>
+          <p class="fine" id="liq-note">…</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- VPN -->
+    <section id="tab-vpn" class="panel glass pinable" role="tabpanel" hidden>
+      <h2>Free VPN desk</h2>
+      <p class="lede">Honest free tiers. Affiliate links need your own partner signup. Ad slots are placeholders until you wire a network.</p>
+      <div class="cards3" id="vpn-cards"></div>
+      <div class="ad-slot">Ad slot · 728×90 placeholder · wire AdSense / EthicalAds after approval</div>
+      <p class="fine">Urban VPN free extension has been flagged in privacy write-ups for data collection. We omit it. Atlas VPN free tier has been retired or restricted in some regions. Verify before promoting.</p>
+    </section>
+
+    <!-- PROTECT -->
+    <section id="tab-protect" class="panel glass pinable" role="tabpanel" hidden>
+      <h2>Protect</h2>
+      <p class="lede">Free, up-to-date malware / spyware checks you can link or embed. No fake partnerships.</p>
+      <div class="cards3" id="protect-cards"></div>
+      <div class="ad-slot">Ad / affiliate slot · Malwarebytes Impact or similar · signup required</div>
+      <p class="fine">VirusTotal is free for URL/file checks via their site (API keys have rate limits). URLhaus is free for lookups. Windows Defender is built-in. Document any affiliate ID before going live.</p>
+    </section>
+  </main>
+
+  <footer class="bar glass">
+    <span>StarSwarm SGI Security Network</span>
+    <span class="mute">by StarSwarm Agentic Security</span>
+  </footer>
+</div>
+
+<!-- Study overlay -->
+<aside id="study-drawer" class="drawer glass" hidden>
+  <button class="x" id="study-close" aria-label="Close">×</button>
+  <h3>Study cards</h3>
+  <div class="chiprow" id="study-tabs">
+    <button class="chip on" data-study="ref">Quick ref</button>
+    <button class="chip" data-study="lists">Checklists</button>
+    <button class="chip" data-study="cards">Cheatsheet</button>
+  </div>
+  <div id="study-body"></div>
+</aside>
+
+<!-- Threat detail overlay -->
+<aside id="ti-drawer" class="drawer glass" hidden>
+  <button class="x" id="ti-close" aria-label="Close">×</button>
+  <div id="ti-body"></div>
+</aside>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
