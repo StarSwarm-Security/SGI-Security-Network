@@ -7,6 +7,7 @@ import { mountQHM } from './js/qhm/panel.js';
 import { mountSwarmPass } from './js/swarm-pass.js';
 import { mountBounty } from './js/bounty.js';
 import { mountRedeem } from './js/redeem.js';
+import { mountSpotlight } from './js/spotlight.js';
 
 const $ = id => document.getElementById(id);
 const tabs = [...document.querySelectorAll('.tabs [role="tab"]')];
@@ -183,6 +184,8 @@ document.querySelectorAll('.pinable').forEach(p => {
 document.querySelectorAll('.chip,.badge').forEach(el => {
   if (!el.title && el.textContent) el.title = el.textContent.trim();
 });
+
+mountSpotlight();
 
 window.addEventListener('sgi:goto', e => { if (e.detail && panels[e.detail]) show(e.detail); });
 
