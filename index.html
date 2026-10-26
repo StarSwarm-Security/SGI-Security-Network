@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>StarSwarm SGI Security Network</title>
-<meta name="description" content="StarSwarm SGI Security Network: offline Analyze, Threat Index, BTC/ETH liquidation war map, Hive, free VPN and Protect tools.">
+<meta name="description" content="StarSwarm SGI Security Network: offline Analyze, Threat Index, BTC/ETH liquidation war map, Hive, Swarm Pass, Bounty board, free VPN and Protect tools.">
 <meta name="theme-color" content="#05071a">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -24,6 +24,9 @@
       <button role="tab" data-tab="threats" aria-selected="false">Threat Index</button>
       <button role="tab" data-tab="hive" aria-selected="false">Hive</button>
       <button role="tab" data-tab="qhm" aria-selected="false">Quantum Helium</button>
+      <button role="tab" data-tab="swarm" aria-selected="false">Swarm Pass</button>
+      <button role="tab" data-tab="bounty" aria-selected="false">Bounty</button>
+      <button role="tab" data-tab="redeem" aria-selected="false">Redeem</button>
       <button role="tab" data-tab="vpn" aria-selected="false">VPN</button>
       <button role="tab" data-tab="protect" aria-selected="false">Protect</button>
     </nav>
@@ -42,6 +45,9 @@
         <button data-go="qhm"><b>Quantum Helium</b><span>Bubbles + BTC/ETH liquidation war map.</span></button>
         <button data-go="vpn"><b>VPN</b><span>Free tiers + affiliate slots (signup needed).</span></button>
         <button data-go="protect"><b>Protect</b><span>VirusTotal, Malwarebytes, Defender tips.</span></button>
+        <button data-go="swarm"><b>Swarm Pass</b><span>Badges, streaks, Swarm Credits (local).</span></button>
+        <button data-go="bounty"><b>Bounty</b><span>Demo leaderboards · SC only.</span></button>
+        <button data-go="redeem"><b>Redeem</b><span>XMR / SOL / ETH / BTC gift cards — Coming soon.</span></button>
       </div>
       <p class="fine">Click a glass panel to pin opaque. Hover chips for secondary facts. No trackers. No invented live numbers.</p>
     </section>
@@ -112,6 +118,21 @@
           <p class="fine" id="liq-note">…</p>
         </aside>
       </div>
+    </section>
+
+    <!-- SWARM PASS -->
+    <section id="tab-swarm" class="panel glass pinable" role="tabpanel" hidden>
+      <div id="swarm-root"></div>
+    </section>
+
+    <!-- BOUNTY -->
+    <section id="tab-bounty" class="panel glass pinable" role="tabpanel" hidden>
+      <div id="bounty-root"></div>
+    </section>
+
+    <!-- REDEEM -->
+    <section id="tab-redeem" class="panel glass pinable" role="tabpanel" hidden>
+      <div id="redeem-root"></div>
     </section>
 
     <!-- VPN -->

@@ -4,12 +4,15 @@ import { mountHive, NODES, THREATS } from './js/hive.js';
 import { loadWarMap, drawWarMap } from './js/liq.js';
 import { loadThreatIndex } from './js/threat-index.js';
 import { mountQHM } from './js/qhm/panel.js';
+import { mountSwarmPass } from './js/swarm-pass.js';
+import { mountBounty } from './js/bounty.js';
+import { mountRedeem } from './js/redeem.js';
 
 const $ = id => document.getElementById(id);
 const tabs = [...document.querySelectorAll('.tabs [role="tab"]')];
 const panels = Object.fromEntries([...document.querySelectorAll('[role="tabpanel"]')].map(el => [el.id.replace('tab-', ''), el]));
 
-let qhmCtl = null, hiveCtl = null, threatData = null, liqSym = 'BTC', liqReady = false;
+let qhmCtl = null, hiveCtl = null, threatData = null, liqSym = 'BTC', liqReady = false, swarmCtl = null, bountyCtl = null, redeemCtl = null;
 
 function show(id) {
   for (const [k, el] of Object.entries(panels)) el.hidden = k !== id;
@@ -33,6 +36,18 @@ function show(id) {
   }
   if (id === 'threats' && !threatData) initThreats();
   if (id === 'liq') refreshLiq();
+  if (id === 'swarm') {
+    if (!swarmCtl) swarmCtl = mountSwarmPass($('swarm-root'));
+    else swarmCtl.refresh();
+  }
+  if (id === 'bounty') {
+    if (!bountyCtl) bountyCtl = mountBounty($('bounty-root'));
+    else bountyCtl.refresh();
+  }
+  if (id === 'redeem') {
+    if (!redeemCtl) redeemCtl = mountRedeem($('redeem-root'));
+    else redeemCtl.refresh();
+  }
 }
 
 tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
@@ -168,6 +183,8 @@ document.querySelectorAll('.pinable').forEach(p => {
 document.querySelectorAll('.chip,.badge').forEach(el => {
   if (!el.title && el.textContent) el.title = el.textContent.trim();
 });
+
+window.addEventListener('sgi:goto', e => { if (e.detail && panels[e.detail]) show(e.detail); });
 
 const start = (location.hash || '').replace(/^#/, '');
 show(panels[start] ? start : 'home');

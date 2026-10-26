@@ -129,3 +129,32 @@ select{border-radius:8px;border:1px solid rgba(0,255,100,.2);background:rgba(0,0
   #liq-canvas{height:100px}
   #tab-threats .ti-list{grid-template-columns:1fr}
 }
+
+/* Swarm Pass / Bounty / Redeem */
+.sp-stats,.bn-rails{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.sp-stats div{padding:6px 10px;border-radius:8px;border:1px solid rgba(0,255,100,.18);background:rgba(0,0,0,.3);min-width:72px}
+.sp-stats span{display:block;font-size:8px;color:var(--mute);text-transform:uppercase;font-family:Orbitron,sans-serif}
+.sp-stats b{font-family:Sora,sans-serif;font-size:16px;color:var(--g2)}
+.sp-sub{font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--g2);margin:14px 0 6px;text-shadow:0 0 8px rgba(0,255,100,.3)}
+.sp-badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px}
+.sp-badge{padding:8px 10px;border-radius:10px;border:1px solid rgba(0,255,100,.15);background:rgba(0,0,0,.28);opacity:.55}
+.sp-badge.on{opacity:1;border-color:var(--g);box-shadow:0 0 14px rgba(0,255,100,.18);background:rgba(0,255,80,.06)}
+.sp-badge b{display:block;font-family:Orbitron,sans-serif;font-size:11px;color:var(--g2);margin-bottom:2px}
+.sp-badge span{font-size:10px;color:var(--mute);line-height:1.3}
+.sp-legal{margin-top:14px;padding:10px 12px;border-radius:12px;border:1px solid rgba(0,255,100,.2);background:rgba(0,0,0,.35)}
+.sp-terms{margin:6px 0 0 16px;font-size:11px;color:#b8e6c8;line-height:1.45}
+.sp-terms li{margin-bottom:4px}
+.chip.disabled,.cta.disabled,button.disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.4);pointer-events:none;box-shadow:none!important}
+.bn-table-wrap{overflow:auto;margin-top:8px;border-radius:10px;border:1px solid rgba(0,255,100,.18)}
+.bn-table{width:100%;border-collapse:collapse;font-size:12px}
+.bn-table th,.bn-table td{padding:7px 10px;text-align:left;border-bottom:1px solid rgba(0,255,100,.1)}
+.bn-table th{font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--mute);background:rgba(0,0,0,.35)}
+.bn-table .rk{font-family:Orbitron,sans-serif;color:var(--g2);width:48px}
+.bn-table .sc{font-family:Sora,sans-serif;color:var(--g);font-weight:600}
+.bn-pot{margin-top:6px}
+.redeem-card.coming{position:relative}
+.redeem-card .cta.disabled{background:linear-gradient(180deg,#445,#223);color:#889}
+@media (max-width:760px){
+  .sp-badges{grid-template-columns:1fr 1fr}
+  .tabs button{font-size:7.5px;padding:5px 3px}
+}
