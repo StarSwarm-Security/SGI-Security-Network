@@ -26,7 +26,7 @@ export function mountSpotlight() {
   function onLeave() { mx = -9999; my = -9999; dirty = true; }
 
   function onClick(e) {
-    const t = e.target.closest('.panel,.glass,.cardx,.hub button,.ti-item,.chip,.cta,.tabs button,.find,.sp-badge,.bn-table-wrap,button,a');
+    const t = e.target.closest('.panel,.glass,.cardx,.hub button,.ti-item,.chip,.cta,.tabs button,.find,.sp-badge,.bn-table-wrap,.castle-hot,.castle-li,button,a');
     if (t) {
       t.classList.add('lit-flash');
       setTimeout(() => t.classList.remove('lit-flash'), 700);

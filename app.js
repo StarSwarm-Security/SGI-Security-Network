@@ -9,17 +9,35 @@ import { mountBounty } from './js/bounty.js';
 import { mountRedeem } from './js/redeem.js';
 import { mountSpotlight } from './js/spotlight.js';
 import { mountCastle, WINGS } from './js/castle.js';
+import { scanPaste, samplePaste } from './js/paste-guard.js';
 
 const $ = id => document.getElementById(id);
 const tabs = [...document.querySelectorAll('.tabs [role="tab"]')];
 const panels = Object.fromEntries([...document.querySelectorAll('[role="tabpanel"]')].map(el => [el.id.replace('tab-', ''), el]));
+const moreBtn = $('more-btn');
+const moreMenu = $('more-menu');
+
+function setMoreOpen(open) {
+  if (!moreBtn || !moreMenu) return;
+  moreMenu.hidden = !open;
+  moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+function syncTabChrome(activeId) {
+  tabs.forEach(t => {
+    const on = t.dataset.tab === activeId;
+    t.classList.toggle('on', on);
+    t.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  if (moreBtn) moreBtn.classList.toggle('open-section', activeId && activeId !== 'home');
+}
 
 let qhmCtl = null, hiveCtl = null, threatData = null, liqSym = 'BTC', liqReady = false, swarmCtl = null, bountyCtl = null, redeemCtl = null, castleCtl = null;
 const wingOverlay = () => $('wing-overlay');
 const wingBody = () => $('wing-body');
 const mainEl = () => document.querySelector('main');
 const WING_TITLE = Object.fromEntries(WINGS.map(w => [w.id, `${w.name} · ${w.sub}`]));
-WING_TITLE.home = 'Space Castle';
+WING_TITLE.home = 'Home';
 
 function parkPanel(el) {
   if (el && el.parentElement === wingBody()) mainEl().appendChild(el);
@@ -49,11 +67,8 @@ function openWing(id) {
   wingOverlay().hidden = false;
   document.body.classList.add('wing-open');
   $('wing-title').textContent = WING_TITLE[id] || id;
-  tabs.forEach(t => {
-    const on = t.dataset.tab === id;
-    t.classList.toggle('on', on);
-    t.setAttribute('aria-selected', on ? 'true' : 'false');
-  });
+  syncTabChrome(id);
+  setMoreOpen(false);
   history.replaceState(null, '', '#' + id);
   if (castleCtl) castleCtl.highlight(id);
   bootPanel(id);
@@ -99,6 +114,11 @@ function bootPanel(id) {
     if (!redeemCtl) redeemCtl = mountRedeem($('redeem-root'));
     else redeemCtl.refresh();
   }
+  if (id === 'shield') paintShield();
+  if (id === 'analyze') {
+    const wantPg = (location.hash || '').includes('pasteguard') || analyzeMode === 'pasteguard';
+    setAnalyzeMode(wantPg ? 'pasteguard' : 'cisco');
+  }
 }
 
 function show(id) {
@@ -111,15 +131,26 @@ function show(id) {
   wingOverlay().hidden = true;
   document.body.classList.remove('wing-open');
   for (const [k, el] of Object.entries(panels)) el.hidden = k !== 'home';
-  tabs.forEach(t => { const on = t.dataset.tab === 'home'; t.classList.toggle('on', on); t.setAttribute('aria-selected', on ? 'true' : 'false'); });
+  syncTabChrome('home');
+  setMoreOpen(false);
   history.replaceState(null, '', '#');
   ensureCastle();
   if (castleCtl) castleCtl.highlight(null);
 }
 
 
-tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
+tabs.forEach(t => t.addEventListener('click', () => { setMoreOpen(false); show(t.dataset.tab); }));
 document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
+
+if (moreBtn && moreMenu) {
+  moreBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    setMoreOpen(moreMenu.hidden);
+  });
+  document.addEventListener('click', e => {
+    if (!moreMenu.hidden && !e.target.closest('.more-wrap')) setMoreOpen(false);
+  });
+}
 
 /* Analyze */
 const SAMPLE = `Router# show ip interface brief
@@ -154,6 +185,46 @@ $('run-analyze').onclick = () => {
   }
   out.innerHTML = html;
 };
+
+/* Analyze modes: Cisco | Paste Guard */
+let analyzeMode = 'cisco';
+function setAnalyzeMode(mode) {
+  analyzeMode = mode;
+  document.querySelectorAll('#analyze-modes [data-mode]').forEach(c => c.classList.toggle('on', c.dataset.mode === mode));
+  const cisco = $('cisco-desk');
+  const pg = $('pg-desk');
+  if (cisco) cisco.hidden = mode !== 'cisco';
+  if (pg) pg.hidden = mode !== 'pasteguard';
+}
+document.querySelectorAll('#analyze-modes [data-mode]').forEach(c => {
+  c.onclick = () => setAnalyzeMode(c.dataset.mode);
+});
+
+function paintPg(res) {
+  const out = $('pg-out');
+  if (!out) return;
+  const v = res.verdict;
+  const label = v === 'dangerous' ? 'Dangerous' : v === 'suspicious' ? 'Suspicious' : 'Safe';
+  let html = `<div class="pg-verdict ${v}"><span class="pg-pill">${label}</span><p>${res.note}</p></div>`;
+  if (!res.hits.length && v === 'safe') {
+    html += `<div class="find ok"><span class="sev">clear</span><strong> No Paste Guard rule hits.</strong><p class="fine">Still treat unexpected links with care.</p></div>`;
+  }
+  for (const h of res.hits) {
+    html += `<div class="find ${h.sev === 'dangerous' ? 'high' : ''}"><span class="sev">${h.sev}</span> <strong>${h.title}</strong>` +
+      `<p class="fine">${h.id}</p><p>${h.why}</p>` +
+      (h.fix ? `<p><b>Do:</b> ${h.fix}</p>` : '') + `</div>`;
+  }
+  out.innerHTML = html;
+}
+
+$('run-pg').onclick = () => paintPg(scanPaste($('pg-paste').value));
+['pg-sample-safe','pg-sample-sus','pg-sample-bad'].forEach(id => {
+  const el = $(id); if (!el) return;
+  el.onclick = () => {
+    $('pg-paste').value = samplePaste(el.dataset.pg);
+    paintPg(scanPaste($('pg-paste').value));
+  };
+});
 
 /* Study drawer (merged into Analyze) */
 const studyBody = $('study-body');
@@ -226,19 +297,22 @@ document.querySelectorAll('[data-sym]').forEach(b => b.onclick = () => {
 });
 addEventListener('resize', () => { if (!$('tab-qhm').hidden) refreshLiq(); });
 
-/* VPN */
-$('vpn-cards').innerHTML = [
-  { name: 'Proton VPN Free', note: 'Unlimited data, no ads, 1 device, no-logs. Swiss. Free forever tier funded by paid users.', aff: 'Affiliate: Proton Partners (signup at proton.me/partners). Free tier itself has no ads.', url: 'https://protonvpn.com/free-vpn', cta: 'Get free Proton VPN' },
-  { name: 'Windscribe Free', note: '10 GB/month after email confirm (2 GB without). Built-in R.O.B.E.R.T. ad/tracker blocker. Honest marketing.', aff: 'Affiliate: Windscribe direct (~25% recurring on Pro). Free tier stays free.', url: 'https://windscribe.com/', cta: 'Get Windscribe Free' },
-  { name: 'Cloudflare WARP / 1.1.1.1', note: 'Free consumer VPN-like tunnel from Cloudflare. No classic affiliate program. Good zero-cost option.', aff: 'No affiliate program we found. Link only.', url: 'https://one.one.one.one/', cta: 'Get 1.1.1.1' },
-].map(v => `<article class="cardx"><h3>${v.name}</h3><p>${v.note}</p><p class="fine">${v.aff}</p><a href="${v.url}" target="_blank" rel="noopener">${v.cta}</a></article>`).join('');
-
-/* Protect */
-$('protect-cards').innerHTML = [
-  { name: 'VirusTotal', note: 'Paste a URL or upload a file for multi-engine scans. Free web UI. API keys are rate-limited.', aff: 'No consumer affiliate. Embed: link out or VT widget if you apply for API access.', url: 'https://www.virustotal.com/gui/home/url', cta: 'Check a URL' },
-  { name: 'Malwarebytes Free', note: 'On-demand malware / adware scanner. Free tier is real; Premium is the upsell.', aff: 'Affiliate via Impact (Malwarebytes partners). Wire your Impact ID before monetizing.', url: 'https://www.malwarebytes.com/mwb-download', cta: 'Download free' },
-  { name: 'URLhaus + Defender tips', note: 'URLhaus: free malware URL database lookups. Windows Defender: keep Real-time protection on, run Offline scan after a scare.', aff: 'URLhaus is free (abuse.ch). Defender is built into Windows. No affiliate.', url: 'https://urlhaus.abuse.ch/', cta: 'Open URLhaus' },
-].map(v => `<article class="cardx"><h3>${v.name}</h3><p>${v.note}</p><p class="fine">${v.aff}</p><a href="${v.url}" target="_blank" rel="noopener">${v.cta}</a></article>`).join('');
+/* Honest Shield (VPN + Protect) */
+function paintShield() {
+  if (!$('vpn-cards') || $('vpn-cards').dataset.ready) return;
+  $('vpn-cards').innerHTML = [
+    { name: 'Proton VPN Free', note: 'Unlimited data, no ads, 1 device, no-logs. Swiss. Free forever tier funded by paid users.', aff: 'Affiliate: Proton Partners (signup at proton.me/partners). Free tier itself has no ads.', url: 'https://protonvpn.com/free-vpn', cta: 'Get free Proton VPN' },
+    { name: 'Windscribe Free', note: '10 GB/month after email confirm (2 GB without). Built-in R.O.B.E.R.T. ad/tracker blocker. Honest marketing.', aff: 'Affiliate: Windscribe direct (~25% recurring on Pro). Free tier stays free.', url: 'https://windscribe.com/', cta: 'Get Windscribe Free' },
+    { name: 'Cloudflare WARP / 1.1.1.1', note: 'Free consumer VPN-like tunnel from Cloudflare. No classic affiliate program. Good zero-cost option.', aff: 'No affiliate program we found. Link only.', url: 'https://one.one.one.one/', cta: 'Get 1.1.1.1' },
+  ].map(v => `<article class="cardx"><h3>${v.name}</h3><p>${v.note}</p><p class="fine">${v.aff}</p><a href="${v.url}" target="_blank" rel="noopener">${v.cta}</a></article>`).join('');
+  $('protect-cards').innerHTML = [
+    { name: 'VirusTotal', note: 'Paste a URL or upload a file for multi-engine scans. Free web UI. API keys are rate-limited.', aff: 'No consumer affiliate. Embed: link out or VT widget if you apply for API access.', url: 'https://www.virustotal.com/gui/home/url', cta: 'Check a URL' },
+    { name: 'Malwarebytes Free', note: 'On-demand malware / adware scanner. Free tier is real; Premium is the upsell.', aff: 'Affiliate via Impact (Malwarebytes partners). Wire your Impact ID before monetizing.', url: 'https://www.malwarebytes.com/mwb-download', cta: 'Download free' },
+    { name: 'URLhaus + Defender tips', note: 'URLhaus: free malware URL database lookups. Windows Defender: keep Real-time protection on, run Offline scan after a scare.', aff: 'URLhaus is free (abuse.ch). Defender is built into Windows. No affiliate.', url: 'https://urlhaus.abuse.ch/', cta: 'Open URLhaus' },
+  ].map(v => `<article class="cardx"><h3>${v.name}</h3><p>${v.note}</p><p class="fine">${v.aff}</p><a href="${v.url}" target="_blank" rel="noopener">${v.cta}</a></article>`).join('');
+  $('vpn-cards').dataset.ready = '1';
+}
+paintShield();
 
 
 /* Pin opaque glass on click */
@@ -256,9 +330,18 @@ mountSpotlight();
 
 $('wing-back').onclick = () => closeWing();
 $('wing-close').onclick = () => closeWing();
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !wingOverlay().hidden) closeWing(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (!moreMenu?.hidden) { setMoreOpen(false); return; }
+  if (!wingOverlay().hidden) closeWing();
+});
 
 window.addEventListener('sgi:goto', e => { if (e.detail && panels[e.detail]) show(e.detail); });
 
-const start = (location.hash || '').replace(/^#/, '');
+let start = (location.hash || '').replace(/^#/, '');
+if (start === 'vpn' || start === 'protect') start = 'shield';
+if (start === 'pasteguard' || start === 'paste-guard') {
+  analyzeMode = 'pasteguard';
+  start = 'analyze';
+}
 show(panels[start] ? start : 'home');

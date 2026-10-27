@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>StarSwarm SGI Security Network</title>
-<meta name="description" content="StarSwarm SGI Security Network: Explore a haunted space castle — each wing opens Analyze, Threat Index, Quantum Helium, Hive, VPN, Protect, Swarm Pass, Bounty, and Redeem.">
+<meta name="description" content="StarSwarm SGI Security Network: Interactive cover map — Analyze (+ Paste Guard), Threat Index, Quantum Helium, Hive, Honest Shield, Swarm Pass, Bounty, and Redeem.">
 <meta name="theme-color" content="#050a14">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -20,43 +20,64 @@
     </div>
     <nav class="tabs" role="tablist" aria-label="SGI tabs">
       <button role="tab" class="on" data-tab="home" aria-selected="true">Home</button>
-      <button role="tab" data-tab="analyze" aria-selected="false">Analyze</button>
-      <button role="tab" data-tab="threats" aria-selected="false">Threat Index</button>
-      <button role="tab" data-tab="hive" aria-selected="false">Hive</button>
-      <button role="tab" data-tab="qhm" aria-selected="false">Quantum Helium</button>
-      <button role="tab" data-tab="swarm" aria-selected="false">Swarm Pass</button>
-      <button role="tab" data-tab="bounty" aria-selected="false">Bounty</button>
-      <button role="tab" data-tab="redeem" aria-selected="false">Redeem</button>
-      <button role="tab" data-tab="vpn" aria-selected="false">VPN</button>
-      <button role="tab" data-tab="protect" aria-selected="false">Protect</button>
+      <div class="more-wrap">
+        <button type="button" class="more-btn" id="more-btn" aria-haspopup="true" aria-expanded="false" aria-controls="more-menu">More ▾</button>
+        <div class="more-menu" id="more-menu" role="menu" hidden>
+          <button role="tab" data-tab="analyze" aria-selected="false">Analyze</button>
+          <button role="tab" data-tab="threats" aria-selected="false">Threat Index</button>
+          <button role="tab" data-tab="hive" aria-selected="false">Hive</button>
+          <button role="tab" data-tab="qhm" aria-selected="false">Quantum Helium</button>
+          <button role="tab" data-tab="swarm" aria-selected="false">Swarm Pass</button>
+          <button role="tab" data-tab="bounty" aria-selected="false">Bounty</button>
+          <button role="tab" data-tab="redeem" aria-selected="false">Redeem</button>
+          <button role="tab" data-tab="shield" aria-selected="false">Honest Shield</button>
+        </div>
+      </div>
     </nav>
     <a class="pill" href="https://github.com/sponsors/StarSwarm-Security" target="_blank" rel="noopener">Sponsor</a>
   </header>
 
   <main>
-    <!-- HOME: haunted space castle map -->
+    <!-- HOME: interactive cover map -->
     <section id="tab-home" class="panel castle-panel pinable" role="tabpanel">
       <div id="castle-root"></div>
     </section>
 
-    <!-- Wing overlay: section panels embed from castle wings -->
+    <!-- Section overlay from map hotspots -->
 
-    <!-- ANALYZE -->
+    <!-- ANALYZE + PASTE GUARD -->
     <section id="tab-analyze" class="panel glass pinable" role="tabpanel" hidden>
       <div class="row-head">
         <h2>Analyze</h2>
-        <div class="chiprow">
+        <div class="chiprow" id="analyze-modes">
+          <button type="button" class="chip on" data-mode="cisco">Cisco</button>
+          <button type="button" class="chip" data-mode="pasteguard">Paste Guard</button>
           <button type="button" class="chip" id="study-open">Study cards</button>
-          <button type="button" class="chip" id="sample-paste">Sample paste</button>
         </div>
       </div>
-      <label class="lbl" for="paste">Cisco output or symptoms</label>
-      <textarea id="paste" rows="7" spellcheck="false" placeholder="Paste show run, show ip int brief, logs, or a symptom…"></textarea>
-      <div class="row">
-        <select id="device"><option value="auto">Auto device</option><option value="router">Router</option><option value="switch">Switch</option><option value="wlc">WLC</option><option value="asa">ASA/FTD</option></select>
-        <button class="cta" id="run-analyze">Run offline</button>
+      <div id="cisco-desk">
+        <label class="lbl" for="paste">Cisco output or symptoms</label>
+        <textarea id="paste" rows="7" spellcheck="false" placeholder="Paste show run, show ip int brief, logs, or a symptom…"></textarea>
+        <div class="row">
+          <select id="device"><option value="auto">Auto device</option><option value="router">Router</option><option value="switch">Switch</option><option value="wlc">WLC</option><option value="asa">ASA/FTD</option></select>
+          <button type="button" class="chip" id="sample-paste">Sample</button>
+          <button class="cta" id="run-analyze">Run offline</button>
+        </div>
+        <div id="analyze-out" class="out"></div>
       </div>
-      <div id="analyze-out" class="out"></div>
+      <div id="pg-desk" hidden>
+        <p class="lede">Offline scam / ClickFix / lookalike check. Paste never leaves this device. Heuristic, not a verdict from an AV cloud.</p>
+        <label class="lbl" for="pg-paste">Suspicious text, link, or chat paste</label>
+        <textarea id="pg-paste" rows="7" spellcheck="false" placeholder="Paste a sketchy DM, URL, or “press Win+R” instruction…"></textarea>
+        <div class="row">
+          <button type="button" class="chip" id="pg-sample-safe" data-pg="safe">Sample safe</button>
+          <button type="button" class="chip" id="pg-sample-sus" data-pg="suspicious">Sample suspicious</button>
+          <button type="button" class="chip" id="pg-sample-bad" data-pg="dangerous">Sample dangerous</button>
+          <button class="cta" id="run-pg">Scan offline</button>
+        </div>
+        <div id="pg-out" class="out"></div>
+        <p class="fine">Share tip: tell people the verdict and rule names only — never forward the raw paste.</p>
+      </div>
     </section>
 
     <!-- THREAT INDEX -->
@@ -124,28 +145,25 @@
       <div id="redeem-root"></div>
     </section>
 
-    <!-- VPN -->
-    <section id="tab-vpn" class="panel glass pinable" role="tabpanel" hidden>
-      <h2>Free VPN desk</h2>
-      <p class="lede">Honest free tiers. Affiliate links need your own partner signup. Ad slots are placeholders until you wire a network.</p>
+    <!-- HONEST SHIELD (VPN + Protect) -->
+    <section id="tab-shield" class="panel glass pinable" role="tabpanel" hidden>
+      <div class="row-head">
+        <h2>Honest Shield</h2>
+        <span class="badge">Free first</span>
+      </div>
+      <p class="lede">VPN + malware desk without scareware. Real free tiers, clear affiliate notes, no fake partnerships. Wire your own partner IDs before monetizing.</p>
+      <h3 class="sp-sub">Free VPN</h3>
       <div class="cards3" id="vpn-cards"></div>
-      <div class="ad-slot">Ad slot · 728×90 placeholder · wire AdSense / EthicalAds after approval</div>
-      <p class="fine">Urban VPN free extension has been flagged in privacy write-ups for data collection. We omit it. Atlas VPN free tier has been retired or restricted in some regions. Verify before promoting.</p>
-    </section>
-
-    <!-- PROTECT -->
-    <section id="tab-protect" class="panel glass pinable" role="tabpanel" hidden>
-      <h2>Protect</h2>
-      <p class="lede">Free, up-to-date malware / spyware checks you can link or embed. No fake partnerships.</p>
+      <h3 class="sp-sub">Malware / spyware checks</h3>
       <div class="cards3" id="protect-cards"></div>
-      <div class="ad-slot">Ad / affiliate slot · Malwarebytes Impact or similar · signup required</div>
-      <p class="fine">VirusTotal is free for URL/file checks via their site (API keys have rate limits). URLhaus is free for lookups. Windows Defender is built-in. Document any affiliate ID before going live.</p>
+      <div class="ad-slot">Ad / affiliate slot · EthicalAds or Malwarebytes Impact · signup required</div>
+      <p class="fine">We omit Urban VPN free (privacy write-ups). Atlas free tier is retired or restricted in some regions. VirusTotal / URLhaus are free lookups. Windows Defender is built-in. Document any affiliate ID before going live.</p>
     </section>
   </main>
 
   <div id="wing-overlay" class="wing-overlay" hidden>
     <div class="wing-bar glass">
-      <button type="button" class="chip" id="wing-back">← Castle</button>
+      <button type="button" class="chip" id="wing-back">← Home</button>
       <span class="wing-title" id="wing-title">Wing</span>
       <button type="button" class="x" id="wing-close" aria-label="Close wing">×</button>
     </div>
