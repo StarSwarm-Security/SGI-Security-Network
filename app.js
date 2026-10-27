@@ -8,17 +8,67 @@ import { mountSwarmPass } from './js/swarm-pass.js';
 import { mountBounty } from './js/bounty.js';
 import { mountRedeem } from './js/redeem.js';
 import { mountSpotlight } from './js/spotlight.js';
+import { mountCastle, WINGS } from './js/castle.js';
 
 const $ = id => document.getElementById(id);
 const tabs = [...document.querySelectorAll('.tabs [role="tab"]')];
 const panels = Object.fromEntries([...document.querySelectorAll('[role="tabpanel"]')].map(el => [el.id.replace('tab-', ''), el]));
 
-let qhmCtl = null, hiveCtl = null, threatData = null, liqSym = 'BTC', liqReady = false, swarmCtl = null, bountyCtl = null, redeemCtl = null;
+let qhmCtl = null, hiveCtl = null, threatData = null, liqSym = 'BTC', liqReady = false, swarmCtl = null, bountyCtl = null, redeemCtl = null, castleCtl = null;
+const wingOverlay = () => $('wing-overlay');
+const wingBody = () => $('wing-body');
+const mainEl = () => document.querySelector('main');
+const WING_TITLE = Object.fromEntries(WINGS.map(w => [w.id, `${w.name} · ${w.sub}`]));
+WING_TITLE.home = 'Space Castle';
 
-function show(id) {
-  for (const [k, el] of Object.entries(panels)) el.hidden = k !== id;
-  tabs.forEach(t => { const on = t.dataset.tab === id; t.classList.toggle('on', on); t.setAttribute('aria-selected', on ? 'true' : 'false'); });
-  history.replaceState(null, '', id === 'home' ? '#' : '#' + id);
+function parkPanel(el) {
+  if (el && el.parentElement === wingBody()) mainEl().appendChild(el);
+}
+
+function ensureCastle() {
+  if (!castleCtl && $('castle-root')) {
+    castleCtl = mountCastle($('castle-root'), { onWing: (wid) => openWing(wid) });
+  }
+  return castleCtl;
+}
+
+function openWing(id) {
+  ensureCastle();
+  if (panels.home) panels.home.hidden = false;
+  // return any panel already in overlay
+  [...wingBody().children].forEach(parkPanel);
+  const panel = panels[id];
+  if (!panel) return;
+  wingBody().appendChild(panel);
+  panel.hidden = false;
+  for (const [k, el] of Object.entries(panels)) {
+    if (k !== id && k !== 'home') el.hidden = true;
+  }
+  // keep home visible under overlay as castle backdrop
+  if (panels.home) panels.home.hidden = false;
+  wingOverlay().hidden = false;
+  document.body.classList.add('wing-open');
+  $('wing-title').textContent = WING_TITLE[id] || id;
+  tabs.forEach(t => {
+    const on = t.dataset.tab === id;
+    t.classList.toggle('on', on);
+    t.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  history.replaceState(null, '', '#' + id);
+  if (castleCtl) castleCtl.highlight(id);
+  bootPanel(id);
+}
+
+function closeWing() {
+  [...wingBody().children].forEach(parkPanel);
+  wingOverlay().hidden = true;
+  document.body.classList.remove('wing-open');
+  if (castleCtl) castleCtl.highlight(null);
+  show('home');
+}
+
+
+function bootPanel(id) {
   if (id === 'qhm') {
     if (!qhmCtl) qhmCtl = mountQHM($('qhm-root'));
     refreshLiq();
@@ -28,10 +78,10 @@ function show(id) {
       const d = $('hive-detail'); d.hidden = false;
       const p = n.p || {};
       d.innerHTML = `<button class="x" id="hive-x">×</button><h3>${n.label || n.id}</h3><p class="fine">${p.type || n.kind || ''}</p><p>${p.what || n.sub || ''}</p>` +
-        (p.watches ? `<h4 style="margin-top:8px;font-family:Sora,sans-serif;font-size:12px;color:#9fd4ff">Watches</h4><p>${p.watches}</p>` : '') +
-        (p.ccna ? `<h4 style="margin-top:8px;font-family:Sora,sans-serif;font-size:12px;color:#9fd4ff">CCNA</h4><p>${p.ccna}</p>` : '') +
-        (p.defense ? `<h4 style="margin-top:8px;font-family:Sora,sans-serif;font-size:12px;color:#9fd4ff">Defense</h4><p>${p.defense}</p>` : '') +
-        `<p class="fine" style="margin-top:10px;color:#ff8fa3">Simulated training map. Not a live SOC.</p>`;
+        (p.watches ? `<h4 style="margin-top:8px;font-family:Sora,sans-serif;font-size:12px;color:var(--cyan)">Watches</h4><p>${p.watches}</p>` : '') +
+        (p.ccna ? `<h4 style="margin-top:8px;font-family:Sora,sans-serif;font-size:12px;color:var(--cyan)">CCNA</h4><p>${p.ccna}</p>` : '') +
+        (p.defense ? `<h4 style="margin-top:8px;font-family:Sora,sans-serif;font-size:12px;color:var(--cyan)">Defense</h4><p>${p.defense}</p>` : '') +
+        `<p class="fine" style="margin-top:10px;color:var(--r)">Simulated training map. Not a live SOC.</p>`;
       d.querySelector('#hive-x').onclick = () => { d.hidden = true; };
     }});
   }
@@ -50,6 +100,23 @@ function show(id) {
     else redeemCtl.refresh();
   }
 }
+
+function show(id) {
+  if (id !== 'home' && panels[id]) {
+    openWing(id);
+    return;
+  }
+  // home / castle
+  [...wingBody().children].forEach(parkPanel);
+  wingOverlay().hidden = true;
+  document.body.classList.remove('wing-open');
+  for (const [k, el] of Object.entries(panels)) el.hidden = k !== 'home';
+  tabs.forEach(t => { const on = t.dataset.tab === 'home'; t.classList.toggle('on', on); t.setAttribute('aria-selected', on ? 'true' : 'false'); });
+  history.replaceState(null, '', '#');
+  ensureCastle();
+  if (castleCtl) castleCtl.highlight(null);
+}
+
 
 tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
 document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
@@ -186,6 +253,10 @@ document.querySelectorAll('.chip,.badge').forEach(el => {
 });
 
 mountSpotlight();
+
+$('wing-back').onclick = () => closeWing();
+$('wing-close').onclick = () => closeWing();
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !wingOverlay().hidden) closeWing(); });
 
 window.addEventListener('sgi:goto', e => { if (e.detail && panels[e.detail]) show(e.detail); });
 

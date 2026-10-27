@@ -2,9 +2,13 @@
 
 Native merge of offline Analyze, Threat Index, Defender Hive, Quantum Helium Maps (+ liquidation dock), **Swarm Pass**, **Bounty board**, **Redeem** (Coming soon), VPN, and Protect under one matrix/black glass shell.
 
-**Live:** https://starswarm-sgi.pages.dev/ (publish after user yes)
+**Live:** https://starswarm-sgi.pages.dev/ · https://sgi.starswarm.workers.dev/
 
 Parent brand: StarSwarm Agentic Security. Cover art + Orbitron/Archivo Black (OFL).
+
+## Home (v6)
+
+Interactive **haunted space castle** SVG map. Each wing opens that section as a glass overlay (← Castle). Mobile list fallback. Cover art + dog spotlight kept. Not deployed until publish yes.
 
 ## Tabs
 

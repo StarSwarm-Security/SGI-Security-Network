@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>StarSwarm SGI Security Network</title>
-<meta name="description" content="StarSwarm SGI Security Network: offline Analyze, Threat Index, BTC/ETH liquidation war map, Hive, Swarm Pass, Bounty board, free VPN and Protect tools.">
+<meta name="description" content="StarSwarm SGI Security Network: Explore a haunted space castle — each wing opens Analyze, Threat Index, Quantum Helium, Hive, VPN, Protect, Swarm Pass, Bounty, and Redeem.">
 <meta name="theme-color" content="#050a14">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -34,23 +34,12 @@
   </header>
 
   <main>
-    <!-- HOME -->
-    <section id="tab-home" class="panel glass home-desk pinable" role="tabpanel">
-      <h2 class="hero-title">Dense security desk</h2>
-      <p class="lede">Offline network analysis, a merged threat index, BTC/ETH liquidation war map, defender hive, free VPN picks and protect tools. Wallet tracker removed.</p>
-      <div class="hub">
-        <button data-go="analyze"><b>Analyze</b><span>Paste Cisco / symptoms. Study cards as overlays.</span></button>
-        <button data-go="threats"><b>Threat Index</b><span>A–Z threats, bots, restricted wallets.</span></button>
-        <button data-go="hive"><b>Hive</b><span>Defender swarm on a CCNA map.</span></button>
-        <button data-go="qhm"><b>Quantum Helium</b><span>Bubbles + BTC/ETH liquidation war map.</span></button>
-        <button data-go="vpn"><b>VPN</b><span>Free tiers + affiliate slots (signup needed).</span></button>
-        <button data-go="protect"><b>Protect</b><span>VirusTotal, Malwarebytes, Defender tips.</span></button>
-        <button data-go="swarm"><b>Swarm Pass</b><span>Badges, streaks, Swarm Credits (local).</span></button>
-        <button data-go="bounty"><b>Bounty</b><span>Demo leaderboards · SC only.</span></button>
-        <button data-go="redeem"><b>Redeem</b><span>XMR / SOL / ETH / BTC gift cards — Coming soon.</span></button>
-      </div>
-      <p class="fine">Click a glass panel to pin opaque. Hover chips for secondary facts. No trackers. No invented live numbers.</p>
+    <!-- HOME: haunted space castle map -->
+    <section id="tab-home" class="panel castle-panel pinable" role="tabpanel">
+      <div id="castle-root"></div>
     </section>
+
+    <!-- Wing overlay: section panels embed from castle wings -->
 
     <!-- ANALYZE -->
     <section id="tab-analyze" class="panel glass pinable" role="tabpanel" hidden>
@@ -153,6 +142,15 @@
       <p class="fine">VirusTotal is free for URL/file checks via their site (API keys have rate limits). URLhaus is free for lookups. Windows Defender is built-in. Document any affiliate ID before going live.</p>
     </section>
   </main>
+
+  <div id="wing-overlay" class="wing-overlay" hidden>
+    <div class="wing-bar glass">
+      <button type="button" class="chip" id="wing-back">← Castle</button>
+      <span class="wing-title" id="wing-title">Wing</span>
+      <button type="button" class="x" id="wing-close" aria-label="Close wing">×</button>
+    </div>
+    <div class="wing-body" id="wing-body"></div>
+  </div>
 
   <footer class="bar glass">
     <span>StarSwarm SGI Security Network</span>

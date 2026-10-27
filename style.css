@@ -43,7 +43,7 @@ html,body{height:100%;overflow:hidden;background:#000;color:var(--ink);font-fami
 .pill{text-decoration:none;color:var(--g);font-family:Orbitron,sans-serif;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
   padding:7px 11px;border-radius:8px;border:1px solid var(--g);background:rgba(160,200,255,.06);box-shadow:0 0 12px rgba(160,200,255,.15)}
 .pill:hover{background:rgba(160,200,255,.15)}
-main{min-height:0;position:relative;display:grid;place-items:center}
+main{min-height:0;position:relative;display:grid;place-items:stretch;align-content:stretch}
 .panel{height:100%;width:100%;border-radius:16px;overflow:auto;padding:12px 14px}
 /* Home desk half size */
 .home-desk{width:min(560px,92%);height:auto;max-height:58%;place-self:center;padding:14px 16px;
@@ -190,3 +190,60 @@ select{border-radius:8px;border:1px solid rgba(160,200,255,.2);background:rgba(0
 .lit-flash{animation:litFlash .7s ease-out;box-shadow:0 0 0 1px var(--amber),0 0 28px rgba(240,192,96,.55),0 0 60px rgba(200,220,255,.25)!important;border-color:var(--amber)!important}
 @keyframes litFlash{0%{filter:brightness(1.35)}100%{filter:brightness(1)}}
 .shell{isolation:isolate}
+
+/* ===== v6 Space Castle home ===== */
+.castle-panel{padding:0;overflow:hidden;background:rgba(2,6,14,.25);border:1px solid rgba(160,200,255,.22);
+  box-shadow:0 0 0 1px rgba(240,192,96,.08),0 20px 60px rgba(0,0,0,.55);display:flex;flex-direction:column}
+.castle-wrap{height:100%;display:grid;grid-template-rows:auto 1fr auto auto;min-height:0;padding:8px 10px 6px;position:relative}
+.castle-chrome{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px;padding:2px 4px 6px}
+.castle-lede{margin:0;font-size:11.5px;max-width:70ch}
+.castle-stage{min-height:0;flex:1;display:grid;place-items:center;overflow:hidden}
+.castle-svg{width:100%;height:100%;max-height:100%;min-height:280px;touch-action:manipulation}
+.castle-svg .wlab{fill:#e8eef8;font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:1.2px;pointer-events:none}
+.castle-svg .wsub{fill:#9ec4ff;font-family:Inter,sans-serif;font-size:9px;pointer-events:none;opacity:.9}
+.castle-svg .hint{fill:#7a8aa3;font-family:Inter,sans-serif;font-size:10px;pointer-events:none}
+.castle-svg .wing{cursor:pointer;transition:filter .15s,opacity .15s}
+.castle-svg .wing:hover,.castle-svg .wing.hot,.castle-svg .wing:focus{filter:brightness(1.25) drop-shadow(0 0 10px rgba(240,192,96,.55));outline:none}
+.castle-svg .wing.active{filter:brightness(1.35) drop-shadow(0 0 14px rgba(110,200,255,.65))}
+.castle-svg .wing:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.castle-svg .beacon{animation:beaconPulse 2.8s ease-in-out infinite}
+@keyframes beaconPulse{0%,100%{opacity:.45}50%{opacity:.95}}
+.castle-tip{position:absolute;left:12px;bottom:52px;z-index:4;padding:5px 10px;border-radius:8px;
+  background:rgba(2,8,18,.85);border:1px solid rgba(240,192,96,.4);font-family:Orbitron,sans-serif;
+  font-size:10px;letter-spacing:.4px;color:var(--amber);pointer-events:none;text-transform:uppercase}
+.castle-list{display:none;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:5px;margin-top:6px}
+.castle-li{text-align:left;padding:7px 9px;border-radius:8px;border:1px solid rgba(160,200,255,.2);
+  background:rgba(0,0,0,.35);color:var(--ink);cursor:pointer;font:inherit}
+.castle-li:hover,.castle-li:focus{border-color:var(--amber);box-shadow:0 0 12px rgba(240,192,96,.25)}
+.castle-li b{display:block;font-family:Orbitron,sans-serif;font-size:10px;color:var(--g2);letter-spacing:.3px}
+.castle-li span{font-size:10px;color:var(--mute)}
+.castle-fine{margin:4px 2px 0}
+
+/* Wing overlay over castle */
+.wing-overlay{position:absolute;z-index:6;inset:auto 12px calc(36px + env(safe-area-inset-bottom)) 12px;top:calc(56px + env(safe-area-inset-top));
+  display:flex;flex-direction:column;border-radius:16px;overflow:hidden;
+  background:rgba(2,8,18,.82);border:1px solid rgba(240,192,96,.35);
+  box-shadow:0 0 0 1px rgba(160,200,255,.12),0 24px 80px rgba(0,0,0,.7),0 0 40px rgba(240,192,96,.12);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);animation:wingIn .22s ease-out}
+.wing-overlay[hidden]{display:none!important}
+@keyframes wingIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.wing-bar{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:0;border:0;border-bottom:1px solid rgba(160,200,255,.2);flex-shrink:0}
+.wing-title{font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--amber);
+  text-shadow:0 0 10px rgba(240,192,96,.35);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wing-bar .x{position:static;font-size:22px;line-height:1;padding:0 4px}
+.wing-body{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column}
+.wing-body > .panel{flex:1;border:0;border-radius:0;height:auto;min-height:100%;background:transparent;box-shadow:none;backdrop-filter:none}
+body.wing-open .castle-panel{filter:brightness(.55) saturate(.85)}
+body.wing-open .tabs button.on{box-shadow:0 0 16px rgba(240,192,96,.5)}
+
+/* Home no longer half-desk */
+.home-desk{/* legacy */ }
+
+@media (max-width:760px){
+  .castle-stage{max-height:42vh}
+  .castle-list{display:grid}
+  .castle-svg .wlab{font-size:9px}
+  .castle-svg .wsub{font-size:8px}
+  .wing-overlay{inset:auto 6px calc(32px + env(safe-area-inset-bottom)) 6px;top:calc(100px + env(safe-area-inset-top))}
+  .castle-tip{display:none}
+}
