@@ -1,0 +1,10 @@
+# Copy to worker/.dev.vars for local wrangler dev. Never commit .dev.vars.
+# Leave these empty until Phase 1. Do not paste API keys, payment data,
+# wallet secrets, or a real Apple private key.
+REVENUECAT_WEBHOOK_SECRET=
+APPLE_CLIENT_ID=
+APPLE_TEAM_ID=
+APPLE_KEY_ID=
+APPLE_PRIVATE_KEY=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=

@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowJs": true,
+    "checkJs": false,
+    "noImplicitOverride": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "worker-configuration.d.ts",
+    "node_modules/@cloudflare/vitest-plugin/types/cloudflare-test.d.ts"
+  ]
+}
