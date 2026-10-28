@@ -40,6 +40,15 @@ The shell (castle map, tabs, Analyze, Paste Guard, Threat Index, Hive, Honest Sh
 
 This repo does not deploy or publish the live hosts.
 
+## Privacy and Terms
+
+Standalone documents, not the app shell. After this tree is published, paste these into Google Branding (they return the policy with HTTP 200):
+
+- https://starswarm-sgi.pages.dev/privacy
+- https://starswarm-sgi.pages.dev/terms
+
+`/privacy.html` and `/terms.html` are the same files. Pages redirects those `.html` URLs to the links above. Do not add a `_redirects` rule from `/privacy` back to `/privacy.html`; that loops. There is no path router in the castle app (tabs use a hash on `/`). A top-level `404.html` is what stops Cloudflare Pages from treating every unknown path as `index.html`. Do not delete `404.html` or replace the legal files with the app shell. This change does not deploy.
+
 ## Local
 
 ```bash
