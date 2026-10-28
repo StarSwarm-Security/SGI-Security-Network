@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" class="legal-doc">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy Policy · StarSwarm SGI Security Network</title>
+<meta name="description" content="Privacy Policy for StarSwarm SGI Security Network by StarSwarm Agentic Security. Device sessions, Google Sign-In, and what we do not sell.">
+<meta name="sgi-document" content="privacy">
+<meta name="theme-color" content="#050a14">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://starswarm-sgi.pages.dev/privacy">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="cover" aria-hidden="true"></div>
+<div class="veil" aria-hidden="true"></div>
+<article class="legal">
+  <header class="legal-top">
+    <a class="legal-brand" href="index.html">
+      <img src="assets/mascot-dog-v1-1024.png" alt="" width="42" height="42">
+      <span>
+        <small>StarSwarm Agentic Security</small>
+        <strong>SGI Security Network</strong>
+      </span>
+    </a>
+    <nav class="legal-nav" aria-label="Legal">
+      <a href="privacy.html" aria-current="page">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </nav>
+  </header>
+
+  <p class="legal-kicker">StarSwarm SGI</p>
+  <h1>Privacy Policy</h1>
+  <p class="legal-date">Effective 28 October 2026</p>
+
+  <p>StarSwarm Agentic Security publishes the SGI Security Network (“SGI”) at <a href="https://starswarm-sgi.pages.dev/">starswarm-sgi.pages.dev</a>. SGI is a browser security desk: a cover map, Analyze, Paste Guard, a threat index, study notes, and the other tools on that site. This page is the privacy policy for that site and for Google Sign-In on it.</p>
+
+  <h2>Who we are</h2>
+  <p>The publisher is StarSwarm Agentic Security. The product name on the site is SGI Security Network. The GitHub organization is <a href="https://github.com/StarSwarm-Security">StarSwarm-Security</a>. Sponsorship is <a href="https://github.com/sponsors/StarSwarm-Security">GitHub Sponsors</a>. Support email: <a href="mailto:porschephotoshootz@gmail.com">porschephotoshootz@gmail.com</a>.</p>
+
+  <h2>Device session</h2>
+  <p>“Continue with this device” asks the SGI API for an anonymous session. This browser keeps a bearer session token in <code>localStorage</code> under the key <code>sgi.session.v1</code> so a session that is still in date can skip the gate. The server stores a hash of that token, a device id, and an internal user id. That path does not ask for your name, email, or a password. The first device session also records a free plan and a 3-day Pro trial. The trial is not a charge.</p>
+
+  <h2>Google Sign-In</h2>
+  <p>If you choose Google Sign-In, Google sends an ID token. That token includes your Google account subject (<code>sub</code>) and, when Google includes it, your email address. We use the subject so the same Google account can sign in again. If an email is in the token, we accept the sign-in only when Google marks that email as verified. We do not write the email address into our database. We do not store the raw ID token. We never receive your Google password.</p>
+  <p>We do not sell that data, and we do not share Google user data with advertisers or use it to build an ad profile. We do not ask Google for anything beyond identifying the account for this sign-in. Google’s own policy describes what Google collects when you use their button: <a href="https://policies.google.com/privacy">policies.google.com/privacy</a>.</p>
+
+  <h2>Analyze, Paste Guard, and other tools</h2>
+  <ul>
+    <li><strong>Analyze and Paste Guard</strong> on the public site run in the browser. Paste Guard is built so the paste stays on the device. The public pages do not call the analyze API. If some other client does, the text is used to produce findings. A cache may store those findings and a hash of the input. There is no separate raw-paste column.</li>
+    <li><strong>Swarm Pass</strong> keeps badges, streaks, and Swarm Credits in this browser. They are not money. An optional API snapshot can store that same ledger with the device id and user id. The Pass tab does not collect an email, a wallet, or an IP address for the ledger.</li>
+    <li><strong>Bounty</strong> shows sample handles. <strong>Redeem</strong> is a preview: this build does not send gift cards and does not move XMR, SOL, ETH, or BTC.</li>
+    <li><strong>Support chat</strong> answers from a FAQ file on the site unless that page is explicitly pointed at the API. Do not send passwords, keys, or payment data.</li>
+    <li><strong>Quantum Helium</strong> can request public market data from CoinGecko in your browser. <strong>Honest Shield</strong> links out to other sites (VPN and malware-check tools). Those sites are not us and have their own policies. The threat index, hive, and study cards are files shipped with the site.</li>
+  </ul>
+
+  <h2>What we do not do</h2>
+  <p>We do not sell personal data. The site does not ship a third-party analytics tracker and does not set an advertising cookie. Cloudflare Pages serves the site. The API is a Cloudflare Worker with a D1 database, so Cloudflare handles the connection as the host.</p>
+
+  <h2>How long it stays</h2>
+  <p>The browser copy of the session stays until it expires or you clear site data for this host. Server rows for a device or a Google subject stay until we delete them. There is no delete button in the app. Email <a href="mailto:porschephotoshootz@gmail.com">porschephotoshootz@gmail.com</a> or contact the <a href="https://github.com/StarSwarm-Security">StarSwarm-Security</a> organization and name the device or Google account. We will remove the user, device, and session rows we can tie to that subject. Cached analyze findings are stored by hash, not under your name.</p>
+
+  <h2>Children</h2>
+  <p>SGI is not directed at children under 13. We do not knowingly collect personal information from them.</p>
+
+  <h2>Changes</h2>
+  <p>The date at the top is the version on the site. If this text changes, that date changes with it. The matching terms are on the <a href="terms.html">Terms of Service</a> page.</p>
+
+  <p class="legal-end">StarSwarm Agentic Security · SGI Security Network · <a href="mailto:porschephotoshootz@gmail.com">porschephotoshootz@gmail.com</a> · <a href="https://github.com/StarSwarm-Security">GitHub</a> · <a href="https://github.com/sponsors/StarSwarm-Security">Sponsors</a></p>
+</article>
+</body>
+</html>
