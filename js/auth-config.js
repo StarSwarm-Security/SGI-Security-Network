@@ -13,5 +13,5 @@
 export const AUTH_CONFIG = {
   apiBase: 'https://sgi-api.starswarm.workers.dev',
   /** @type {string} Placeholder. Empty on purpose. */
-  googleClientId: '',
+  googleClientId: '550016428729-3uep68gu42rkhp65ihno7b4e9li44cqp.apps.googleusercontent.com',
 };

@@ -1,0 +1,28 @@
+{
+  "name": "sgi-api",
+  "private": true,
+  "version": "0.0.0",
+  "description": "StarSwarm SGI API skeleton. Local wrangler dev only; this package has no deploy script.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "types": "wrangler types",
+    "typecheck": "wrangler types && tsc --noEmit",
+    "migrate:local": "wrangler d1 migrations apply sgi-api --local",
+    "test": "vitest run",
+    "bundle:dry-run": "wrangler deploy --dry-run --outdir .tmp/dry-run"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.4.9",
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.12",
+    "wrangler": "^4.154.0"
+  },
+  "dependencies": {
+    "@cloudflare/ai-chat": "^0.12.2",
+    "@modelcontextprotocol/client": "^2.3.1",
+    "agents": "^0.31.0",
+    "ai": "^7.0.155"
+  }
+}
