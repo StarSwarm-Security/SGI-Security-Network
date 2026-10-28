@@ -68,7 +68,7 @@ CORS allows `https://starswarm-sgi.pages.dev`, `https://sgi.starswarm.workers.de
 
 Skeleton routes:
 
-- `POST /v1/auth/device` — anonymous free-tier device. Session tokens are stored as hashes.
+- `POST /v1/auth/device` — anonymous device. Session tokens are stored as hashes. The first session starts a 3-day Pro trial (same daily analyze limit as the paid plans) and also keeps a free entitlement with no expiry. After the trial timestamp passes, the active plan falls back to free. The trial is not a charge.
 - `GET /v1/auth/providers`, `POST /v1/auth/apple`, `POST /v1/auth/google`
 - `POST /v1/analyze` — entitlements, per-tier daily limit, D1 cache by content hash. Uses `js/analyzers.js` and `js/paste-guard.js`.
 - `POST /v1/webhooks/revenuecat` — signature check, then entitlement upsert. App user id must be this API’s user UUID, not an email.
@@ -76,7 +76,16 @@ Skeleton routes:
 - `POST /v1/redeem/codes` — one-time promo codes. `POST /v1/redeem/gift-card` is 501 (no wallets or transfers).
 - `POST /v1/breach/check`, `GET /v1/breach/status`, `POST /v1/scan/external` — placeholders only. Domain-ownership verification comes before any real lookup.
 
-Catalog placeholders: free, monthly $1.00 and $9.00, yearly special $49.99. This API does not charge.
+Catalog placeholders (this API does not charge):
+
+| Plan | Price | RevenueCat product id (not live) |
+| --- | --- | --- |
+| Pro trial | 3 days, then free | `sgi.trial.3d` |
+| Monthly | $9.99 / month | `sgi.monthly.999` |
+| Yearly special | $39.99 / year | `sgi.yearly.special_3999` |
+| Free | $0, no expiry | none |
+
+The trial starts on the first anonymous device session. Free remains on the account and is what analyze uses after those 3 days. Monthly and yearly replace the trial while they are active and use the same Pro analyze limit.
 
 ## License
 

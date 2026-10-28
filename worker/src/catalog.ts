@@ -1,45 +1,70 @@
 export const DEVICE_TYPES = ["auto", "router", "switch", "firewall", "wireless", "pc"] as const;
 export type DeviceType = (typeof DEVICE_TYPES)[number];
 
-export type TierId = "free" | "monthly" | "yearly";
+export type TierId = "free" | "trial" | "monthly" | "yearly";
+
+/** Paid Pro analyze cap. The 3-day trial and both paid plans use this limit. */
+export const PRO_ANALYZE_PER_DAY = 300;
+
+/** Trial length. Starts on the first anonymous device session, then falls back to free. */
+export const TRIAL_DAYS = 3;
+
+export const TRIAL_PRODUCT_ID = "sgi.trial.3d";
+export const MONTHLY_PRODUCT_ID = "sgi.monthly.999";
+export const YEARLY_PRODUCT_ID = "sgi.yearly.special_3999";
 
 export interface CatalogProduct {
   productId: string;
   tier: Exclude<TierId, "free">;
   priceCents: number;
   label: string;
+  /** Set only for the free Pro trial. Paid plans bill on their own interval. */
+  trialDays: number | null;
 }
 
 /**
  * Placeholder catalog. Not live App Store, Play, or RevenueCat ids.
- * Monthly covers the $1.00–$9.00 band with the two endpoints.
- * Yearly is the $49.99 special. This API never charges.
+ * This API never charges.
+ * - 3-day Pro trial: $0, product sgi.trial.3d
+ * - Monthly: $9.99, product sgi.monthly.999
+ * - Yearly special: $39.99, product sgi.yearly.special_3999
+ * Free has no product id and stays on the account after the trial expires.
  */
 export const PRODUCTS: readonly CatalogProduct[] = [
   {
-    productId: "sgi.monthly.placeholder_1",
-    tier: "monthly",
-    priceCents: 100,
-    label: "Monthly placeholder $1.00",
+    productId: TRIAL_PRODUCT_ID,
+    tier: "trial",
+    priceCents: 0,
+    label: "Pro trial, 3 days",
+    trialDays: TRIAL_DAYS,
   },
   {
-    productId: "sgi.monthly.placeholder_9",
+    productId: MONTHLY_PRODUCT_ID,
     tier: "monthly",
-    priceCents: 900,
-    label: "Monthly placeholder $9.00",
+    priceCents: 999,
+    label: "Monthly $9.99",
+    trialDays: null,
   },
   {
-    productId: "sgi.yearly.special_4999",
+    productId: YEARLY_PRODUCT_ID,
     tier: "yearly",
-    priceCents: 4999,
-    label: "Yearly special $49.99",
+    priceCents: 3999,
+    label: "Yearly special $39.99",
+    trialDays: null,
   },
 ];
 
+export const CATALOG_NOTE =
+  "Placeholder prices only. This API does not charge. " +
+  "A 3-day Pro trial starts on the first anonymous device session and uses Pro limits, then falls back to free. " +
+  "Monthly is $9.99. Yearly special is $39.99. " +
+  "RevenueCat product ids are not live: sgi.trial.3d, sgi.monthly.999, sgi.yearly.special_3999.";
+
 export const ANALYZE_PER_DAY: Record<TierId, number> = {
   free: 30,
-  monthly: 300,
-  yearly: 2000,
+  trial: PRO_ANALYZE_PER_DAY,
+  monthly: PRO_ANALYZE_PER_DAY,
+  yearly: PRO_ANALYZE_PER_DAY,
 };
 
 export function productById(productId: string): CatalogProduct | undefined {

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { handleAppleSignIn } from "../src/auth/providers";
 import { hmacSha256Hex } from "../src/crypto";
 import { handleRevenueCat } from "../src/webhooks/revenuecat";
-import { ANALYZE_PER_DAY } from "../src/catalog";
+import { ANALYZE_PER_DAY, MONTHLY_PRODUCT_ID, PRODUCTS, TRIAL_DAYS, TRIAL_PRODUCT_ID, YEARLY_PRODUCT_ID } from "../src/catalog";
 import { utcDay } from "../src/time";
 import { TEST_WEBHOOK_SECRET } from "./fixture";
 
@@ -67,7 +67,7 @@ describe("sgi-api skeleton", () => {
 
   it("mints an anonymous free-tier device and rejects a repeated device id", async () => {
     const first = await signup();
-    expect(first.entitlement.tier).toBe("free");
+    expect(first.entitlement.tier).toBe("trial");
     expect(first.sessionToken.startsWith("sgi_")).toBe(true);
     const stored = await env.DB.prepare(`SELECT token_hash FROM device_sessions WHERE device_id = ?`).bind(first.deviceId).all<{ token_hash: string }>();
     expect(stored.results.some((row) => row.token_hash === first.sessionToken)).toBe(false);
@@ -82,7 +82,55 @@ describe("sgi-api skeleton", () => {
     expect(me.status).toBe(200);
     const body = await me.json() as { userId: string; entitlement: { tier: string } };
     expect(body.userId).toBe(first.userId);
-    expect(body.entitlement.tier).toBe("free");
+    expect(body.entitlement.tier).toBe("trial");
+  });
+
+  it("starts a 3-day Pro trial and falls back to the permanent free tier", async () => {
+    const created = await signup();
+    const opened = await api("/v1/entitlements", {}, created.sessionToken);
+    const active = await opened.json() as {
+      entitlement: { tier: string; priceCents: number; analyzePerDay: number; expiresAt: string; productId: string };
+      products: Array<{ productId: string; priceCents: number; label: string; trialDays: number | null }>;
+    };
+    expect(active.entitlement).toMatchObject({
+      tier: "trial",
+      priceCents: 0,
+      productId: TRIAL_PRODUCT_ID,
+      analyzePerDay: ANALYZE_PER_DAY.monthly,
+    });
+    expect(ANALYZE_PER_DAY.trial).toBe(ANALYZE_PER_DAY.monthly);
+    const trialEnd = Date.parse(active.entitlement.expiresAt);
+    const threeDays = TRIAL_DAYS * 24 * 60 * 60 * 1000;
+    expect(trialEnd).toBeGreaterThan(Date.now() + threeDays - 60_000);
+    expect(trialEnd).toBeLessThan(Date.now() + threeDays + 60_000);
+
+    const freeRow = await env.DB.prepare(
+      `SELECT expires_at FROM entitlements WHERE user_id = ?1 AND tier = 'free' AND source = 'default'`,
+    ).bind(created.userId).first<{ expires_at: string | null }>();
+    expect(freeRow?.expires_at).toBeNull();
+
+    await env.DB.prepare(
+      `UPDATE entitlements SET expires_at = ?1 WHERE user_id = ?2 AND tier = 'trial'`,
+    ).bind("2000-01-01T00:00:00.000Z", created.userId).run();
+    const after = await api("/v1/entitlements", {}, created.sessionToken);
+    const fallenBack = await after.json() as { entitlement: { tier: string; analyzePerDay: number; priceCents: number } };
+    expect(fallenBack.entitlement).toMatchObject({
+      tier: "free",
+      priceCents: 0,
+      analyzePerDay: ANALYZE_PER_DAY.free,
+    });
+
+    const catalog = await api("/v1/catalog");
+    const listed = await catalog.json() as { products: typeof PRODUCTS };
+    expect(listed.products).toEqual([...PRODUCTS]);
+    expect(listed.products.map((product) => product.productId)).toEqual([
+      TRIAL_PRODUCT_ID,
+      MONTHLY_PRODUCT_ID,
+      YEARLY_PRODUCT_ID,
+    ]);
+    expect(listed.products.find((product) => product.tier === "monthly")?.priceCents).toBe(999);
+    expect(listed.products.find((product) => product.tier === "yearly")?.priceCents).toBe(3999);
+    expect(listed.products.find((product) => product.tier === "trial")?.trialDays).toBe(3);
   });
 
   it("leaves Apple and Google unwired", async () => {
@@ -188,7 +236,7 @@ describe("sgi-api skeleton", () => {
       globalThis.fetch = original;
     }
 
-    const limit = ANALYZE_PER_DAY.free;
+    const limit = ANALYZE_PER_DAY.trial;
     await env.DB.prepare(
       `INSERT INTO analyze_usage (device_id, user_id, window_start, request_count)
        VALUES (?1, ?2, ?3, ?4)
@@ -296,7 +344,7 @@ describe("sgi-api skeleton", () => {
         id: "evt_yearly_1",
         type: "INITIAL_PURCHASE",
         app_user_id: userId,
-        product_id: "sgi.yearly.special_4999",
+        product_id: YEARLY_PRODUCT_ID,
         expiration_at_ms: Date.now() + 86_400_000,
         email: "person@example.com",
       },
@@ -324,7 +372,7 @@ describe("sgi-api skeleton", () => {
     const ent = await api("/v1/entitlements", {}, sessionToken);
     expect((await ent.json() as { entitlement: { tier: string; priceCents: number } }).entitlement).toMatchObject({
       tier: "yearly",
-      priceCents: 4999,
+      priceCents: 3999,
     });
 
     const duplicate = await api("/v1/webhooks/revenuecat", {
@@ -340,7 +388,7 @@ describe("sgi-api skeleton", () => {
         id: "evt_email_1",
         type: "INITIAL_PURCHASE",
         app_user_id: "person@example.com",
-        product_id: "sgi.monthly.placeholder_1",
+        product_id: MONTHLY_PRODUCT_ID,
         expiration_at_ms: Date.now() + 86_400_000,
       },
     };

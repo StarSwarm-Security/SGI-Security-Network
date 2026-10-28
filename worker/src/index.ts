@@ -1,4 +1,4 @@
-import { PRODUCTS } from "./catalog";
+import { CATALOG_NOTE, PRODUCTS } from "./catalog";
 import { applyCors, preflight } from "./cors";
 import { handleAnalyze } from "./analyze/handler";
 import { handleAppleSignIn, handleGoogleSignIn, handleProviders } from "./auth/providers";
@@ -38,7 +38,7 @@ const routes: Record<string, Partial<Record<string, Handler>>> = {
   "/v1/catalog": {
     GET: async () => json({
       chargedByThisApi: false,
-      note: "Placeholder prices only. Monthly band is $1.00–$9.00. Yearly special is $49.99. App Store, Play, and RevenueCat ids are not live. This API does not charge.",
+      note: CATALOG_NOTE,
       products: PRODUCTS,
     }),
   },
@@ -72,7 +72,7 @@ const routes: Record<string, Partial<Record<string, Handler>>> = {
     GET: authed(async (_request, env, session) => json({
       entitlement: await loadEntitlement(env, session.userId),
       products: PRODUCTS,
-      note: "Prices are placeholders. This API does not charge.",
+      note: CATALOG_NOTE,
     })),
   },
   "/v1/analyze": {

@@ -1,6 +1,13 @@
 -- StarSwarm SGI API skeleton.
 -- No email, IP, payment-instrument, or wallet columns.
 -- price_cents is a catalog placeholder, not a charge.
+--
+-- Plans (not live RevenueCat / App Store / Play ids):
+--   free     permanent row, no expiry, no product id. Remains after the trial.
+--   trial    sgi.trial.3d, $0, 3 days, Pro limits. Starts on first anonymous
+--            device session (POST /v1/auth/device), then falls back to free.
+--   monthly  sgi.monthly.999, $9.99 / month (999 cents), Pro limits.
+--   yearly   sgi.yearly.special_3999, $39.99 / year (3999 cents), Pro limits.
 
 CREATE TABLE users (
   id TEXT PRIMARY KEY,
@@ -33,11 +40,11 @@ CREATE TABLE device_sessions (
 CREATE TABLE entitlements (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users (id),
-  tier TEXT NOT NULL CHECK (tier IN ('free', 'monthly', 'yearly')),
+  tier TEXT NOT NULL CHECK (tier IN ('free', 'trial', 'monthly', 'yearly')),
   product_id TEXT,
   price_cents INTEGER,
   status TEXT NOT NULL CHECK (status IN ('active', 'expired', 'revoked', 'grace')),
-  source TEXT NOT NULL CHECK (source IN ('default', 'revenuecat', 'promo')),
+  source TEXT NOT NULL CHECK (source IN ('default', 'trial', 'revenuecat', 'promo')),
   expires_at TEXT,
   revenuecat_event_id TEXT,
   created_at TEXT NOT NULL,

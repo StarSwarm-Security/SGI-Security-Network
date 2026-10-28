@@ -7,7 +7,7 @@ export interface ActiveEntitlement {
   productId: string | null;
   priceCents: number | null;
   expiresAt: string | null;
-  source: "default" | "revenuecat" | "promo";
+  source: "default" | "trial" | "revenuecat" | "promo";
   analyzePerDay: number;
 }
 
@@ -17,7 +17,7 @@ interface EntitlementRow {
   product_id: string | null;
   price_cents: number | null;
   expires_at: string | null;
-  source: "default" | "revenuecat" | "promo";
+  source: "default" | "trial" | "revenuecat" | "promo";
 }
 
 export async function loadEntitlement(env: Env, userId: string): Promise<ActiveEntitlement> {
@@ -27,7 +27,7 @@ export async function loadEntitlement(env: Env, userId: string): Promise<ActiveE
      WHERE user_id = ?1
        AND status IN ('active', 'grace')
        AND (expires_at IS NULL OR expires_at > ?2)
-     ORDER BY CASE tier WHEN 'yearly' THEN 3 WHEN 'monthly' THEN 2 ELSE 1 END DESC,
+     ORDER BY CASE tier WHEN 'yearly' THEN 4 WHEN 'monthly' THEN 3 WHEN 'trial' THEN 2 ELSE 1 END DESC,
               updated_at DESC
      LIMIT 1`,
   ).bind(userId, nowIso()).first<EntitlementRow>();

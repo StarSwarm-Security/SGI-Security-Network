@@ -1,3 +1,4 @@
+import { TRIAL_DAYS, TRIAL_PRODUCT_ID } from "../catalog";
 import { json } from "../http";
 import { logError } from "../log";
 import { randomToken, sha256Hex } from "../crypto";
@@ -45,9 +46,13 @@ function isConflict(error: unknown): boolean {
 }
 
 /**
- * Anonymous free-tier device. The device id is an identifier, not a secret.
+ * Anonymous device. The device id is an identifier, not a secret.
  * Repeating it does not mint another session. The bearer token is the secret
  * and only its hash is stored.
+ *
+ * The first session starts a 3-day Pro trial (same analyze limits as monthly)
+ * and also writes a free entitlement with no expiry. When the trial expires,
+ * loadEntitlement falls back to that free row. The trial is not a charge.
  *
  * TODO(Phase 1): Play Integrity / App Attest before raising rate limits.
  * Do not key limits on IP addresses.
@@ -67,7 +72,9 @@ export async function createAnonymousDevice(env: Env, requestedId: string | unde
   const expiresAt = addDaysIso(SESSION_DAYS);
   const sessionToken = randomToken();
   const tokenHash = await sha256Hex(sessionToken);
-  const entitlementId = crypto.randomUUID();
+  const freeEntitlementId = crypto.randomUUID();
+  const trialEntitlementId = crypto.randomUUID();
+  const trialExpiresAt = addDaysIso(TRIAL_DAYS);
 
   try {
     await env.DB.batch([
@@ -84,7 +91,13 @@ export async function createAnonymousDevice(env: Env, requestedId: string | unde
            id, user_id, tier, product_id, price_cents, status, source,
            expires_at, revenuecat_event_id, created_at, updated_at
          ) VALUES (?1, ?2, 'free', NULL, 0, 'active', 'default', NULL, NULL, ?3, ?3)`,
-      ).bind(entitlementId, userId, now),
+      ).bind(freeEntitlementId, userId, now),
+      env.DB.prepare(
+        `INSERT INTO entitlements (
+           id, user_id, tier, product_id, price_cents, status, source,
+           expires_at, revenuecat_event_id, created_at, updated_at
+         ) VALUES (?1, ?2, 'trial', ?3, 0, 'active', 'trial', ?4, NULL, ?5, ?5)`,
+      ).bind(trialEntitlementId, userId, TRIAL_PRODUCT_ID, trialExpiresAt, now),
       env.DB.prepare(
         `INSERT INTO device_sessions (token_hash, device_id, user_id, created_at, expires_at)
          VALUES (?1, ?2, ?3, ?4, ?5)`,
