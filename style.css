@@ -132,7 +132,10 @@ select{border-radius:8px;border:1px solid rgba(160,200,255,.2);background:rgba(0
 .ad-slot{margin-top:12px;border:1px dashed rgba(160,200,255,.3);border-radius:10px;padding:14px;text-align:center;color:var(--mute);font-size:11px;background:rgba(0,0,0,.25);font-family:Orbitron,sans-serif;letter-spacing:.5px;text-transform:uppercase}
 .drawer{position:fixed;z-index:8;right:12px;top:calc(68px + env(safe-area-inset-top));width:min(360px,calc(100vw - 24px));max-height:calc(100vh - 110px);overflow:auto;padding:14px;border-radius:14px;background:var(--glass-pin)}
 .drawer .x{position:absolute;right:8px;top:6px;background:none;border:0;color:var(--mute);font-size:20px;cursor:pointer}
-.bar{display:flex;justify-content:space-between;padding:6px 12px;border-radius:10px;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:.6px;text-transform:uppercase;color:var(--mute)}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:6px 12px;flex-wrap:wrap;padding:6px 12px;border-radius:10px;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:.6px;text-transform:uppercase;color:var(--mute)}
+.legal-links{display:flex;gap:12px}
+.legal-links a{color:#c5d4ea;text-decoration:none}
+.legal-links a:hover{color:#fff}
 .mute{color:var(--mute)}.up{color:var(--g)}.down{color:var(--r)}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:8px 0}
 .stats div{padding:6px;border-radius:8px;border:1px solid rgba(160,200,255,.15);background:rgba(0,0,0,.3)}
@@ -349,6 +352,9 @@ html.sgi-open .abyss-restore{display:none !important}
 .abyss-google{display:flex; justify-content:center; min-height:44px; margin-bottom:8px}
 .abyss-google[hidden]{display:none !important}
 .abyss-note, .abyss-fine{color:#9c9286; font-size:12px; line-height:1.45; margin:8px 0 0}
+.abyss-legal{display:flex; justify-content:center; flex-wrap:wrap; gap:8px 16px; margin:16px 0 0; font-size:12.5px; line-height:1.4}
+.abyss-legal a{color:#e7d7c4; text-underline-offset:3px}
+.abyss-legal a:hover{color:#fff}
 .abyss-or{
   display:flex; align-items:center; gap:12px; margin:14px 0; color:#8a8074;
   font-family:Sora, sans-serif; font-size:11px; letter-spacing:.18em; text-transform:uppercase}
@@ -413,4 +419,57 @@ html.sgi-open #abyss-gate{animation:abyss-dissolve .95s ease forwards}
 @media (max-width:760px){
   .sgi-sup{right:8px;bottom:calc(40px + env(safe-area-inset-bottom))}
   .sgi-sup-panel{max-height:52vh}
+}
+
+/* Legal documents. Own pages, not the app shell. Must scroll. */
+html.legal-doc, html.legal-doc body{
+  height:auto; min-height:100%; overflow-x:hidden; overflow-y:auto; background:#000; color:#e8eef8;
+}
+html.legal-doc .cover{filter:saturate(.72) contrast(1.05) brightness(.42)}
+html.legal-doc .veil{
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(8,16,32,.2), rgba(0,0,0,.78) 68%),
+    linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.72));
+}
+.legal{
+  position:relative; z-index:2;
+  width:min(740px, calc(100% - 28px));
+  margin:calc(22px + env(safe-area-inset-top)) auto calc(36px + env(safe-area-inset-bottom));
+  padding:26px 28px 34px; border-radius:18px;
+  background:rgba(5,10,18,.9);
+  border:1px solid rgba(160,200,255,.3);
+  box-shadow:0 24px 70px rgba(0,0,0,.66), inset 0 1px 0 rgba(255,255,255,.06), 0 0 0 1px rgba(240,192,96,.06);
+  font-family:Inter, system-ui, sans-serif; font-size:16.5px; line-height:1.65; color:#d7e0ee;
+}
+.legal-top{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:18px}
+.legal-brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; min-width:0}
+.legal-brand img{width:42px; height:42px; border-radius:10px; object-fit:cover; object-position:center 42%; border:1px solid rgba(110,200,255,.45); box-shadow:0 0 14px rgba(80,170,255,.28); background:#06101c}
+.legal-brand small{display:block; font-family:Orbitron, sans-serif; font-size:9px; letter-spacing:.28em; text-transform:uppercase; color:#6ec8ff}
+.legal-brand strong{display:block; font-family:Orbitron, sans-serif; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:#f4f7fc}
+.legal-nav{display:flex; gap:14px; font-family:Orbitron, sans-serif; font-size:10px; letter-spacing:.14em; text-transform:uppercase}
+.legal-nav a{color:#c5d4ea; text-decoration:none}
+.legal-nav a[aria-current="page"]{color:#f0c060}
+.legal-nav a:hover{color:#fff}
+.legal h1{
+  font-family:"Archivo Black", Impact, sans-serif; font-weight:400;
+  font-size:clamp(28px, 5vw, 40px); letter-spacing:.3px; text-transform:uppercase;
+  color:#f7f4ee; line-height:1.12; margin:0 0 8px;
+  text-shadow:0 0 16px rgba(200,220,255,.28), 0 0 22px rgba(240,192,96,.12);
+}
+.legal .legal-kicker{font-family:Orbitron, sans-serif; font-size:10px; letter-spacing:.32em; text-transform:uppercase; color:#6ec8ff; margin:0 0 8px}
+.legal .legal-date{color:#9aa8be; font-size:14px; margin:0 0 18px}
+.legal h2{
+  font-family:Orbitron, sans-serif; font-weight:700; font-size:12px; letter-spacing:.14em;
+  text-transform:uppercase; color:#9ec4ff; margin:26px 0 8px;
+}
+.legal p{margin:0 0 12px}
+.legal ul{margin:0 0 12px 1.2em; padding:0}
+.legal li{margin:0 0 8px}
+.legal a{color:#9ec4ff; text-underline-offset:3px}
+.legal code{font-family:ui-monospace,Menlo,monospace;font-size:.92em;color:#f0c060}
+.legal a:hover{color:#fff}
+.legal strong{color:#f4f7fc; font-weight:650}
+.legal-end{margin-top:8px; padding-top:14px; border-top:1px solid rgba(160,200,255,.18); color:#b7c3d6; font-size:15px}
+@media (max-width:760px){
+  .legal{width:calc(100% - 16px); padding:20px 16px 28px; font-size:16px}
 }

@@ -1,0 +1,4 @@
+# Do not rewrite /privacy -> /privacy.html (or /terms).
+# Pages already serves privacy.html at /privacy, and redirects /privacy.html to /privacy.
+# A 200 rewrite back to the .html file loops (308 /privacy -> /privacy).
+# Do not add "/* /index.html 200". Unknown paths use 404.html, not the app shell.
