@@ -8,7 +8,7 @@
     "dev": "wrangler dev",
     "types": "wrangler types",
     "typecheck": "wrangler types && tsc --noEmit",
-    "migrate:local": "wrangler d1 migrations apply sgi-entitlements --local",
+    "migrate:local": "wrangler d1 migrations apply sgi-api --local",
     "test": "vitest run",
     "bundle:dry-run": "wrangler deploy --dry-run --outdir .tmp/dry-run"
   },

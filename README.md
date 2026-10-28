@@ -54,7 +54,9 @@ npm test
 npm run dev
 ```
 
-`npm run dev` serves the API locally (Wrangler’s default is http://127.0.0.1:8787) against a local D1 database. `migrate:local` applies `worker/migrations/`. The `database_id` in config is a placeholder, not a live database. `npm run bundle:dry-run` only bundles; it does not upload. `npm test` may warn that `.dev.vars` is missing; the Vitest config injects a fake webhook secret and does not call RevenueCat.
+`npm run dev` serves the API locally (Wrangler’s default is http://127.0.0.1:8787) against a local D1 database. `migrate:local` applies `worker/migrations/` to that local database only.
+
+The remote D1 database already exists on the Cloudflare account: name `sgi-api`, id `9cb29592-5e30-4d4d-aecf-7aff7bf91a10`, jurisdiction `us`. The Worker binding is still `DB`, with `remote: false`, so local dev does not talk to it. Schema migrations and an API deploy are still manual and need an explicit yes. Do not run `wrangler d1 migrations apply --remote` or any remote SQL until then. `npm run bundle:dry-run` only bundles; it does not upload. `npm test` may warn that `.dev.vars` is missing; the Vitest config injects a fake webhook secret and does not call RevenueCat.
 
 Copy `worker/.dev.vars.example` to `worker/.dev.vars` for local secrets. Never commit `.dev.vars`. Set real values later with `wrangler secret put` (not in git):
 

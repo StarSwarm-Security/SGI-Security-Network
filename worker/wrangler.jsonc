@@ -66,12 +66,14 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "sgi-entitlements",
-      // Placeholder UUID. Not a live database. Replace only after an explicit
-      // Phase 1 `wrangler d1 create`. A fixed id avoids Wrangler auto-provisioning
-      // a remote database if someone runs a remote command by mistake.
-      "database_id": "00000000-0000-4000-8000-000000000001",
-      "preview_database_id": "local-sgi-entitlements",
+      "database_name": "sgi-api",
+      // Remote D1 on the Cloudflare account, jurisdiction us.
+      // `remote: false` keeps wrangler dev and tests on local SQLite.
+      // Do not run `wrangler d1 migrations apply --remote` or any remote SQL
+      // until there is an explicit yes. Deploy is still manual.
+      "database_id": "9cb29592-5e30-4d4d-aecf-7aff7bf91a10",
+      "preview_database_id": "local-sgi-api",
+      "remote": false,
       "migrations_dir": "migrations"
     }
   ]
