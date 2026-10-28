@@ -340,6 +340,7 @@ describe("Google ID token sign-in", () => {
     );
     expect(conflict.status).toBe(400);
 
+    resetGoogleCertCache();
     const unavailable = await handleGoogleSignIn(
       googleRequest({ id_token: await signToken(claims()) }),
       googleEnv(),
@@ -348,6 +349,7 @@ describe("Google ID token sign-in", () => {
     expect(unavailable.status).toBe(503);
     expect((await unavailable.json() as { error: string }).error).toBe("google_certs_unavailable");
 
+    resetGoogleCertCache();
     const unknownKid = await handleGoogleSignIn(
       googleRequest({ id_token: await signToken(claims(), "other-kid") }),
       googleEnv(),
