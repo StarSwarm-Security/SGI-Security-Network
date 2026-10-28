@@ -1,3 +1,4 @@
+import { routeAgentRequest } from "agents";
 import { CATALOG_NOTE, PRODUCTS } from "./catalog";
 import { applyCors, preflight } from "./cors";
 import { handleAnalyze } from "./analyze/handler";
@@ -7,6 +8,8 @@ import { handleBreachStub } from "./breach/stubs";
 import { loadEntitlement } from "./entitlements/load";
 import { asRecord, json, readJson } from "./http";
 import { llmStatus } from "./analyze/llm";
+import { supportLlmEnabled } from "./support/faq";
+import { handleSupportChat, handleSupportFaq } from "./support/http";
 import { logError, logInfo } from "./log";
 import { handleGiftCard, handleRedeemCode } from "./redeem/handler";
 import { handleGetPass, handlePutPass } from "./swarm/pass";
@@ -32,6 +35,7 @@ const routes: Record<string, Partial<Record<string, Handler>>> = {
       service: "sgi-api",
       phase: "skeleton",
       llmEnabled: llmStatus(env).enabled,
+      supportLlm: supportLlmEnabled(env),
       storage: "d1",
     }),
   },
@@ -100,7 +104,15 @@ const routes: Record<string, Partial<Record<string, Handler>>> = {
   "/v1/scan/external": {
     POST: (request) => handleBreachStub(request),
   },
+  "/v1/support/faq": {
+    GET: async () => handleSupportFaq(),
+  },
+  "/v1/support/chat": {
+    POST: (request, env) => handleSupportChat(request, env),
+  },
 };
+
+export { SupportChat } from "./support/agent";
 
 function normalizePath(pathname: string): string {
   if (pathname.length > 1 && pathname.endsWith("/")) return pathname.slice(0, -1);
@@ -130,6 +142,16 @@ export default {
       return response;
     }
     try {
+      if (path.startsWith("/agents/")) {
+        const routed = await routeAgentRequest(request, env);
+        const response = !routed
+          ? applyCors(request, json({ error: "not_found" }, 404))
+          : request.headers.get("Upgrade") === "websocket"
+            ? routed
+            : applyCors(request, routed);
+        logInfo("request", { method: request.method, path, status: response.status, ms: Date.now() - started });
+        return response;
+      }
       const response = applyCors(request, await dispatch(request, env));
       logInfo("request", { method: request.method, path, status: response.status, ms: Date.now() - started });
       return response;

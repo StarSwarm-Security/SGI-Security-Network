@@ -296,3 +296,34 @@ body.wing-open .tabs button.on{box-shadow:0 0 16px rgba(240,192,96,.5)}
 .find.suspicious .sev,.find.dangerous .sev{color:var(--r)}
 #pg-desk .row{flex-wrap:wrap;gap:6px}
 #tab-shield .sp-sub{margin-top:4px}
+
+/* Support chat — corner launcher, closed by default so map hotspots stay clickable. */
+.sgi-sup{position:fixed;z-index:30;right:12px;bottom:calc(46px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none;max-width:calc(100vw - 16px)}
+.sgi-sup-launch,.sgi-sup-panel,.sgi-sup-send,.sgi-sup-x{pointer-events:auto}
+.sgi-sup-launch{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(240,192,96,.55);border-radius:999px;padding:8px 12px;min-height:44px;cursor:pointer;
+  color:#0a1220;font-family:Orbitron,sans-serif;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  background:linear-gradient(180deg,#f4f7fc,#c5d4ea 46%,#e8b84a);box-shadow:0 0 16px rgba(240,192,96,.35),0 8px 20px rgba(0,0,0,.4)}
+.sgi-sup-launch .sgi-sup-dog{color:#0a1220;display:flex}
+.sgi-sup-panel{width:min(320px,calc(100vw - 16px));max-height:min(420px,58vh);display:flex;flex-direction:column;border-radius:16px;padding:10px;background:rgba(6,12,24,.88)}
+.sgi-sup-panel[hidden]{display:none!important}
+.sgi-sup-head{display:flex;align-items:center;gap:8px}
+.sgi-sup-head h2{font-family:Orbitron,sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:0;
+  background:linear-gradient(90deg,#fff,#9ec4ff 60%,#f0c060);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sgi-sup-status{font-size:10px;color:var(--mute);margin:0}
+.sgi-sup-dog{display:flex;filter:drop-shadow(0 0 6px rgba(240,192,96,.45))}
+.sgi-sup-x{margin-left:auto;border:0;background:transparent;color:var(--g);font-size:20px;line-height:1;cursor:pointer;min-width:44px;min-height:44px}
+.sgi-sup-log{overflow:auto;display:flex;flex-direction:column;gap:6px;margin:8px 0;min-height:96px;max-height:34vh}
+.sgi-sup-bubble{border-radius:12px;padding:8px 10px;font-size:12.5px;line-height:1.4;max-width:100%}
+.sgi-sup-bubble p{margin:0;white-space:pre-wrap;word-break:break-word}
+.sgi-sup-bubble.you{align-self:flex-end;background:rgba(110,200,255,.16);border:1px solid rgba(110,200,255,.35);color:#e8eef8}
+.sgi-sup-bubble.bot{align-self:flex-start;background:rgba(240,192,96,.08);border:1px solid rgba(240,192,96,.28);color:#eef3fb}
+.sgi-sup-bubble a{display:inline-block;margin-top:6px;color:#9ec4ff}
+.sgi-sup-warn{font-size:10px;color:var(--amber);margin:0 0 6px}
+.sgi-sup-form{display:flex;gap:6px}
+.sgi-sup-form input{flex:1;min-width:0;border-radius:10px;border:1px solid rgba(160,200,255,.28);background:rgba(0,0,0,.35);color:var(--ink);padding:8px 10px;font:inherit;font-size:16px}
+.sgi-sup-send{border:0;border-radius:10px;padding:8px 10px;cursor:pointer;font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#0a1220;background:linear-gradient(180deg,#f4f7fc,#e8b84a)}
+.sgi-sup-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+@media (max-width:760px){
+  .sgi-sup{right:8px;bottom:calc(40px + env(safe-area-inset-bottom))}
+  .sgi-sup-panel{max-height:52vh}
+}

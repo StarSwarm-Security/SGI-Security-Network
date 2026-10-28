@@ -75,6 +75,9 @@ Skeleton routes:
 - `GET` / `PUT /v1/swarm-pass` — optional sync. Browser localStorage stays the Phase 0 ledger.
 - `POST /v1/redeem/codes` — one-time promo codes. `POST /v1/redeem/gift-card` is 501 (no wallets or transfers).
 - `POST /v1/breach/check`, `GET /v1/breach/status`, `POST /v1/scan/external` — placeholders only. Domain-ownership verification comes before any real lookup.
+- `POST /v1/support/chat` and `GET /v1/support/faq` — corner support chat. `SupportChat` is an `AIChatAgent` at `/agents/support-chat/:id`. With `ENABLE_SUPPORT_LLM` at `0` (the default) both the HTTP route and the agent answer from `data/support-faq.json` only. This Wrangler has no local Workers AI simulator, so the `ai` binding is not in `wrangler.jsonc` (it would open a remote session). After a spend yes, add `"ai": { "binding": "AI", "remote": true }` and set `ENABLE_SUPPORT_LLM` to `1`. That calls `@cf/zai-org/glm-4.7-flash` with the FAQ as the system prompt and spends Workers AI quota. Until then a missing binding stays on the FAQ.
+
+The static site loads `js/support-chat.js`. The launcher sits in the corner and stays closed until opened, so castle hotspots stay clickable. It reads the FAQ from `data/support-faq.json` on the page. Set `window.SGI_API_BASE` (for example `http://127.0.0.1:8787`) before the script if you want it to call the worker. If that base is missing or the request fails, the widget stays on the on-device FAQ and says support is offline. Do not paste passwords or keys into the chat. The only human link is the GitHub Sponsors URL already in the header. This site does not publish an X or Telegram handle.
 
 Catalog placeholders (this API does not charge):
 

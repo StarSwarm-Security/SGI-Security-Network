@@ -24,10 +24,31 @@
     }
   },
   "vars": {
-    // LLM calls stay off until an explicit spend-cap yes. The handler stubs
-    // the provider even if this is flipped to "1".
-    "ENABLE_LLM": "0"
+    // Analyze LLM calls stay off until an explicit spend-cap yes.
+    "ENABLE_LLM": "0",
+    // Support chat answers from the FAQ pack unless this is "1".
+    // "1" calls Workers AI (binding AI) and spends quota. Default is off.
+    "ENABLE_SUPPORT_LLM": "0"
   },
+  // Workers AI has no local simulator in this Wrangler, so an `ai` binding
+  // always opens a remote session. Leave it out of this draft so `wrangler dev`
+  // and tests stay offline. When a spend yes exists, add:
+  // "ai": { "binding": "AI", "remote": true }
+  // and set ENABLE_SUPPORT_LLM to "1". Until then the support agent uses the FAQ pack.
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "SupportChat",
+        "class_name": "SupportChat"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1-support-chat",
+      "new_sqlite_classes": ["SupportChat"]
+    }
+  ],
   // Names only. Values come from `wrangler secret put` or local `.dev.vars`.
   // Missing secrets warn during `wrangler dev` and are empty at runtime.
   // Webhooks fail closed until REVENUECAT_WEBHOOK_SECRET is set.
