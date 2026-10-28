@@ -41,9 +41,9 @@ The static site does not call the API. Paste Guard and Analyze still run in the 
 
 ## API skeleton (Workers + D1)
 
-Phase 1 backend lives in `worker/` and is not deployed. Config is `worker/wrangler.jsonc` (the current Wrangler format; same role as a wrangler.toml). The Worker name is `sgi-api`. It has no routes, `workers_dev` is false, and preview URLs are off, so it cannot replace https://starswarm-sgi.pages.dev/ or https://sgi.starswarm.workers.dev/.
+Phase 1 backend lives in `worker/`. Config is `worker/wrangler.jsonc` (the current Wrangler format; same role as a wrangler.toml). The Worker name is `sgi-api`. It has no routes. `workers_dev` is true and preview URLs are off, so a deploy publishes only `sgi-api.<account>.workers.dev`. That does not replace https://starswarm-sgi.pages.dev/ or https://sgi.starswarm.workers.dev/.
 
-Do not run `wrangler deploy`, `wrangler d1 create`, or `wrangler d1 migrations apply --remote`. There is no deploy script.
+Remote D1 migration `0001_init.sql` is already applied to database `sgi-api`. Do not run `wrangler d1 migrations apply --remote` again. From `worker/`, `npx wrangler deploy` publishes `sgi-api` only.
 
 ```bash
 cd worker
@@ -52,11 +52,12 @@ npm run typecheck
 npm run migrate:local
 npm test
 npm run dev
+npx wrangler deploy
 ```
 
 `npm run dev` serves the API locally (Wrangler’s default is http://127.0.0.1:8787) against a local D1 database. `migrate:local` applies `worker/migrations/` to that local database only.
 
-The remote D1 database already exists on the Cloudflare account: name `sgi-api`, id `9cb29592-5e30-4d4d-aecf-7aff7bf91a10`, jurisdiction `us`. The Worker binding is still `DB`, with `remote: false`, so local dev does not talk to it. Schema migrations and an API deploy are still manual and need an explicit yes. Do not run `wrangler d1 migrations apply --remote` or any remote SQL until then. `npm run bundle:dry-run` only bundles; it does not upload. `npm test` may warn that `.dev.vars` is missing; the Vitest config injects a fake webhook secret and does not call RevenueCat.
+The remote D1 database is `sgi-api`, id `9cb29592-5e30-4d4d-aecf-7aff7bf91a10`, jurisdiction `us`, and `0001_init.sql` is already recorded in `d1_migrations`. The Worker binding is still `DB`, with `remote: false`, so local dev does not talk to that database. Do not re-apply remote SQL. `npm run bundle:dry-run` only bundles; it does not upload. `npm test` may warn that `.dev.vars` is missing; the Vitest config injects a fake webhook secret and does not call RevenueCat. RevenueCat, Apple, and Google secrets are not required for deploy. If they are unset, sign-in stays a 501 stub and the webhook fails closed.
 
 Copy `worker/.dev.vars.example` to `worker/.dev.vars` for local secrets. Never commit `.dev.vars`. Set real values later with `wrangler secret put` (not in git):
 

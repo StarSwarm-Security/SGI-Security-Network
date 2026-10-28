@@ -1,15 +1,13 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  // API skeleton only. Do not run `wrangler deploy`, `wrangler d1 create`,
-  // or `wrangler d1 migrations apply --remote` from this package.
-  // The live static app stays on Pages (starswarm-sgi.pages.dev) and the
-  // existing `sgi` worker (sgi.starswarm.workers.dev). This Worker is named
-  // sgi-api and has no routes, so a later deploy cannot replace that hostname.
+  // Deploy this Worker only as sgi-api. No routes, so this cannot replace
+  // starswarm-sgi.pages.dev or the existing sgi worker at sgi.starswarm.workers.dev.
+  // Remote D1 migration 0001_init.sql is already applied. Do not run it again.
   "name": "sgi-api",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-27",
   "compatibility_flags": ["nodejs_compat"],
-  "workers_dev": false,
+  "workers_dev": true,
   "preview_urls": false,
   "upload_source_maps": true,
   "observability": {
@@ -49,28 +47,17 @@
       "new_sqlite_classes": ["SupportChat"]
     }
   ],
-  // Names only. Values come from `wrangler secret put` or local `.dev.vars`.
-  // Missing secrets warn during `wrangler dev` and are empty at runtime.
-  // Webhooks fail closed until REVENUECAT_WEBHOOK_SECRET is set.
-  "secrets": {
-    "required": [
-      "REVENUECAT_WEBHOOK_SECRET",
-      "APPLE_CLIENT_ID",
-      "APPLE_TEAM_ID",
-      "APPLE_KEY_ID",
-      "APPLE_PRIVATE_KEY",
-      "GOOGLE_CLIENT_ID",
-      "GOOGLE_CLIENT_SECRET"
-    ]
-  },
+  // RevenueCat, Apple, and Google secrets are optional. Do not commit values.
+  // Set them later with `wrangler secret put` if those flows are turned on.
+  // Until then they are unset and the webhook fails closed.
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "sgi-api",
-      // Remote D1 on the Cloudflare account, jurisdiction us.
+      // Remote D1, jurisdiction us. 0001_init.sql is already applied.
+      // Do not run `wrangler d1 migrations apply --remote` again.
       // `remote: false` keeps wrangler dev and tests on local SQLite.
-      // Do not run `wrangler d1 migrations apply --remote` or any remote SQL
-      // until there is an explicit yes. Deploy is still manual.
+      // `npx wrangler deploy` from this directory publishes sgi-api only.
       "database_id": "9cb29592-5e30-4d4d-aecf-7aff7bf91a10",
       "preview_database_id": "local-sgi-api",
       "remote": false,
