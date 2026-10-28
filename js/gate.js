@@ -98,12 +98,14 @@ async function acceptAuth(res, provider) {
   return { ok: false, message: 'The network did not return a session.' };
 }
 
-function unlock() {
+function unlock(opts = {}) {
   if (opened) return;
   opened = true;
   setState('open');
   try { bootSgi(); } catch (err) { console.error(err); }
-  html.classList.remove('sgi-locked', 'sgi-restoring');
+  if (opts.keepCardHidden) html.classList.add('sgi-restoring');
+  else html.classList.remove('sgi-restoring');
+  html.classList.remove('sgi-locked');
   html.classList.add('sgi-open');
   requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
   if (gate) {
@@ -120,7 +122,7 @@ function unlock() {
   const finish = () => {
     try { bootSpotlight(); } catch (err) { console.error(err); }
     gate?.remove();
-    html.classList.remove('sgi-open');
+    html.classList.remove('sgi-open', 'sgi-restoring');
   };
   if (reduce) finish();
   else window.setTimeout(finish, 980);
@@ -256,7 +258,7 @@ async function restoreOrShow() {
     setState('restoring');
     const check = await confirmMe(existing.sessionToken || '');
     if (check.ok) {
-      unlock();
+      unlock({ keepCardHidden: true });
       return;
     }
     if (check.status === 401 || check.status === 403) clearSession();

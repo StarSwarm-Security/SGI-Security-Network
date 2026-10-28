@@ -329,6 +329,7 @@ html.sgi-locked body > :not(#abyss-gate) { display:none !important; visibility:h
   color:rgba(243,236,223,.72); text-align:center}
 html.sgi-restoring .abyss-restore{display:block}
 html.sgi-restoring .abyss-card{visibility:hidden}
+html.sgi-open .abyss-restore{display:none !important}
 .abyss-card{
   position:relative; z-index:3; width:min(420px, 100%);
   max-height:min(640px, 100%); overflow:auto;
