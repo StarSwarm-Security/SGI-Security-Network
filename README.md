@@ -29,13 +29,24 @@ Sample seasons/handles/scores. USDC/XMR payout toggles grayed **Coming soon**. S
 ### Redeem (UI only)
 Redeem SC for **XMR / SOL / ETH / BTC** gift cards — Coming soon / needs partner + Terms. Fold-style BTC gift cards noted as an example partner path. **No real redemptions, wallets, or transfers.** Future crypto gift-card redeem may need KYC.
 
+## Gate
+
+The shell (castle map, tabs, Analyze, Paste Guard, Threat Index, Hive, Honest Shield, and the rest) stays behind a full-screen black abyss until the API accepts a session.
+
+- Google Sign-In is first when a public client id is available from `GET /v1/auth/providers`, `window.SGI_GOOGLE_CLIENT_ID`, or `js/auth-config.js`. Do not commit a client secret.
+- Anonymous fallback calls `POST /v1/auth/device` while that seal is offered, then confirms `GET /v1/me`.
+- The bearer token is kept in this browser so a still-valid session skips the card. Apple stays hidden.
+- Paste Guard still runs only on the device after the gate opens.
+
+This repo does not deploy or publish the live hosts.
+
 ## Local
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Open http://localhost:8000. No trackers. No invented live numbers.
+Open http://localhost:8000. The gate calls `https://sgi-api.starswarm.workers.dev` (that origin allows `http://localhost:8000`). No trackers. No invented live numbers.
 
 The static site does not call the API. Paste Guard and Analyze still run in the browser. Swarm Pass and Redeem still use the localStorage ledger.
 
