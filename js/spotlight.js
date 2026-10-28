@@ -14,9 +14,9 @@ export function mountSpotlight() {
   function resize() {
     w = c.width = window.innerWidth;
     h = c.height = window.innerHeight;
-    // Cover dog sits lower-center in art; map to viewport origin of beam
-    dogX = w * 0.48;
-    dogY = h * 0.72;
+    // Hero dog sits lower-left in sgi-hero-v1; beam origin on a full-bleed 16:9 cover
+    dogX = w * 0.13;
+    dogY = h * 0.76;
     dirty = true;
   }
 
