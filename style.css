@@ -8,7 +8,7 @@
   --beam:rgba(255,220,160,.55);--bg:#000}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:#000;color:var(--ink);font-family:Inter,system-ui,sans-serif}
-.cover{position:fixed;inset:0;background:url(assets/cover.jpg) 65% top/cover no-repeat;z-index:0;filter:saturate(.85) contrast(1.08) brightness(.72)}
+.cover{position:fixed;inset:0;background:url(assets/sgi-hero-v1-1600x900.png) center center/cover no-repeat;z-index:0;filter:saturate(.85) contrast(1.08) brightness(.72)}
 .veil{position:fixed;inset:0;z-index:1;pointer-events:none;
   background:radial-gradient(ellipse at 50% 30%,rgba(10,20,40,.25),rgba(0,0,0,.72) 70%),
   linear-gradient(180deg,rgba(0,0,0,.65),rgba(8,14,28,.4) 40%,rgba(0,0,0,.82))}
@@ -26,6 +26,9 @@ html,body{height:100%;overflow:hidden;background:#000;color:var(--ink);font-fami
 .glass.pinned,.glass.pinable.pinned{background:var(--glass-pin);box-shadow:0 0 0 1px var(--g),0 0 24px rgba(160,200,255,.2),0 16px 50px rgba(0,0,0,.6)}
 .pinable{cursor:default}.pinable:active{transform:scale(.998)}
 .top{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px;min-width:0}
+.brand-mark{width:40px;height:40px;flex:0 0 auto;border-radius:9px;object-fit:cover;object-position:center 42%;
+  border:1px solid rgba(110,200,255,.45);box-shadow:0 0 14px rgba(80,170,255,.35);background:#06101c}
 .brand .parent{font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);text-shadow:0 0 8px rgba(110,200,255,.45)}
 .brand h1{font-family:Orbitron,sans-serif;font-weight:900;font-size:clamp(15px,2.4vw,22px);letter-spacing:1px;text-transform:uppercase;
   color:var(--ink);text-shadow:0 0 14px rgba(200,220,255,.45),0 0 28px rgba(240,192,96,.2);
@@ -219,8 +222,8 @@ select{border-radius:8px;border:1px solid rgba(160,200,255,.2);background:rgba(0
 .castle-wrap{height:100%;display:grid;grid-template-rows:auto 1fr auto auto;min-height:0;padding:8px 10px 6px;position:relative}
 .castle-chrome{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px;padding:2px 4px 6px}
 .castle-lede{margin:0;font-size:11.5px;max-width:70ch}
-.castle-stage{min-height:0;flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:2px 0}
-.castle-map{position:relative;width:100%;max-width:100%;aspect-ratio:3/1;border-radius:12px;overflow:hidden;
+.castle-stage{min-height:0;flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:2px 0;container-type:size}
+.castle-map{position:relative;width:min(100cqw, calc(100cqh * 16 / 9));aspect-ratio:16/9;border-radius:12px;overflow:hidden;
   border:1px solid rgba(160,200,255,.28);box-shadow:0 0 0 1px rgba(240,192,96,.1),0 12px 40px rgba(0,0,0,.5);
   background:#050a14}
 .castle-photo{display:block;width:100%;height:100%;object-fit:cover;object-position:center center;pointer-events:none;
@@ -242,7 +245,7 @@ select{border-radius:8px;border:1px solid rgba(160,200,255,.2);background:rgba(0
 .castle-hot.active{background:rgba(16,36,64,.62);border-color:rgba(110,200,255,.9);
   box-shadow:0 0 22px rgba(110,200,255,.45)}
 .castle-hot.active .hot-lab,.castle-hot.active .hot-sub{opacity:1;transform:none}
-.castle-svg{display:none!important} /* SVG fortress retired — cover photo is the map */
+.castle-svg{display:none!important} /* SVG fortress retired — hero photo is the map */
 .castle-tip{position:absolute;left:12px;bottom:52px;z-index:4;padding:5px 10px;border-radius:8px;
   background:rgba(2,8,18,.85);border:1px solid rgba(240,192,96,.4);font-family:Orbitron,sans-serif;
   font-size:10px;letter-spacing:.4px;color:var(--amber);pointer-events:none;text-transform:uppercase}

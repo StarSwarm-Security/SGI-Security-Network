@@ -1,21 +1,21 @@
-/** Cover-photo interactive map — hotspots over assets/cover.jpg. */
+/** Interactive map — same wings, hotspots on the castle in assets/sgi-hero-v1-1600x900.png. */
 export const WINGS = [
   { id: 'analyze',  name: 'Signal Keep',       sub: 'Analyze · Paste Guard', tip: 'Central keep — Cisco + offline Paste Guard',
-    box: [46.5, 22, 9, 34] },
+    box: [45, 24, 12, 16] },
   { id: 'threats',  name: 'Archive Spire',     sub: 'Threat Index',          tip: 'West spires — A–Z threats & bots',
-    box: [40, 28, 7.5, 30] },
+    box: [33, 24, 11, 14] },
   { id: 'qhm',      name: 'Helium Observatory', sub: 'Quantum Helium + Liq', tip: 'East towers — bubbles & war map',
-    box: [55, 26, 9, 32] },
+    box: [58, 24, 12, 14] },
   { id: 'hive',     name: 'Swarm Courtyard',   sub: 'Defender Hive',         tip: 'Front yard — CCNA defender swarm',
-    box: [46, 54, 12, 16] },
+    box: [45, 42, 13, 13] },
   { id: 'shield',   name: 'Honest Shield',     sub: 'VPN + Protect',         tip: 'Gate + armory — honest free VPN & malware checks',
-    box: [52, 58, 14, 22] },
+    box: [59, 40, 12, 14] },
   { id: 'swarm',    name: 'Barracks',          sub: 'Swarm Pass',            tip: 'West flank — badges & credits',
-    box: [39, 56, 8, 18] },
+    box: [32, 40, 11, 14] },
   { id: 'bounty',   name: 'Arena',             sub: 'Bounty board',          tip: 'Upper crystals — demo leaderboards',
-    box: [49, 12, 9, 12] },
+    box: [47, 13, 9, 10] },
   { id: 'redeem',   name: 'Vault',             sub: 'Redeem credits',        tip: 'Shield vault — gift cards Coming soon',
-    box: [18, 44, 5.5, 14] },
+    box: [26, 46, 7, 10] },
 ];
 
 function boxStyle([l, t, w, h]) {
@@ -31,7 +31,7 @@ export function mountCastle(root, { onWing } = {}) {
       </div>
       <div class="castle-stage" id="castle-stage">
         <div class="castle-map" id="castle-map" role="img" aria-label="StarSwarm SGI interactive map">
-          <img class="castle-photo" src="assets/cover.jpg" alt="StarSwarm cover art" width="1500" height="500" decoding="async">
+          <img class="castle-photo" src="assets/sgi-hero-v1-1600x900.png" alt="StarSwarm hero: robot dog spotlight over the castle" width="1600" height="900" decoding="async">
           ${WINGS.map(w => `
             <button type="button" class="castle-hot wing" data-go="${w.id}"
               style="${boxStyle(w.box)}"
