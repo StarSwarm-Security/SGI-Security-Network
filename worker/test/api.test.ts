@@ -133,7 +133,7 @@ describe("sgi-api skeleton", () => {
     expect(listed.products.find((product) => product.tier === "trial")?.trialDays).toBe(3);
   });
 
-  it("leaves Apple and Google unwired", async () => {
+  it("keeps Apple stubbed and Google unconfigured until secrets exist", async () => {
     const providers = await api("/v1/auth/providers");
     expect(providers.status).toBe(200);
     const listed = await providers.json() as { anonymous: boolean; apple: boolean; google: boolean };
@@ -145,6 +145,22 @@ describe("sgi-api skeleton", () => {
     expect(appleBody.error).toBe("not_configured");
     expect(appleBody.missing).toContain("APPLE_PRIVATE_KEY");
     expect(JSON.stringify(appleBody)).not.toContain("ignore-me");
+
+    const google = await api("/v1/auth/google", {
+      method: "POST",
+      body: JSON.stringify({ id_token: "do-not-log", credential: "do-not-log" }),
+    });
+    expect(google.status).toBe(501);
+    expect(google.headers.get("Access-Control-Allow-Origin")).toBe(PAGES);
+    expect(google.headers.get("Cache-Control")).toBe("no-store");
+    const googleBody = await google.json() as { error: string; missing: string[] };
+    expect(googleBody.error).toBe("not_configured");
+    expect(googleBody.missing).toEqual(["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"]);
+    expect(JSON.stringify(googleBody)).not.toContain("do-not-log");
+    const googlePreflight = await api("/v1/auth/google", { method: "OPTIONS" });
+    expect(googlePreflight.status).toBe(204);
+    expect(googlePreflight.headers.get("Access-Control-Allow-Methods")).toContain("POST");
+    expect(googlePreflight.headers.get("Access-Control-Allow-Headers")).toContain("Authorization");
 
     const calls: string[] = [];
     const original = globalThis.fetch;

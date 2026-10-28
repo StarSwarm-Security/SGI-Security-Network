@@ -57,13 +57,13 @@ npx wrangler deploy
 
 `npm run dev` serves the API locally (Wrangler’s default is http://127.0.0.1:8787) against a local D1 database. `migrate:local` applies `worker/migrations/` to that local database only.
 
-The remote D1 database is `sgi-api`, id `9cb29592-5e30-4d4d-aecf-7aff7bf91a10`, jurisdiction `us`, and `0001_init.sql` is already recorded in `d1_migrations`. The Worker binding is still `DB`, with `remote: false`, so local dev does not talk to that database. Do not re-apply remote SQL. `npm run bundle:dry-run` only bundles; it does not upload. `npm test` may warn that `.dev.vars` is missing; the Vitest config injects a fake webhook secret and does not call RevenueCat. RevenueCat, Apple, and Google secrets are not required for deploy. If they are unset, sign-in stays a 501 stub and the webhook fails closed.
+The remote D1 database is `sgi-api`, id `9cb29592-5e30-4d4d-aecf-7aff7bf91a10`, jurisdiction `us`, and `0001_init.sql` is already recorded in `d1_migrations`. The Worker binding is still `DB`, with `remote: false`, so local dev does not talk to that database. Do not re-apply remote SQL. `npm run bundle:dry-run` only bundles; it does not upload. `npm test` may warn that `.dev.vars` is missing; the Vitest config injects a fake webhook secret and does not call RevenueCat. RevenueCat, Apple, and Google secrets are not required for deploy. If they are unset, Apple sign-in stays a 501 stub, Google sign-in returns 501 `not_configured`, and the webhook fails closed. This repo change does not deploy the Worker.
 
 Copy `worker/.dev.vars.example` to `worker/.dev.vars` for local secrets. Never commit `.dev.vars`. Set real values later with `wrangler secret put` (not in git):
 
 - `REVENUECAT_WEBHOOK_SECRET` — required before the webhook accepts events. Unsigned requests are rejected. RevenueCat’s static Authorization header should be this same value. `X-RevenueCat-Signature` may instead be hex HMAC-SHA256 of the raw body.
 - `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` — Sign in with Apple placeholders. The route stays a 501 stub and does not call Apple.
-- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google sign-in placeholders. The route stays a 501 stub and does not call Google.
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google sign-in. `GET /v1/auth/providers` reports `google: true` only when both are non-empty. `GOOGLE_CLIENT_SECRET` is reserved for a future authorization-code exchange and is not used to verify ID tokens. Verification uses `GOOGLE_CLIENT_ID` as the token `aud`. Do not commit either value.
 
 `ENABLE_LLM` defaults to `0`. Setting it to `1` still does not call a model.
 
@@ -72,7 +72,9 @@ CORS allows `https://starswarm-sgi.pages.dev`, `https://sgi.starswarm.workers.de
 Skeleton routes:
 
 - `POST /v1/auth/device` — anonymous device. Session tokens are stored as hashes. The first session starts a 3-day Pro trial (same daily analyze limit as the paid plans) and also keeps a free entitlement with no expiry. After the trial timestamp passes, the active plan falls back to free. The trial is not a charge.
-- `GET /v1/auth/providers`, `POST /v1/auth/apple`, `POST /v1/auth/google`
+- `GET /v1/auth/providers` — anonymous is always on. Apple is on only when every Apple secret is set (the route is still a stub). Google is on only when both Google secrets are set.
+- `POST /v1/auth/apple` — still a 501 stub. It does not call Apple.
+- `POST /v1/auth/google` — body `{ "id_token": "..." }` or `{ "credential": "..." }` (GIS button alias). Until both Google secrets are set, the response is 501 `not_configured` with the missing names. After that, the Worker fetches Google's JWKS (`https://www.googleapis.com/oauth2/v3/certs`, cached in the isolate for at most 10 minutes), checks the RS256 signature with Web Crypto, and requires `iss` of `accounts.google.com` or `https://accounts.google.com`, `aud` equal to `GOOGLE_CLIENT_ID`, a current `exp` (60 second skew), and `email_verified` when an email claim is present. A bad token is 401 `invalid_id_token`. An expired token is 401 `expired_id_token`. The raw ID token is not stored or logged. The Google `sub` is stored as `users.provider_subject` so a repeat sign-in returns a new bearer session for the same user. The first sign-in creates the same free and trial entitlements as an anonymous device. CORS matches the other routes. Analyze rate limits stay per device and UTC day on that session. Optional `deviceId` reuses or creates a device for this user and does not take over another user's device.
 - `POST /v1/analyze` — entitlements, per-tier daily limit, D1 cache by content hash. Uses `js/analyzers.js` and `js/paste-guard.js`.
 - `POST /v1/webhooks/revenuecat` — signature check, then entitlement upsert. App user id must be this API’s user UUID, not an email.
 - `GET` / `PUT /v1/swarm-pass` — optional sync. Browser localStorage stays the Phase 0 ledger.
@@ -91,7 +93,7 @@ Catalog placeholders (this API does not charge):
 | Yearly special | $39.99 / year | `sgi.yearly.special_3999` |
 | Free | $0, no expiry | none |
 
-The trial starts on the first anonymous device session. Free remains on the account and is what analyze uses after those 3 days. Monthly and yearly replace the trial while they are active and use the same Pro analyze limit.
+The trial starts on the first anonymous device session or the first Google sign-in for a subject. Free remains on the account and is what analyze uses after those 3 days. A repeat Google sign-in does not start another trial. Monthly and yearly replace the trial while they are active and use the same Pro analyze limit.
 
 ## License
 

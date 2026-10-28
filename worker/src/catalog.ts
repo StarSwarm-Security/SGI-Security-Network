@@ -6,7 +6,7 @@ export type TierId = "free" | "trial" | "monthly" | "yearly";
 /** Paid Pro analyze cap. The 3-day trial and both paid plans use this limit. */
 export const PRO_ANALYZE_PER_DAY = 300;
 
-/** Trial length. Starts on the first anonymous device session, then falls back to free. */
+/** Trial length. Starts on the first anonymous device or Google account, then falls back to free. */
 export const TRIAL_DAYS = 3;
 
 export const TRIAL_PRODUCT_ID = "sgi.trial.3d";

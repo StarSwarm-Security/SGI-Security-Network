@@ -50,6 +50,8 @@
   // RevenueCat, Apple, and Google secrets are optional. Do not commit values.
   // Set them later with `wrangler secret put` if those flows are turned on.
   // Until then they are unset and the webhook fails closed.
+  // Google ID-token verification uses GOOGLE_CLIENT_ID as aud. GOOGLE_CLIENT_SECRET
+  // stays required for providerStatus and is reserved for a future auth-code exchange.
   "d1_databases": [
     {
       "binding": "DB",
