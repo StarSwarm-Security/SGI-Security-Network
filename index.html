@@ -1,18 +1,66 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="sgi-locked">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>StarSwarm SGI Security Network</title>
 <meta name="description" content="StarSwarm SGI Security Network: Interactive cover map — Analyze (+ Paste Guard), Threat Index, Quantum Helium, Hive, Honest Shield, Swarm Pass, Bounty, and Redeem.">
-<meta name="theme-color" content="#050a14">
+<meta name="theme-color" content="#000000">
+<!--
+  Public Google Identity Services client id only. Leave unset.
+  The gate reads GET /v1/auth/providers (googleClientId / clientId / google.clientId),
+  then window.SGI_GOOGLE_CLIENT_ID, then js/auth-config.js.
+  Never put GOOGLE_CLIENT_SECRET, an Apple private key, or any other secret here.
+-->
+<style id="abyss-critical">
+  html.sgi-locked, html.sgi-locked body { background:#000 !important; overflow:hidden !important; }
+  html.sgi-locked body > :not(#abyss-gate) { display:none !important; visibility:hidden !important; }
+  #abyss-gate { position:fixed; inset:0; background:#000; color:#f3ecdf; }
+  html.sgi-restoring #abyss-gate .abyss-card { visibility:hidden; }
+  html.sgi-restoring #abyss-restore { display:block; }
+</style>
+<script>
+/* Same key as js/auth-client.js SESSION_KEY. Hides the auth card before first paint when a seal is still in date. */
+(function () {
+  try {
+    var raw = localStorage.getItem('sgi.session.v1');
+    if (!raw) return;
+    var s = JSON.parse(raw);
+    if (!s || (!s.sessionToken && s.via !== 'cookie')) return;
+    if (s.expiresAt) {
+      var t = Date.parse(s.expiresAt);
+      if (isFinite(t) && t <= Date.now()) return;
+    }
+    document.documentElement.classList.add('sgi-restoring');
+  } catch (e) {}
+})();
+</script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="abyss-gate" class="abyss" role="dialog" aria-modal="true" aria-labelledby="abyss-title" data-state="locked">
+  <div class="abyss-spot" aria-hidden="true"></div>
+  <canvas id="abyss-dust" class="abyss-dust" aria-hidden="true"></canvas>
+  <div class="abyss-vignette" aria-hidden="true"></div>
+  <p id="abyss-restore" class="abyss-restore">Checking the seal…</p>
+  <div class="abyss-card">
+    <p class="abyss-kicker">StarSwarm</p>
+    <h2 id="abyss-title">The gate is shut</h2>
+    <p class="abyss-lede">The keep stays dark until a session is accepted.</p>
+    <div id="abyss-google" class="abyss-google" hidden></div>
+    <button type="button" class="abyss-btn abyss-btn-google" id="abyss-google-fallback" disabled>Sign in with Google</button>
+    <p id="abyss-google-note" class="abyss-note">Google Sign-In lights when a public client id is published. No secret is kept in this page.</p>
+    <div class="abyss-or" id="abyss-or"><span>or</span></div>
+    <button type="button" class="abyss-btn abyss-btn-device" id="abyss-device">Continue with this device</button>
+    <p id="abyss-status" class="abyss-status" role="status" aria-live="polite"></p>
+    <p class="abyss-fine">A device session is the anonymous fallback while that seal is open. Apple stays unlit.</p>
+    <noscript><p class="abyss-status">This gate needs a browser that can reach the network.</p></noscript>
+  </div>
+</div>
 <div class="cover" aria-hidden="true"></div>
 <div class="veil" aria-hidden="true"></div>
 <div class="matrix" aria-hidden="true"></div>
-<div class="shell">
+<div class="shell" inert aria-hidden="true">
   <header class="top glass">
     <div class="brand">
       <img class="brand-mark" src="assets/mascot-dog-v1-1024.png" alt="StarSwarm robot dog" width="1024" height="1024" decoding="async">
@@ -197,7 +245,7 @@
   <div id="ti-body"></div>
 </aside>
 
-<script type="module" src="app.js"></script>
+<script type="module" src="js/gate.js"></script>
 <div id="sgi-support"></div>
 <script type="module" src="js/support-chat.js"></script>
 </body>

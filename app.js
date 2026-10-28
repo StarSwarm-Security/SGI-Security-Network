@@ -312,9 +312,6 @@ function paintShield() {
   ].map(v => `<article class="cardx"><h3>${v.name}</h3><p>${v.note}</p><p class="fine">${v.aff}</p><a href="${v.url}" target="_blank" rel="noopener">${v.cta}</a></article>`).join('');
   $('vpn-cards').dataset.ready = '1';
 }
-paintShield();
-
-
 /* Pin opaque glass on click */
 document.querySelectorAll('.pinable').forEach(p => {
   p.addEventListener('click', e => {
@@ -326,8 +323,6 @@ document.querySelectorAll('.chip,.badge').forEach(el => {
   if (!el.title && el.textContent) el.title = el.textContent.trim();
 });
 
-mountSpotlight();
-
 $('wing-back').onclick = () => closeWing();
 $('wing-close').onclick = () => closeWing();
 document.addEventListener('keydown', e => {
@@ -338,10 +333,31 @@ document.addEventListener('keydown', e => {
 
 window.addEventListener('sgi:goto', e => { if (e.detail && panels[e.detail]) show(e.detail); });
 
-let start = (location.hash || '').replace(/^#/, '');
-if (start === 'vpn' || start === 'protect') start = 'shield';
-if (start === 'pasteguard' || start === 'paste-guard') {
-  analyzeMode = 'pasteguard';
-  start = 'analyze';
+let booted = false;
+let spotLit = false;
+
+/** Mount the shell. Called only after the abyss gate has an accepted session. */
+export function bootSgi() {
+  if (booted) return;
+  booted = true;
+  const shell = document.querySelector('.shell');
+  if (shell) {
+    shell.removeAttribute('inert');
+    shell.removeAttribute('aria-hidden');
+  }
+  paintShield();
+  let start = (location.hash || '').replace(/^#/, '');
+  if (start === 'vpn' || start === 'protect') start = 'shield';
+  if (start === 'pasteguard' || start === 'paste-guard') {
+    analyzeMode = 'pasteguard';
+    start = 'analyze';
+  }
+  show(panels[start] ? start : 'home');
 }
-show(panels[start] ? start : 'home');
+
+/** Dog spotlight stays off until the gate has dissolved. */
+export function bootSpotlight() {
+  if (spotLit) return;
+  spotLit = true;
+  mountSpotlight();
+}
