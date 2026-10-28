@@ -1,0 +1,14 @@
+# Copy to worker/.dev.vars for local wrangler dev. Never commit .dev.vars.
+# Leave these empty until Phase 1. Do not paste API keys, payment data,
+# wallet secrets, or a real Apple private key.
+REVENUECAT_WEBHOOK_SECRET=
+APPLE_CLIENT_ID=
+APPLE_TEAM_ID=
+APPLE_KEY_ID=
+APPLE_PRIVATE_KEY=
+# GOOGLE_CLIENT_ID is the OAuth client id and the ID-token audience (aud).
+# GOOGLE_CLIENT_SECRET is reserved for a future authorization-code exchange.
+# It is not used to verify ID tokens. providerStatus still requires both.
+# Set them later with `wrangler secret put`. Do not commit real values.
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=

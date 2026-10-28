@@ -1,0 +1,69 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Deploy this Worker only as sgi-api. No routes, so this cannot replace
+  // starswarm-sgi.pages.dev or the existing sgi worker at sgi.starswarm.workers.dev.
+  // Remote D1 migration 0001_init.sql is already applied. Do not run it again.
+  "name": "sgi-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-27",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "upload_source_maps": true,
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 0.01
+    }
+  },
+  "vars": {
+    // Analyze LLM calls stay off until an explicit spend-cap yes.
+    "ENABLE_LLM": "0",
+    // Support chat answers from the FAQ pack unless this is "1".
+    // "1" calls Workers AI (binding AI) and spends quota. Default is off.
+    "ENABLE_SUPPORT_LLM": "0"
+  },
+  // Workers AI has no local simulator in this Wrangler, so an `ai` binding
+  // always opens a remote session. Leave it out of this draft so `wrangler dev`
+  // and tests stay offline. When a spend yes exists, add:
+  // "ai": { "binding": "AI", "remote": true }
+  // and set ENABLE_SUPPORT_LLM to "1". Until then the support agent uses the FAQ pack.
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "SupportChat",
+        "class_name": "SupportChat"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1-support-chat",
+      "new_sqlite_classes": ["SupportChat"]
+    }
+  ],
+  // RevenueCat, Apple, and Google secrets are optional. Do not commit values.
+  // Set them later with `wrangler secret put` if those flows are turned on.
+  // Until then they are unset and the webhook fails closed.
+  // Google ID-token verification uses GOOGLE_CLIENT_ID as aud. GOOGLE_CLIENT_SECRET
+  // stays required for providerStatus and is reserved for a future auth-code exchange.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sgi-api",
+      // Remote D1, jurisdiction us. 0001_init.sql is already applied.
+      // Do not run `wrangler d1 migrations apply --remote` again.
+      // `remote: false` keeps wrangler dev and tests on local SQLite.
+      // `npx wrangler deploy` from this directory publishes sgi-api only.
+      "database_id": "9cb29592-5e30-4d4d-aecf-7aff7bf91a10",
+      "preview_database_id": "local-sgi-api",
+      "remote": false,
+      "migrations_dir": "migrations"
+    }
+  ]
+}

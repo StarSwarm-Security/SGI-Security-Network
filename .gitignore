@@ -1,0 +1,15 @@
+# Worker local state. The static Pages site has no build output.
+node_modules/
+worker/.wrangler/
+worker/.tmp/
+worker/worker-configuration.d.ts
+worker/worker-configuration.d.ts
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+worker/.dev.vars
+worker/.dev.vars.*
+!.dev.vars.example
+!worker/.dev.vars.example
+*.log

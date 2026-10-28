@@ -1,0 +1,54 @@
+{
+  "warning": "Do not paste passwords, seed phrases, private keys, or payment details. Support does not need them and will not repeat them.",
+  "greeting": "StarSwarm support. Ask about Honest Shield, Paste Guard, Analyze, Swarm Pass, Redeem, or pricing. Do not paste secrets.",
+  "secretReply": "I did not keep that message. Do not paste passwords, recovery phrases, private keys, or payment details here. Close the tab if you already pasted one, and move anything exposed.",
+  "fallback": "I can help with Honest Shield, Paste Guard, Analyze, Swarm Pass, Redeem, and pricing (3-day Pro trial, then free, or $9.99/month, or $39.99/year). Say “talk to a human” for the sponsor link that is actually on this site.",
+  "sponsors": {
+    "label": "GitHub Sponsors",
+    "href": "https://github.com/sponsors/StarSwarm-Security"
+  },
+  "entries": [
+    {
+      "id": "honest-shield",
+      "title": "Honest Shield",
+      "keywords": ["honest shield", "vpn", "proton", "warp", "windscribe", "malwarebytes", "virustotal", "urlhaus", "affiliate", "protect"],
+      "answer": "Honest Shield is the free-first VPN and malware desk. It links Proton VPN Free, Windscribe Free, and Cloudflare WARP, plus VirusTotal, Malwarebytes Free, and URLhaus. Affiliate notes are on the tab. This build does not sell a VPN and does not hide a paid upsell behind a scare screen."
+    },
+    {
+      "id": "paste-guard",
+      "title": "Paste Guard",
+      "keywords": ["paste guard", "pasteguard", "clickfix", "scam", "suspicious", "dangerous", "seed"],
+      "answer": "Paste Guard runs in the browser on the Analyze tab. Verdicts are Safe, Suspicious, or Dangerous. They are heuristics, not an antivirus cloud. On the static site the paste stays on the device. Do not paste seeds or keys into support."
+    },
+    {
+      "id": "analyze",
+      "title": "Analyze",
+      "keywords": ["analyze", "cisco", "show run", "specialist", "config"],
+      "answer": "Analyze is the offline Cisco-style swarm on the Analyze tab. It runs on this device in the static site. The API skeleton can mirror that engine later behind an entitlement, but this page does not upload your paste to chat."
+    },
+    {
+      "id": "swarm-pass",
+      "title": "Swarm Pass",
+      "keywords": ["swarm pass", "swarm credit", "credits", "badge", "streak", "check-in", "check in", "tour"],
+      "answer": "Swarm Pass stores badges, streaks, and Swarm Credits in this browser (localStorage). Tour completion and the daily Guard check-in earn credits. Install-only and store reviews earn nothing. Credits are not cash, not crypto, and not transferable."
+    },
+    {
+      "id": "redeem",
+      "title": "Redeem",
+      "keywords": ["redeem", "gift card", "giftcard", "bitcoin", "btc", "xmr", "sol", "eth", "coming soon", "kyc"],
+      "answer": "Redeem is Coming soon. This build does not send XMR, SOL, ETH, or BTC gift cards and does not create a wallet transfer. A future partner path would need Terms and may need KYC. Your credit balance stays local until you opt into sync."
+    },
+    {
+      "id": "pricing",
+      "title": "Pricing",
+      "keywords": ["price", "pricing", "cost", "trial", "pro", "monthly", "yearly", "9.99", "$9.99", "39.99", "$39.99", "subscribe", "subscription", "plan", "how much", "free tier"],
+      "answer": "Plan placeholders, not a charge on this page: a 3-day Pro trial starts on the first anonymous device session and uses Pro limits, then falls back to free. Monthly is $9.99/month. Yearly special is $39.99/year. Free remains after the trial. The live static site does not bill you."
+    },
+    {
+      "id": "human",
+      "title": "Talk to a human",
+      "keywords": ["human", "person", "someone", "operator", "staff", "real person", "talk to"],
+      "answer": "A person can be reached through GitHub Sponsors, which is the sponsor link already on this site: https://github.com/sponsors/StarSwarm-Security. This site does not publish an X or Telegram handle, so support will not invent one."
+    }
+  ]
+}
