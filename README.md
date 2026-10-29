@@ -1,6 +1,6 @@
 # StarSwarm SGI Security Network
 
-Native merge of offline Analyze (**Paste Guard** Safe/Suspicious/Dangerous), Threat Index, Defender Hive, Quantum Helium Maps (+ liquidation dock), **Swarm Pass**, **Bounty board**, **Redeem** (Coming soon), and **Honest Shield** (VPN + Protect) under one cover-map shell.
+Native merge of offline Analyze (**Paste Guard** Safe/Suspicious/Dangerous), Threat Index, Defender Hive, **Swarm Pass**, **Bounty board**, **Redeem** (Coming soon), and **Honest Shield** (VPN + Protect) under one cover-map shell.
 
 **Live:** https://starswarm-sgi.pages.dev/ · https://sgi.starswarm.workers.dev/
 
@@ -12,7 +12,7 @@ Interactive cover map with always-on hotspot labels. Header is Home + More (over
 
 ## Tabs
 
-Home · Analyze (+ Paste Guard) · Threat Index · Hive · Quantum Helium · **Swarm Pass** · **Bounty** · **Redeem** · **Honest Shield**
+Home · Analyze (+ Paste Guard) · Threat Index · Hive · **Swarm Pass** · **Bounty** · **Redeem** · **Honest Shield**
 
 ### Paste Guard (Phase 0)
 Offline rules in Analyze → Paste Guard mode. Verdicts: Safe / Suspicious / Dangerous. Paste never leaves the device. Heuristic only.
