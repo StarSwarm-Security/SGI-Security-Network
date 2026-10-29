@@ -8,7 +8,7 @@ Parent brand: StarSwarm Agentic Security. Cover art + Orbitron/Archivo Black (OF
 
 ## Home (v8)
 
-Interactive cover map with always-on hotspot labels. Header is Home + More (overflow for the other decks). Vault hotspot shrunk so it no longer covers the map. Mobile list fallback. Cover art + dog spotlight. Live on starswarm-sgi.pages.dev.
+Interactive cover map. Clickable labels sit on the art and open that deck directly — no label popup. Header is Home + More (overflow for the other decks). Mobile uses the list. Cover art + dog spotlight. Live on starswarm-sgi.pages.dev.
 
 ## Tabs
 
