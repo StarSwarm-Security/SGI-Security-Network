@@ -1,9 +1,7 @@
 import { runSwarm, SPECIALISTS } from './js/analyzers.js';
 import { REF_DATA, SCENARIOS, CS_DATA } from './js/study.js';
 import { mountHive, NODES, THREATS } from './js/hive.js';
-import { loadWarMap, drawWarMap } from './js/liq.js';
 import { loadThreatIndex } from './js/threat-index.js';
-import { mountQHM } from './js/qhm/panel.js';
 import { mountSwarmPass } from './js/swarm-pass.js';
 import { mountBounty } from './js/bounty.js';
 import { mountRedeem } from './js/redeem.js';
@@ -32,7 +30,7 @@ function syncTabChrome(activeId) {
   if (moreBtn) moreBtn.classList.toggle('open-section', activeId && activeId !== 'home');
 }
 
-let qhmCtl = null, hiveCtl = null, threatData = null, liqSym = 'BTC', liqReady = false, swarmCtl = null, bountyCtl = null, redeemCtl = null, castleCtl = null;
+let hiveCtl = null, threatData = null, swarmCtl = null, bountyCtl = null, redeemCtl = null, castleCtl = null;
 const wingOverlay = () => $('wing-overlay');
 const wingBody = () => $('wing-body');
 const mainEl = () => document.querySelector('main');
@@ -84,10 +82,6 @@ function closeWing() {
 
 
 function bootPanel(id) {
-  if (id === 'qhm') {
-    if (!qhmCtl) qhmCtl = mountQHM($('qhm-root'));
-    refreshLiq();
-  }
   if (id === 'hive' && !hiveCtl) {
     hiveCtl = mountHive($('hive-svg'), { onNode: n => {
       const d = $('hive-detail'); d.hidden = false;
@@ -101,7 +95,6 @@ function bootPanel(id) {
     }});
   }
   if (id === 'threats' && !threatData) initThreats();
-  if (id === 'liq') refreshLiq();
   if (id === 'swarm') {
     if (!swarmCtl) swarmCtl = mountSwarmPass($('swarm-root'));
     else swarmCtl.refresh();
@@ -276,26 +269,6 @@ $('ti-list').onclick = e => {
     (i.source ? `<p class="fine" style="margin-top:8px"><a href="${i.source}" target="_blank" rel="noopener" style="color:#9fd4ff">Source</a></p>` : '');
 };
 $('ti-close').onclick = () => { $('ti-drawer').hidden = true; };
-
-/* Liquidation */
-async function refreshLiq() {
-  const data = await loadWarMap(liqSym);
-  const badge = $('liq-badge');
-  badge.textContent = data.liveLiq ? 'Live clusters' : 'SAMPLE';
-  badge.className = 'badge ' + (data.liveLiq ? 'live' : 'sample');
-  $('liq-note').textContent = data.note;
-  $('liq-stats').innerHTML =
-    `<div><span>${liqSym} mark</span><b>${data.price != null ? '$' + data.price.toLocaleString(undefined,{maximumFractionDigits:0}) : '–'}</b></div>` +
-    `<div><span>24h</span><b class="${(data.chg||0)>=0?'up':'down'}">${data.chg==null?'–':(data.chg>=0?'+':'')+data.chg.toFixed(2)+'%'}</b></div>` +
-    `<div><span>Levels</span><b>${data.clusters.length}</b></div>` +
-    `<div><span>Price feed</span><b>${data.livePrice?'CoinGecko':'n/a'}</b></div>`;
-  drawWarMap($('liq-canvas'), data);
-}
-document.querySelectorAll('[data-sym]').forEach(b => b.onclick = () => {
-  document.querySelectorAll('[data-sym]').forEach(x => x.classList.toggle('on', x === b));
-  liqSym = b.dataset.sym; refreshLiq();
-});
-addEventListener('resize', () => { if (!$('tab-qhm').hidden) refreshLiq(); });
 
 /* Honest Shield (VPN + Protect) */
 function paintShield() {

@@ -4,8 +4,6 @@ export const WINGS = [
     box: [45, 24, 12, 16] },
   { id: 'threats',  name: 'Archive Spire',     sub: 'Threat Index',          tip: 'West spires — A–Z threats & bots',
     box: [33, 24, 11, 14] },
-  { id: 'qhm',      name: 'Helium Observatory', sub: 'Quantum Helium + Liq', tip: 'East towers — bubbles & war map',
-    box: [58, 24, 12, 14] },
   { id: 'hive',     name: 'Swarm Courtyard',   sub: 'Defender Hive',         tip: 'Front yard — CCNA defender swarm',
     box: [45, 42, 13, 13] },
   { id: 'shield',   name: 'Honest Shield',     sub: 'VPN + Protect',         tip: 'Gate + armory — honest free VPN & malware checks',

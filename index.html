@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>StarSwarm SGI Security Network</title>
-<meta name="description" content="StarSwarm SGI Security Network: Interactive cover map — Analyze (+ Paste Guard), Threat Index, Quantum Helium, Hive, Honest Shield, Swarm Pass, Bounty, and Redeem.">
+<meta name="description" content="StarSwarm SGI Security Network: Interactive cover map — Analyze (+ Paste Guard), Threat Index, Hive, Honest Shield, Swarm Pass, Bounty, and Redeem.">
 <meta name="theme-color" content="#000000">
 <!--
   Public Google Identity Services client id only. Leave unset.
@@ -78,7 +78,6 @@
           <button role="tab" data-tab="analyze" aria-selected="false">Analyze</button>
           <button role="tab" data-tab="threats" aria-selected="false">Threat Index</button>
           <button role="tab" data-tab="hive" aria-selected="false">Hive</button>
-          <button role="tab" data-tab="qhm" aria-selected="false">Quantum Helium</button>
           <button role="tab" data-tab="swarm" aria-selected="false">Swarm Pass</button>
           <button role="tab" data-tab="bounty" aria-selected="false">Bounty</button>
           <button role="tab" data-tab="redeem" aria-selected="false">Redeem</button>
@@ -160,26 +159,6 @@
       <p class="lede">CCNA-shaped defender swarm. Click a node for watches, CCNA notes, and defense tips.</p>
       <svg id="hive-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hive network map"></svg>
       <aside id="hive-detail" class="glass" hidden></aside>
-    </section>
-
-    <!-- QUANTUM HELIUM -->
-    <section id="tab-qhm" class="panel glass qhm-panel pinable" role="tabpanel" hidden>
-      <div class="qhm-grid">
-        <div id="qhm-root"></div>
-        <aside class="liq-dock glass" id="liq-dock">
-          <div class="row-head">
-            <h3>Liq war map</h3>
-            <div class="chiprow">
-              <button type="button" class="chip on" data-sym="BTC">BTC</button>
-              <button type="button" class="chip" data-sym="ETH">ETH</button>
-              <span class="badge" id="liq-badge">…</span>
-            </div>
-          </div>
-          <div class="liq-stats" id="liq-stats"></div>
-          <canvas id="liq-canvas"></canvas>
-          <p class="fine" id="liq-note">…</p>
-        </aside>
-      </div>
     </section>
 
     <!-- SWARM PASS -->
