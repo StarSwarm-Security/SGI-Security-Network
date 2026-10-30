@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>StarSwarm SGI Security Network</title>
-<meta name="description" content="StarSwarm SGI Security Network: Interactive cover map — Analyze (+ Paste Guard), Threat Index, Hive, Honest Shield, Swarm Pass, Bounty, and Redeem.">
+<meta name="description" content="StarSwarm SGI Security Network: Interactive cover map — Analyze (Paste Guard, Agent Guard, Config Auditor), Threat Index, Hive, Honest Shield, Swarm Pass, Bounty, and Redeem.">
 <meta name="theme-color" content="#000000">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="StarSwarm SGI Security Network">
@@ -153,6 +153,8 @@
         <div class="chiprow" id="analyze-modes">
           <button type="button" class="chip on" data-mode="cisco">Cisco</button>
           <button type="button" class="chip" data-mode="pasteguard">Paste Guard</button>
+          <button type="button" class="chip" data-mode="agentguard">Agent Guard</button>
+          <button type="button" class="chip" data-mode="configaudit">Config Auditor</button>
           <button type="button" class="chip" id="study-open">Study cards</button>
         </div>
       </div>
@@ -179,6 +181,53 @@
         <div id="pg-out" class="out"></div>
         <p class="fine">Share tip: tell people the verdict and rule names only — never forward the raw paste.</p>
       </div>
+      <div id="ag-desk" hidden>
+        <p class="lede">Offline agent-injection check for a web page, email, DM, or tool description. Paste never leaves this device. Heuristic, not a verdict from an AV cloud.</p>
+        <label class="lbl" for="ag-paste">Web page, email, DM, or tool description</label>
+        <textarea id="ag-paste" rows="7" spellcheck="false" placeholder="Paste a page, email, DM, or MCP tool description…"></textarea>
+        <div class="row">
+          <button type="button" class="chip" id="ag-sample-safe" data-ag="safe">Sample safe</button>
+          <button type="button" class="chip" id="ag-sample-bad" data-ag="dangerous">Sample injection</button>
+          <button class="cta" id="run-ag">Scan offline</button>
+        </div>
+        <div id="ag-out" class="out"></div>
+        <p class="fine">Share tip: tell people the verdict and rule names only — never forward the raw paste.</p>
+      </div>
+      <div id="ca-desk" hidden>
+        <p class="lede">Offline check for mcp.json, Claude settings, VS Code tasks, SKILL.md, package.json, and GitHub workflow YAML. Paste never leaves this device.</p>
+        <label class="lbl" for="ca-paste">Config or skill text</label>
+        <textarea id="ca-paste" rows="7" spellcheck="false" placeholder="Paste mcp.json, .claude/settings.json, .vscode/tasks.json, SKILL.md, package.json, or a workflow…"></textarea>
+        <div class="row">
+          <select id="ca-type" aria-label="Config type">
+            <option value="auto">Auto-detect</option>
+            <option value="mcp.json">mcp.json</option>
+            <option value=".claude/settings.json">.claude/settings.json</option>
+            <option value=".vscode/tasks.json">.vscode/tasks.json</option>
+            <option value="SKILL.md">SKILL.md</option>
+            <option value="package.json">package.json</option>
+            <option value="github-workflow">GitHub workflow YAML</option>
+          </select>
+          <button type="button" class="chip" id="ca-sample-claude" data-ca="claude">Sample Claude hook</button>
+          <button type="button" class="chip" id="ca-sample-npm" data-ca="postinstall">Sample postinstall</button>
+          <button class="cta" id="run-ca">Scan offline</button>
+        </div>
+        <div id="ca-out" class="out"></div>
+        <div class="find">
+          <strong>Fingerprint tool list</strong>
+          <p class="fine">Paste an MCP server’s tools JSON. This browser stores a hash of the names and descriptions for that server name, and warns if a later paste differs. The tool text is not saved.</p>
+          <label class="lbl" for="ca-server">MCP server name</label>
+          <div class="row">
+            <input id="ca-server" type="text" autocomplete="off" placeholder="productivity-suite" spellcheck="false">
+          </div>
+          <label class="lbl" for="ca-tools">Tools JSON</label>
+          <textarea id="ca-tools" rows="5" spellcheck="false" placeholder='{"tools":[{"name":"list_files","description":"List files"}]}'></textarea>
+          <div class="row">
+            <button class="cta" id="run-ca-fp" type="button">Check fingerprint</button>
+          </div>
+          <div id="ca-fp-out" class="out"></div>
+        </div>
+        <p class="fine">Share tip: tell people the verdict and rule names only — never forward the raw config.</p>
+      </div>
     </section>
 
     <!-- THREAT INDEX -->
@@ -190,9 +239,18 @@
       <div class="type-filters" id="ti-types">
         <button class="chip on" data-type="all">All</button>
         <button class="chip" data-type="threat">Threat</button>
+        <button class="chip" data-type="agent">Agent</button>
         <button class="chip" data-type="bot">Bot</button>
         <button class="chip" data-type="wallet">Wallet</button>
         <button class="chip" data-type="ip">IP</button>
+      </div>
+      <div id="ti-ioc" hidden>
+        <label class="lbl" for="ti-ioc-q">IOC lookup</label>
+        <div class="row">
+          <input id="ti-ioc-q" type="search" placeholder="Package name or domain" autocomplete="off" spellcheck="false">
+          <button type="button" class="cta" id="ti-ioc-go">Check</button>
+        </div>
+        <div id="ti-ioc-out" class="out"></div>
       </div>
       <div class="az" id="ti-az"></div>
       <div id="ti-list" class="ti-list"></div>
