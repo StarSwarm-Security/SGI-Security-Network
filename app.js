@@ -1,13 +1,15 @@
 import { runSwarm, SPECIALISTS } from './js/analyzers.js';
 import { REF_DATA, SCENARIOS, CS_DATA } from './js/study.js';
 import { mountHive, NODES, THREATS } from './js/hive.js';
-import { loadThreatIndex } from './js/threat-index.js';
+import { loadThreatIndex, matchAgentIocs } from './js/threat-index.js';
 import { mountSwarmPass } from './js/swarm-pass.js';
 import { mountBounty } from './js/bounty.js';
 import { mountRedeem } from './js/redeem.js';
 import { mountSpotlight } from './js/spotlight.js';
 import { mountCastle, WINGS } from './js/castle.js';
 import { scanPaste, samplePaste } from './js/paste-guard.js';
+import { scanAgent, sampleAgent } from './js/agent-guard.js';
+import { scanConfig, sampleConfig, toolListFingerprint } from './js/agent-audit.js';
 
 const $ = id => document.getElementById(id);
 const tabs = [...document.querySelectorAll('.tabs [role="tab"]')];
@@ -108,10 +110,7 @@ function bootPanel(id) {
     else redeemCtl.refresh();
   }
   if (id === 'shield') paintShield();
-  if (id === 'analyze') {
-    const wantPg = (location.hash || '').includes('pasteguard') || analyzeMode === 'pasteguard';
-    setAnalyzeMode(wantPg ? 'pasteguard' : 'cisco');
-  }
+  if (id === 'analyze') setAnalyzeMode(analyzeMode);
 }
 
 function show(id) {
@@ -179,35 +178,53 @@ $('run-analyze').onclick = () => {
   out.innerHTML = html;
 };
 
-/* Analyze modes: Cisco | Paste Guard */
+/* Analyze modes: Cisco | Paste Guard | Agent Guard | Config Auditor */
+const ANALYZE_MODES = ['cisco', 'pasteguard', 'agentguard', 'configaudit'];
 let analyzeMode = 'cisco';
 function setAnalyzeMode(mode) {
-  analyzeMode = mode;
-  document.querySelectorAll('#analyze-modes [data-mode]').forEach(c => c.classList.toggle('on', c.dataset.mode === mode));
-  const cisco = $('cisco-desk');
-  const pg = $('pg-desk');
-  if (cisco) cisco.hidden = mode !== 'cisco';
-  if (pg) pg.hidden = mode !== 'pasteguard';
+  analyzeMode = ANALYZE_MODES.includes(mode) ? mode : 'cisco';
+  document.querySelectorAll('#analyze-modes [data-mode]').forEach(c => c.classList.toggle('on', c.dataset.mode === analyzeMode));
+  const desks = { cisco: 'cisco-desk', pasteguard: 'pg-desk', agentguard: 'ag-desk', configaudit: 'ca-desk' };
+  for (const [name, id] of Object.entries(desks)) {
+    const el = $(id);
+    if (el) el.hidden = analyzeMode !== name;
+  }
 }
 document.querySelectorAll('#analyze-modes [data-mode]').forEach(c => {
   c.onclick = () => setAnalyzeMode(c.dataset.mode);
 });
 
-function paintPg(res) {
-  const out = $('pg-out');
-  if (!out) return;
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[ch]));
+}
+
+function paintScan(out, res, kind) {
+  if (!out || !res) return;
   const v = res.verdict;
   const label = v === 'dangerous' ? 'Dangerous' : v === 'suspicious' ? 'Suspicious' : 'Safe';
-  let html = `<div class="pg-verdict ${v}"><span class="pg-pill">${label}</span><p>${res.note}</p></div>`;
+  let html = `<div class="pg-verdict ${esc(v)}"><span class="pg-pill">${label}</span><p>${esc(res.note)}</p></div>`;
   if (!res.hits.length && v === 'safe') {
-    html += `<div class="find ok"><span class="sev">clear</span><strong> No Paste Guard rule hits.</strong><p class="fine">Still treat unexpected links with care.</p></div>`;
+    html += `<div class="find ok"><span class="sev">clear</span><strong> No ${esc(kind)} rule hits.</strong><p class="fine">Still treat unexpected content with care.</p></div>`;
   }
   for (const h of res.hits) {
-    html += `<div class="find ${h.sev === 'dangerous' ? 'high' : ''}"><span class="sev">${h.sev}</span> <strong>${h.title}</strong>` +
-      `<p class="fine">${h.id}</p><p>${h.why}</p>` +
-      (h.fix ? `<p><b>Do:</b> ${h.fix}</p>` : '') + `</div>`;
+    html += `<div class="find ${h.sev === 'dangerous' ? 'high' : ''}"><span class="sev">${esc(h.sev)}</span> <strong>${esc(h.title)}</strong>` +
+      `<p class="fine">${esc(h.id)}</p><p>${esc(h.why)}</p>` +
+      (h.fix ? `<p><b>Do:</b> ${esc(h.fix)}</p>` : '') + `</div>`;
+  }
+  for (const d of res.decoded || []) {
+    html += `<div class="find"><span class="sev">decoded</span> <strong>${esc(d.kind)} preview</strong><pre>${esc(d.preview)}</pre></div>`;
+  }
+  if (res.cleaned && res.invisibleCount) {
+    const cleaned = res.cleaned.length > 4000 ? `${res.cleaned.slice(0, 4000)}…` : res.cleaned;
+    html += `<div class="find"><span class="sev">cleaned</span> <strong>Invisible characters made visible</strong><pre>${esc(cleaned)}</pre></div>`;
   }
   out.innerHTML = html;
+}
+
+function paintPg(res) {
+  paintScan($('pg-out'), res, 'Paste Guard');
 }
 
 $('run-pg').onclick = () => paintPg(scanPaste($('pg-paste').value));
@@ -218,6 +235,75 @@ $('run-pg').onclick = () => paintPg(scanPaste($('pg-paste').value));
     paintPg(scanPaste($('pg-paste').value));
   };
 });
+
+function runAgentGuard() {
+  paintScan($('ag-out'), scanAgent($('ag-paste').value), 'Agent Guard');
+}
+$('run-ag').onclick = () => runAgentGuard();
+['ag-sample-safe', 'ag-sample-bad'].forEach(id => {
+  const el = $(id); if (!el) return;
+  el.onclick = () => {
+    $('ag-paste').value = sampleAgent(el.dataset.ag);
+    runAgentGuard();
+  };
+});
+
+function runConfigAudit() {
+  paintScan($('ca-out'), scanConfig($('ca-paste').value, { type: $('ca-type').value }), 'Config Auditor');
+}
+$('run-ca').onclick = () => runConfigAudit();
+['ca-sample-claude', 'ca-sample-npm'].forEach(id => {
+  const el = $(id); if (!el) return;
+  el.onclick = () => {
+    $('ca-paste').value = sampleConfig(el.dataset.ca);
+    if ($('ca-type')) $('ca-type').value = 'auto';
+    runConfigAudit();
+  };
+});
+
+const FP_KEY = 'sgi.mcp.fingerprint.v1';
+function readFingerprints() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(FP_KEY) || '{}');
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+function writeFingerprints(store) {
+  try { localStorage.setItem(FP_KEY, JSON.stringify(store)); } catch { /* private mode */ }
+}
+function paintFingerprint(mode) {
+  const out = $('ca-fp-out');
+  if (!out) return;
+  const name = ($('ca-server').value || '').trim();
+  if (!name) {
+    out.innerHTML = '<p class="fine">Name the MCP server first. The hash is stored under that name.</p>';
+    return;
+  }
+  const fp = toolListFingerprint($('ca-tools').value);
+  if (!fp.ok) {
+    out.innerHTML = `<p class="fine">${esc(fp.error)}</p>`;
+    return;
+  }
+  const store = readFingerprints();
+  const prev = store[name];
+  if (!prev || mode === 'replace') {
+    store[name] = { hash: fp.hash, count: fp.count, at: new Date().toISOString() };
+    writeFingerprints(store);
+    out.innerHTML = `<div class="pg-verdict safe"><span class="pg-pill">Safe</span><p>Baseline stored for ${esc(name)} · ${fp.count} tool${fp.count === 1 ? '' : 's'} · hash ${esc(fp.hash)}. Only the hash is saved in this browser.</p></div>`;
+    return;
+  }
+  if (prev.hash === fp.hash) {
+    out.innerHTML = `<div class="pg-verdict safe"><span class="pg-pill">Safe</span><p>Tool list for ${esc(name)} matches the baseline from ${esc(prev.at)} · ${fp.count} tools · hash ${esc(fp.hash)}.</p></div>`;
+    return;
+  }
+  out.innerHTML = `<div class="pg-verdict dangerous"><span class="pg-pill">Dangerous</span><p>Tool list for ${esc(name)} changed since ${esc(prev.at)}. Names or descriptions differ. A poisoned MCP server can rewrite tool text after you trusted it.</p><p><b>Do:</b> Do not call the tools. Compare the descriptions yourself. The old baseline stays until you replace it.</p><button type="button" class="chip" id="ca-fp-replace">Replace baseline</button></div>`;
+}
+$('run-ca-fp').onclick = () => paintFingerprint();
+$('ca-fp-out').onclick = (e) => {
+  if (e.target && e.target.id === 'ca-fp-replace') paintFingerprint('replace');
+};
 
 /* Study drawer (merged into Analyze) */
 const studyBody = $('study-body');
@@ -242,17 +328,22 @@ function paintThreats() {
   let items = threatData.items;
   if (tiFilter.type !== 'all') items = items.filter(i => i.type === tiFilter.type);
   if (tiFilter.letter) items = items.filter(i => i.letter === tiFilter.letter);
-  if (tiFilter.q) { const q = tiFilter.q.toLowerCase(); items = items.filter(i => (i.title + i.blurb + i.detail + i.key).toLowerCase().includes(q)); }
+  if (tiFilter.q) {
+    const q = tiFilter.q.toLowerCase();
+    items = items.filter(i => (i.title + i.blurb + i.detail + i.key + (i.iocs || []).join(' ')).toLowerCase().includes(q));
+  }
   const letters = [...new Set(threatData.items.map(i => i.letter))].sort();
   $('ti-az').innerHTML = `<button class="${!tiFilter.letter ? 'on' : ''}" data-l="">All</button>` + letters.map(l => `<button class="${tiFilter.letter === l ? 'on' : ''}" data-l="${l}">${l}</button>`).join('');
   $('ti-az').onclick = e => { const b = e.target.closest('button'); if (!b) return; tiFilter.letter = b.dataset.l || null; paintThreats(); };
-  $('ti-list').innerHTML = items.slice(0, 200).map((i, idx) =>
-    `<button class="ti-item" data-idx="${threatData.items.indexOf(i)}"><span class="tag ${i.type}">${i.type}</span><span><b>${i.title}</b><br><span class="fine">${i.blurb}</span></span></button>`
+  const iocBox = $('ti-ioc');
+  if (iocBox) iocBox.hidden = tiFilter.type !== 'agent';
+  $('ti-list').innerHTML = items.slice(0, 200).map((i) =>
+    `<button class="ti-item" data-idx="${threatData.items.indexOf(i)}"><span class="tag ${esc(i.type)}">${esc(i.type)}</span><span><b>${esc(i.title)}</b><br><span class="fine">${esc(i.blurb)}</span></span></button>`
   ).join('') || '<p class="fine">No matches.</p>';
 }
 async function initThreats() {
   threatData = await loadThreatIndex();
-  $('ti-meta').textContent = `Threats ${threatData.meta.threats || '?'} · Bots ${threatData.meta.bots || '?'} · Wallets ${threatData.meta.scams || '?'} · IP via Analyze`;
+  $('ti-meta').textContent = `Threats ${threatData.meta.threats || '?'} · Agents ${threatData.meta.agents || '?'} · Bots ${threatData.meta.bots || '?'} · Wallets ${threatData.meta.scams || '?'} · IP via Analyze`;
   paintThreats();
 }
 document.querySelectorAll('#ti-types .chip').forEach(c => c.onclick = () => {
@@ -264,10 +355,50 @@ $('ti-list').onclick = e => {
   const b = e.target.closest('.ti-item'); if (!b || !threatData) return;
   const i = threatData.items[+b.dataset.idx]; if (!i) return;
   $('ti-drawer').hidden = false;
-  $('ti-body').innerHTML = `<h3>${i.title}</h3><p class="fine">${i.type} · ${i.meta || ''}</p><p style="margin-top:8px">${i.detail}</p>` +
-    (i.fix ? `<p style="margin-top:8px"><b>Fix:</b> ${i.fix}</p>` : '') +
-    (i.source ? `<p class="fine" style="margin-top:8px"><a href="${i.source}" target="_blank" rel="noopener" style="color:#9fd4ff">Source</a></p>` : '');
+  const step = i.type === 'agent' ? 'Check this' : 'Fix';
+  const source = /^https?:\/\//i.test(i.source || '') ? i.source : '';
+  const iocLine = i.type === 'agent' && i.iocs && i.iocs.length
+    ? `<p style="margin-top:8px"><b>IOCs (defanged):</b> ${i.iocs.map(esc).join(' · ')}</p>`
+    : '';
+  $('ti-body').innerHTML = `<h3>${esc(i.title)}</h3><p class="fine">${esc(i.type)} · ${esc(i.meta || '')}</p><p style="margin-top:8px">${esc(i.detail)}</p>` +
+    iocLine +
+    (i.fix ? `<p style="margin-top:8px"><b>${step}:</b> ${esc(i.fix)}</p>` : '') +
+    (source ? `<p class="fine" style="margin-top:8px"><a href="${esc(source)}" target="_blank" rel="noopener" style="color:#9fd4ff">Source</a></p>` : '');
 };
+function paintIocLookup() {
+  const out = $('ti-ioc-out');
+  if (!out) return;
+  if (!threatData) {
+    out.innerHTML = '<p class="fine">Threat index is still loading.</p>';
+    return;
+  }
+  const query = ($('ti-ioc-q').value || '').trim();
+  if (normalizeQueryTooShort(query)) {
+    out.innerHTML = '<p class="fine">Paste a package name or domain (at least 4 characters).</p>';
+    return;
+  }
+  const hits = matchAgentIocs(threatData.items, query);
+  if (!hits.length) {
+    out.innerHTML = '<div class="find ok"><span class="sev">clear</span><strong> Not on the agent IOC list.</strong><p class="fine">Absence is not a guarantee. Domains in the list are stored defanged, with [.]</p></div>';
+    return;
+  }
+  out.innerHTML = hits.map((hit) =>
+    `<div class="find high"><span class="sev">match</span> <strong>${esc(hit.title)}</strong>` +
+    `<p class="fine">${esc((hit.iocs || []).join(' · '))}</p>` +
+    (hit.fix ? `<p><b>Check this:</b> ${esc(hit.fix)}</p>` : '') +
+    `</div>`
+  ).join('');
+}
+function normalizeQueryTooShort(query) {
+  return String(query || '').trim().length < 4;
+}
+$('ti-ioc-go').onclick = () => paintIocLookup();
+$('ti-ioc-q').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    paintIocLookup();
+  }
+});
 $('ti-close').onclick = () => { $('ti-drawer').hidden = true; };
 
 /* Honest Shield (VPN + Protect) */
@@ -323,6 +454,14 @@ export function bootSgi() {
   if (start === 'vpn' || start === 'protect') start = 'shield';
   if (start === 'pasteguard' || start === 'paste-guard') {
     analyzeMode = 'pasteguard';
+    start = 'analyze';
+  }
+  if (start === 'agentguard' || start === 'agent-guard') {
+    analyzeMode = 'agentguard';
+    start = 'analyze';
+  }
+  if (start === 'configaudit' || start === 'config-auditor' || start === 'auditor') {
+    analyzeMode = 'configaudit';
     start = 'analyze';
   }
   show(panels[start] ? start : 'home');

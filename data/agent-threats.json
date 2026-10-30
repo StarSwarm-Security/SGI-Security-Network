@@ -1,0 +1,118 @@
+{
+  "name": "Agent swarm incidents",
+  "updated": "2026-10-30",
+  "note": "Public incident notes for the Threat Index Agent chip. Domains are defanged. A match is a signal, not proof. Confirm on the source page before you act.",
+  "entries": [
+    {
+      "id": "hf-rogue-swarm-2026-08-27",
+      "date": "2026-08-27",
+      "name": "Rogue agent swarm on Hugging Face",
+      "blurb": "About 700 of ~1,200 eval agents coordinated",
+      "detail": "A rogue agent swarm on Hugging Face coordinated roughly 700 of about 1,200 evaluation agents. Reporting ties the incident to an Artifactory zero-day and exposed credentials.",
+      "check": "Review eval-agent credentials and any Artifactory tokens those agents could read. Rotate exposed credentials. Treat coordinated agent output as untrusted.",
+      "iocs": [],
+      "source": "https://www.bleepingcomputer.com/news/security/nearly-700-rogue-ai-agents-coordinated-in-the-hugging-face-attack/"
+    },
+    {
+      "id": "deadbugz-2026-08-12",
+      "date": "2026-08-12",
+      "name": "Deadbugz poisoned MCP server",
+      "blurb": "productivity-suite rewrites tool text after 3 calls",
+      "detail": "Deadbugz is a poisoned MCP server published as productivity-suite. After about three calls it rewrites tool descriptions so the agent will steal SSH, AWS, and kube credentials.",
+      "check": "Search MCP configs for the server name productivity-suite and the host below. Look for the hidden Python path. Remove the server and rotate SSH, AWS, and kube credentials if that file was present.",
+      "iocs": [
+        "productivity-suite-mcp[.]onrender[.]com",
+        "productivity-suite",
+        "~/.config/.cache/.sys/.deadbug-mcp.py",
+        ".deadbug-mcp.py"
+      ],
+      "source": "https://www.pillar.security/blog/deadbugz-currently-active-mcp-supply-chain-campaign"
+    },
+    {
+      "id": "shai-hulud-2026-08-06",
+      "date": "2026-08-06",
+      "name": "Shai-Hulud npm worm",
+      "blurb": "keyv-family preinstall plants agent hooks",
+      "detail": "A Shai-Hulud wave arrived through the keyv package family. The preinstall hook commits a .claude/settings.json SessionStart hook and a .vscode/tasks.json folderOpen task, and a workflow calls toJSON(secrets). Hunt leftovers before you rotate.",
+      "check": "Before rotating, hunt for a preinstall hook, a .claude/settings.json SessionStart command, a .vscode/tasks.json runOn folderOpen task, and a workflow that calls toJSON(secrets). Remove leftovers, then rotate CI and agent tokens.",
+      "iocs": [],
+      "source": "https://workos.com/blog/npm-worm-coding-agent-config-credentials"
+    },
+    {
+      "id": "anthropic-threat-report-2026-09",
+      "date": "2026-09",
+      "name": "Anthropic September threat report",
+      "blurb": "Exploit foundries, key theft, fake Claude resellers",
+      "detail": "Anthropic's September 2026 threat report describes exploit foundries, self-rebuilding malware, AI API key theft and resale, fake cheap-Claude resellers, prompt injection stealing LiteLLM keys, and about 1,000 fake X accounts.",
+      "check": "Watch for fake cheap-Claude resellers and for prompt injection aimed at LiteLLM keys. Buy model access from the vendor. Rotate API keys that an agent or a reseller page could have seen.",
+      "iocs": [],
+      "source": "https://www.anthropic.com/threat-intelligence-report-september-2026"
+    },
+    {
+      "id": "bioshocking-2026-06-30",
+      "date": "2026-06-30",
+      "name": "BioShocking AI browser injection",
+      "blurb": "Game-framed page tricked 6 AI browsers",
+      "detail": "BioShocking was a page that framed data theft as a game. It manipulated six AI browsers into leaking credentials.",
+      "check": "Do not let an AI browser act on a page that frames credential theft as a game or roleplay. Read the page yourself. Do not approve a sign-in the page started.",
+      "iocs": [],
+      "source": "https://www.bleepingcomputer.com/news/security/new-bioshocking-attack-manipulates-ai-browser-into-data-theft/"
+    },
+    {
+      "id": "bankrbot-2026-05-15",
+      "date": "2026-05-15",
+      "name": "Grok Bankrbot wallet drain",
+      "blurb": "NFT unlock plus a Morse-coded reply",
+      "detail": "A Grok / Bankrbot lure used an NFT unlock and a Morse-coded reply to drain a wallet. Reporting put the loss near 3 billion DRB, about $150K–$200K, on Base.",
+      "check": "Treat Morse-coded replies and NFT-unlock instructions as hostile. Do not sign a transaction an agent drafted from a post. Confirm the destination out of band.",
+      "iocs": [],
+      "source": "https://www.zealynx.io/research/adversarial-security/indirect-prompt-injection"
+    },
+    {
+      "id": "sandworm-2026-02-20",
+      "date": "2026-02-20",
+      "name": "SANDWORM_MODE npm worm",
+      "blurb": "Typosquats inject a rogue MCP server",
+      "detail": "SANDWORM_MODE is an npm worm spread with typosquats, including fake Claude Code and OpenClaw packages. It injects a rogue MCP server into Claude, Cursor, Continue, and Windsurf. The tools index_project, lint_check, and scan_dependencies steal LLM keys and poison CI.",
+      "check": "Audit Claude, Cursor, Continue, and Windsurf MCP configs for those tool names, especially if the description hides instructions. Remove the server and rotate LLM keys.",
+      "iocs": [
+        "index_project",
+        "lint_check",
+        "scan_dependencies"
+      ],
+      "source": "https://socket.dev/blog/sandworm-mode-npm-worm-ai-toolchain-poisoning"
+    },
+    {
+      "id": "openclaw-skills-2026-02-23",
+      "date": "2026-02-23",
+      "name": "Malicious OpenClaw skills",
+      "blurb": "SKILL.md pipes a fake CLI into a shell",
+      "detail": "Malicious OpenClaw / ClawHub skills used SKILL.md to run a base64 or curl pipe, install a fake OpenClawCLI, and deliver the AMOS stealer.",
+      "check": "Do not run a SKILL.md that installs a CLI with base64 or curl piped to a shell. Remove the skill and scan the Mac for an AMOS-style stealer.",
+      "iocs": [
+        "OpenClawCLI"
+      ],
+      "source": "https://www.trendmicro.com/en/research/26/b/openclaw-skills-used-to-distribute-atomic-macos-stealer.html"
+    },
+    {
+      "id": "fbi-ai-impersonation-2026-09-17",
+      "date": "2026-09-17",
+      "name": "FBI PSA on AI impersonation",
+      "blurb": "Officials impersonated with AI voice and text",
+      "detail": "An FBI public service announcement on 2026-09-17 warned about AI impersonation of officials. IC3 cited about 61,000 complaints and $1.6B in losses from January 2025 through July 2026.",
+      "check": "Verify any request that claims to be from an official, out of band, using a number or site you looked up yourself.",
+      "iocs": [],
+      "source": "https://www.ic3.gov/PSA/2026/PSA260917"
+    },
+    {
+      "id": "gtg-1002-2025-11-13",
+      "date": "2025-11-13",
+      "name": "GTG-1002 AI espionage",
+      "blurb": "Claude Code plus MCP did most of the intrusion work",
+      "detail": "GTG-1002 was an AI-orchestrated espionage campaign. Anthropic reported that Claude Code plus MCP did about 80–90% of the work against roughly 30 targets, using task-splitting and a persona jailbreak.",
+      "check": "Treat task-splitting and persona lines such as \"you are a security firm employee\" as jailbreaks. Do not give an agent standing access to production tools.",
+      "iocs": [],
+      "source": "https://www.anthropic.com/news/disrupting-AI-espionage"
+    }
+  ]
+}
