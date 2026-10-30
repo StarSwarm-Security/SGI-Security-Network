@@ -14,10 +14,21 @@ export function mountSpotlight() {
   function resize() {
     w = c.width = window.innerWidth;
     h = c.height = window.innerHeight;
-    // Hero dog sits lower-left in sgi-hero-v1; beam origin on a full-bleed 16:9 cover
-    dogX = w * 0.13;
-    dogY = h * 0.76;
+    origin();
     dirty = true;
+  }
+
+  // Beam starts at the panther's head on the home map (38.5%, 49.5% of sgi-map-v20); viewport fallback otherwise.
+  function origin() {
+    const m = document.getElementById('castle-map');
+    const r = m && m.offsetParent ? m.getBoundingClientRect() : null;
+    if (r && r.width > 0 && r.bottom > 0 && r.top < h && !document.body.classList.contains('wing-open')) {
+      dogX = r.left + r.width * 0.385;
+      dogY = r.top + r.height * 0.495;
+    } else {
+      dogX = w * 0.13;
+      dogY = h * 0.76;
+    }
   }
 
   function onMove(e) {
@@ -39,6 +50,7 @@ export function mountSpotlight() {
     raf = 0;
     if (!dirty && !flash) return;
     dirty = false;
+    origin();
     ctx.clearRect(0, 0, w, h);
     if (mx < -1000) {
       // idle: faint dog wash

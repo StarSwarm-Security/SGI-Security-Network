@@ -6,6 +6,21 @@
 <title>StarSwarm SGI Security Network</title>
 <meta name="description" content="StarSwarm SGI Security Network: Interactive cover map — Analyze (Paste Guard, Agent Guard, Config Auditor), Threat Index, Hive, Honest Shield, Swarm Pass, Bounty, and Redeem.">
 <meta name="theme-color" content="#000000">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="StarSwarm SGI Security Network">
+<meta property="og:title" content="StarSwarm SGI Security Network">
+<meta property="og:description" content="Interactive castle map of offline security desks: Analyze and Paste Guard, Threat Index, Hive, Honest Shield, Swarm Pass, Bounty and Redeem.">
+<meta property="og:url" content="https://starswarm-sgi.pages.dev/">
+<meta property="og:image" content="https://starswarm-sgi.pages.dev/assets/v2/og-cover-v20-1200x630.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="StarSwarm Agentic Intelligence: a panther's beam lights a shield under a floating castle in a starfield">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="StarSwarm SGI Security Network">
+<meta name="twitter:description" content="Interactive castle map of offline security desks: Analyze and Paste Guard, Threat Index, Hive, Honest Shield, Swarm Pass, Bounty and Redeem.">
+<meta name="twitter:image" content="https://starswarm-sgi.pages.dev/assets/v2/og-cover-v20-1200x630.png">
+<meta name="twitter:image:alt" content="StarSwarm Agentic Intelligence: a panther's beam lights a shield under a floating castle in a starfield">
 <!--
   Public Google Identity Services client id only. Leave unset.
   The gate reads GET /v1/auth/providers (googleClientId / clientId / google.clientId),
@@ -36,6 +51,7 @@
 })();
 </script>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="art-v2.css">
 </head>
 <body>
 <div id="abyss-gate" class="abyss" role="dialog" aria-modal="true" aria-labelledby="abyss-title" data-state="locked">
@@ -92,6 +108,40 @@
     <!-- HOME: interactive cover map -->
     <section id="tab-home" class="panel castle-panel pinable" role="tabpanel">
       <div id="castle-root"></div>
+      <div class="art-swarm" aria-labelledby="art-swarm-title">
+        <h2 id="art-swarm-title">How the swarm protects</h2>
+        <p class="lede">Every wing of the keep, one glyph each. Tap a card to open that deck.</p>
+        <div class="art-cards">
+          <button type="button" class="art-card" data-go="analyze">
+            <picture><source srcset="assets/v2/glyphs/glyph-G03-delta-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G03-delta-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Detect</em><b>Signal Keep</b><span>Analyze and Paste Guard, offline.</span>
+          </button>
+          <button type="button" class="art-card" data-go="threats">
+            <picture><source srcset="assets/v2/glyphs/glyph-G02-crescent-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G02-crescent-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Watch</em><b>Archive Spire</b><span>Threat Index of scams, bots and wallets.</span>
+          </button>
+          <button type="button" class="art-card" data-go="shield">
+            <picture><source srcset="assets/v2/glyphs/glyph-G05-ram-horn-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G05-ram-horn-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Defend</em><b>Honest Shield</b><span>VPN and malware desk, free first.</span>
+          </button>
+          <button type="button" class="art-card" data-go="hive">
+            <picture><source srcset="assets/v2/glyphs/glyph-G12-walker-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G12-walker-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Agents</em><b>Swarm Courtyard</b><span>Defender Hive training map.</span>
+          </button>
+          <button type="button" class="art-card" data-go="swarm">
+            <picture><source srcset="assets/v2/glyphs/glyph-G06-lodestone-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G06-lodestone-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Core</em><b>Barracks</b><span>Swarm Pass membership.</span>
+          </button>
+          <button type="button" class="art-card" data-go="bounty">
+            <picture><source srcset="assets/v2/glyphs/glyph-G09-chevron-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G09-chevron-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Escalate</em><b>Arena</b><span>Bounty board.</span>
+          </button>
+          <button type="button" class="art-card" data-go="redeem">
+            <picture><source srcset="assets/v2/glyphs/glyph-G10-vortex-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G10-vortex-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Portal</em><b>Vault</b><span>Redeem credits.</span>
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- Section overlay from map hotspots -->
@@ -240,13 +290,42 @@
         <h2>Honest Shield</h2>
         <span class="badge">Free first</span>
       </div>
-      <p class="lede">VPN + malware desk without scareware. Real free tiers, clear affiliate notes, no fake partnerships. Wire your own partner IDs before monetizing.</p>
-      <h3 class="sp-sub">Free VPN</h3>
-      <div class="cards3" id="vpn-cards"></div>
-      <h3 class="sp-sub">Malware / spyware checks</h3>
-      <div class="cards3" id="protect-cards"></div>
-      <div class="ad-slot">Ad / affiliate slot · EthicalAds or Malwarebytes Impact · signup required</div>
-      <p class="fine">We omit Urban VPN free (privacy write-ups). Atlas free tier is retired or restricted in some regions. VirusTotal / URLhaus are free lookups. Windows Defender is built-in. Document any affiliate ID before going live.</p>
+      <div class="hs-layout">
+        <figure class="hs-graphic" aria-label="Honest Shield index">
+          <picture><source srcset="assets/v2/section-wormhole-shield-outline-1200x675.webp" type="image/webp"><img src="assets/v2/section-wormhole-shield-outline-1200x675.png" width="1200" height="675" alt="" decoding="async" loading="lazy"></picture>
+          <nav class="hs-index" aria-label="Honest Shield sections">
+            <button type="button" class="hs-mark hs-m1" data-hs-go="1" aria-controls="hs-w1"><span class="hs-num">1</span><span class="hs-lab">Free VPN</span></button>
+            <button type="button" class="hs-mark hs-m2" data-hs-go="2" aria-controls="hs-w2"><span class="hs-num">2</span><span class="hs-lab">Malware checks</span></button>
+            <button type="button" class="hs-mark hs-m3" data-hs-go="3" aria-controls="hs-w3"><span class="hs-num">3</span><span class="hs-lab">Our promise</span></button>
+            <button type="button" class="hs-mark hs-m4" data-hs-go="4" aria-controls="hs-w4"><span class="hs-num">4</span><span class="hs-lab">Notes</span></button>
+          </nav>
+        </figure>
+        <section class="hs-widget hs-tl" id="hs-w1" aria-labelledby="hs-t1" tabindex="-1">
+          <h3 class="hs-head"><button type="button" class="hs-toggle" id="hs-t1" aria-expanded="true" aria-controls="hs-b1" data-hs-toggle="1"><span class="hs-num" aria-hidden="true">1</span><span class="hs-title">Free VPN</span><span class="hs-caret" aria-hidden="true"></span></button></h3>
+          <div class="hs-body" id="hs-b1">
+            <div class="cards3" id="vpn-cards"></div>
+          </div>
+        </section>
+        <section class="hs-widget hs-tr" id="hs-w2" aria-labelledby="hs-t2" tabindex="-1">
+          <h3 class="hs-head"><button type="button" class="hs-toggle" id="hs-t2" aria-expanded="true" aria-controls="hs-b2" data-hs-toggle="2"><span class="hs-num" aria-hidden="true">2</span><span class="hs-title">Malware / spyware checks</span><span class="hs-caret" aria-hidden="true"></span></button></h3>
+          <div class="hs-body" id="hs-b2">
+            <div class="cards3" id="protect-cards"></div>
+          </div>
+        </section>
+        <section class="hs-widget hs-bl" id="hs-w3" aria-labelledby="hs-t3" tabindex="-1">
+          <h3 class="hs-head"><button type="button" class="hs-toggle" id="hs-t3" aria-expanded="true" aria-controls="hs-b3" data-hs-toggle="3"><span class="hs-num" aria-hidden="true">3</span><span class="hs-title">Our promise</span><span class="hs-caret" aria-hidden="true"></span></button></h3>
+          <div class="hs-body" id="hs-b3">
+            <p class="lede">VPN + malware desk without scareware. Real free tiers, plain links, no fake partnerships.</p>
+          </div>
+        </section>
+        <section class="hs-widget hs-br" id="hs-w4" aria-labelledby="hs-t4" tabindex="-1">
+          <h3 class="hs-head"><button type="button" class="hs-toggle" id="hs-t4" aria-expanded="true" aria-controls="hs-b4" data-hs-toggle="4"><span class="hs-num" aria-hidden="true">4</span><span class="hs-title">Notes</span><span class="hs-caret" aria-hidden="true"></span></button></h3>
+          <div class="hs-body" id="hs-b4">
+            <p class="fine">We omit Urban VPN free (privacy write-ups). Atlas free tier is retired or restricted in some regions. VirusTotal / URLhaus are free lookups. Windows Defender is built-in.</p>
+            <p class="fine">No affiliate links: we earn nothing from these picks.</p>
+          </div>
+        </section>
+      </div>
     </section>
   </main>
 
@@ -288,6 +367,7 @@
 </aside>
 
 <script type="module" src="js/gate.js"></script>
+<script type="module" src="js/shield-index.js"></script>
 <div id="sgi-support"></div>
 <script type="module" src="js/support-chat.js"></script>
 </body>
