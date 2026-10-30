@@ -405,15 +405,15 @@ $('ti-close').onclick = () => { $('ti-drawer').hidden = true; };
 function paintShield() {
   if (!$('vpn-cards') || $('vpn-cards').dataset.ready) return;
   $('vpn-cards').innerHTML = [
-    { name: 'Proton VPN Free', note: 'Unlimited data, no ads, 1 device, no-logs. Swiss. Free forever tier funded by paid users.', aff: 'Affiliate: Proton Partners (signup at proton.me/partners). Free tier itself has no ads.', url: 'https://protonvpn.com/free-vpn', cta: 'Get free Proton VPN' },
-    { name: 'Windscribe Free', note: '10 GB/month after email confirm (2 GB without). Built-in R.O.B.E.R.T. ad/tracker blocker. Honest marketing.', aff: 'Affiliate: Windscribe direct (~25% recurring on Pro). Free tier stays free.', url: 'https://windscribe.com/', cta: 'Get Windscribe Free' },
-    { name: 'Cloudflare WARP / 1.1.1.1', note: 'Free consumer VPN-like tunnel from Cloudflare. No classic affiliate program. Good zero-cost option.', aff: 'No affiliate program we found. Link only.', url: 'https://one.one.one.one/', cta: 'Get 1.1.1.1' },
-  ].map(v => `<article class="cardx"><h3>${v.name}</h3><p>${v.note}</p><p class="fine">${v.aff}</p><a href="${v.url}" target="_blank" rel="noopener">${v.cta}</a></article>`).join('');
+    { name: 'Proton VPN Free', note: 'Unlimited data, no ads, 1 device, no-logs. Swiss. Free forever tier funded by paid users.', url: 'https://protonvpn.com/free-vpn', cta: 'Get free Proton VPN' },
+    { name: 'Windscribe Free', note: '10 GB/month after email confirm (2 GB without). Built-in R.O.B.E.R.T. ad/tracker blocker. Honest marketing.', url: 'https://windscribe.com/', cta: 'Get Windscribe Free' },
+    { name: 'Cloudflare WARP / 1.1.1.1', note: 'Free consumer VPN-like tunnel from Cloudflare. Good zero-cost option.', url: 'https://one.one.one.one/', cta: 'Get 1.1.1.1' },
+  ].map(v => `<article class="cardx"><h3>${v.name}</h3><p>${v.note}</p>${v.aff ? `<p class="fine">${v.aff}</p>` : ''}<a href="${v.url}" target="_blank" rel="noopener">${v.cta}</a></article>`).join('');
   $('protect-cards').innerHTML = [
-    { name: 'VirusTotal', note: 'Paste a URL or upload a file for multi-engine scans. Free web UI. API keys are rate-limited.', aff: 'No consumer affiliate. Embed: link out or VT widget if you apply for API access.', url: 'https://www.virustotal.com/gui/home/url', cta: 'Check a URL' },
-    { name: 'Malwarebytes Free', note: 'On-demand malware / adware scanner. Free tier is real; Premium is the upsell.', aff: 'Affiliate via Impact (Malwarebytes partners). Wire your Impact ID before monetizing.', url: 'https://www.malwarebytes.com/mwb-download', cta: 'Download free' },
-    { name: 'URLhaus + Defender tips', note: 'URLhaus: free malware URL database lookups. Windows Defender: keep Real-time protection on, run Offline scan after a scare.', aff: 'URLhaus is free (abuse.ch). Defender is built into Windows. No affiliate.', url: 'https://urlhaus.abuse.ch/', cta: 'Open URLhaus' },
-  ].map(v => `<article class="cardx"><h3>${v.name}</h3><p>${v.note}</p><p class="fine">${v.aff}</p><a href="${v.url}" target="_blank" rel="noopener">${v.cta}</a></article>`).join('');
+    { name: 'VirusTotal', note: 'Paste a URL or upload a file for multi-engine scans. Free web UI. API keys are rate-limited.', url: 'https://www.virustotal.com/gui/home/url', cta: 'Check a URL' },
+    { name: 'Malwarebytes Free', note: 'On-demand malware / adware scanner. Free tier is real; Premium is the upsell.', url: 'https://www.malwarebytes.com/mwb-download', cta: 'Download free' },
+    { name: 'URLhaus + Defender tips', note: 'URLhaus: free malware URL database lookups. Windows Defender: keep Real-time protection on, run Offline scan after a scare.', aff: 'URLhaus is free (abuse.ch). Defender is built into Windows.', url: 'https://urlhaus.abuse.ch/', cta: 'Open URLhaus' },
+  ].map(v => `<article class="cardx"><h3>${v.name}</h3><p>${v.note}</p>${v.aff ? `<p class="fine">${v.aff}</p>` : ''}<a href="${v.url}" target="_blank" rel="noopener">${v.cta}</a></article>`).join('');
   $('vpn-cards').dataset.ready = '1';
 }
 /* Pin opaque glass on click */
