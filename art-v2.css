@@ -1,0 +1,61 @@
+/* Site art v2 (cover v20). Kept in its own file so it layers on style.css without touching it.
+   WebP first with PNG fallback: the plain url() line is for browsers without image-set type(). */
+
+/* Page backdrop: cover v20 (text-free) replaces sgi-hero-v1. The castle map itself still uses sgi-hero-v1. */
+.cover{background-image:url(assets/v2/hero-cover-v20-textfree-1500x500.png);
+  background-image:image-set(url(assets/v2/hero-cover-v20-textfree-1500x500.webp) type("image/webp"),url(assets/v2/hero-cover-v20-textfree-1500x500.png) type("image/png"));
+  background-size:cover;background-position:center 60%}
+
+/* Home scrolls: hero banner, then the interactive map (unchanged, full panel height), then glyph cards. */
+#tab-home.castle-panel{display:block;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin}
+#tab-home > #castle-root{height:100%}
+
+.art-hero{position:relative;width:100%;aspect-ratio:3/1;max-height:38vh;min-height:130px;overflow:hidden;
+  border-bottom:1px solid rgba(160,200,255,.22);background-color:#02040d;
+  background-image:url(assets/v2/hero-cover-v20-textfree-1500x500.png);
+  background-image:image-set(url(assets/v2/hero-cover-v20-textfree-1500x500.webp) type("image/webp"),url(assets/v2/hero-cover-v20-textfree-1500x500.png) type("image/png"));
+  background-size:cover;background-position:center 80%;background-repeat:no-repeat}
+/* The banner is capped at 38vh, so it sits lower than the manifest's 60% to keep the panther and the text band in frame. */
+.art-hero::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(0,0,0,.35) 100%)}
+/* Headline sits in the empty bottom band (x 590-910, y 395-490 of 1500x500) where the panther beam points. */
+.art-hero-copy{position:absolute;z-index:1;left:50%;bottom:3%;transform:translateX(-50%);width:min(44%,560px);text-align:center;
+  padding:.35em .6em;border-radius:10px;background:radial-gradient(ellipse at center,rgba(0,0,0,.48),rgba(0,0,0,0) 72%)}
+.art-hero-copy .art-kicker{font-family:Orbitron,sans-serif;font-weight:900;font-size:clamp(13px,2.5vw,30px);letter-spacing:.16em;line-height:1.05;
+  color:#eef6ff;text-transform:uppercase;text-shadow:0 0 14px rgba(110,200,255,.7),0 0 2px #000,0 2px 6px #000}
+.art-hero-copy .art-line{font-family:Sora,sans-serif;font-weight:600;font-size:clamp(8px,1.05vw,13px);letter-spacing:.34em;margin-top:.35em;
+  color:#bfe6ff;text-transform:uppercase;text-shadow:0 0 8px rgba(110,200,255,.55),0 1px 3px #000}
+
+/* Glyph feature cards over the galactic swarm, with a dark overlay under the text. */
+.art-swarm{position:relative;padding:22px 16px 18px;border-top:1px solid rgba(160,200,255,.22);
+  background-color:#02040d;background-image:linear-gradient(rgba(2,4,13,.5),rgba(2,4,13,.55)),url(assets/v2/section-galactic-swarm-v2-1600x900.png);
+  background-image:linear-gradient(rgba(2,4,13,.5),rgba(2,4,13,.55)),image-set(url(assets/v2/section-galactic-swarm-v2-1600x900.webp) type("image/webp"),url(assets/v2/section-galactic-swarm-v2-1600x900.png) type("image/png"));
+  background-size:cover;background-position:center}
+.art-swarm h2{text-align:center}
+.art-swarm > .lede{margin:0 auto 14px;text-align:center}
+.art-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;max-width:1100px;margin:0 auto}
+.art-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px 12px;border-radius:14px;cursor:pointer;font:inherit;color:var(--ink);text-align:center;
+  background:rgba(2,6,16,.62);border:1px solid rgba(160,200,255,.22);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  transition:border-color .15s,transform .15s,box-shadow .15s}
+.art-card:hover,.art-card:focus-visible{border-color:var(--cyan);box-shadow:0 0 18px rgba(110,200,255,.28);transform:translateY(-2px);outline:none}
+.art-card img{display:block;width:112px;height:112px}
+.art-card b{font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#f7f1e6}
+.art-card span{font-size:11px;color:#c5d0e4;line-height:1.35}
+.art-card em{font-style:normal;font-family:Sora,sans-serif;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan)}
+
+/* Section art behind the wing decks (ID selectors win over .wing-body > .panel{background:transparent}). 45-55% dark overlay. */
+#tab-analyze,#tab-threats,#tab-hive,#tab-shield,#tab-swarm,#tab-bounty,#tab-redeem{background-size:cover;background-position:center;background-repeat:no-repeat}
+#tab-analyze{background-image:linear-gradient(rgba(2,6,16,.55),rgba(2,6,16,.55)),url(assets/v2/section-wormhole-ring-halo-1200x675.png);
+  background-image:linear-gradient(rgba(2,6,16,.55),rgba(2,6,16,.55)),image-set(url(assets/v2/section-wormhole-ring-halo-1200x675.webp) type("image/webp"),url(assets/v2/section-wormhole-ring-halo-1200x675.png) type("image/png"))}
+#tab-threats,#tab-shield{background-image:linear-gradient(rgba(2,6,16,.55),rgba(2,6,16,.55)),url(assets/v2/section-wormhole-shield-outline-1200x675.png);
+  background-image:linear-gradient(rgba(2,6,16,.55),rgba(2,6,16,.55)),image-set(url(assets/v2/section-wormhole-shield-outline-1200x675.webp) type("image/webp"),url(assets/v2/section-wormhole-shield-outline-1200x675.png) type("image/png"))}
+#tab-hive{background-image:linear-gradient(rgba(2,6,16,.55),rgba(2,6,16,.55)),url(assets/v2/section-galactic-swarm-v2-1600x900.png);
+  background-image:linear-gradient(rgba(2,6,16,.55),rgba(2,6,16,.55)),image-set(url(assets/v2/section-galactic-swarm-v2-1600x900.webp) type("image/webp"),url(assets/v2/section-galactic-swarm-v2-1600x900.png) type("image/png"))}
+#tab-swarm,#tab-bounty,#tab-redeem{background-image:linear-gradient(rgba(2,6,16,.45),rgba(2,6,16,.5)),url(assets/v2/section-white-construct-v3b-1200x675.png);
+  background-image:linear-gradient(rgba(2,6,16,.45),rgba(2,6,16,.5)),image-set(url(assets/v2/section-white-construct-v3b-1200x675.webp) type("image/webp"),url(assets/v2/section-white-construct-v3b-1200x675.png) type("image/png"))}
+
+@media (max-width:760px){
+  .art-hero-copy{width:72%;bottom:2%}
+  .art-cards{grid-template-columns:repeat(2,1fr)}
+  .art-card img{width:96px;height:96px}
+}
