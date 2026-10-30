@@ -6,6 +6,21 @@
 <title>StarSwarm SGI Security Network</title>
 <meta name="description" content="StarSwarm SGI Security Network: Interactive cover map — Analyze (+ Paste Guard), Threat Index, Hive, Honest Shield, Swarm Pass, Bounty, and Redeem.">
 <meta name="theme-color" content="#000000">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="StarSwarm SGI Security Network">
+<meta property="og:title" content="StarSwarm SGI Security Network">
+<meta property="og:description" content="Interactive castle map of offline security desks: Analyze and Paste Guard, Threat Index, Hive, Honest Shield, Swarm Pass, Bounty and Redeem.">
+<meta property="og:url" content="https://starswarm-sgi.pages.dev/">
+<meta property="og:image" content="https://starswarm-sgi.pages.dev/assets/v2/og-cover-v20-1200x630.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="StarSwarm Agentic Intelligence: a panther's beam lights a shield under a floating castle in a starfield">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="StarSwarm SGI Security Network">
+<meta name="twitter:description" content="Interactive castle map of offline security desks: Analyze and Paste Guard, Threat Index, Hive, Honest Shield, Swarm Pass, Bounty and Redeem.">
+<meta name="twitter:image" content="https://starswarm-sgi.pages.dev/assets/v2/og-cover-v20-1200x630.png">
+<meta name="twitter:image:alt" content="StarSwarm Agentic Intelligence: a panther's beam lights a shield under a floating castle in a starfield">
 <!--
   Public Google Identity Services client id only. Leave unset.
   The gate reads GET /v1/auth/providers (googleClientId / clientId / google.clientId),
@@ -36,6 +51,7 @@
 })();
 </script>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="art-v2.css">
 </head>
 <body>
 <div id="abyss-gate" class="abyss" role="dialog" aria-modal="true" aria-labelledby="abyss-title" data-state="locked">
@@ -91,7 +107,44 @@
   <main>
     <!-- HOME: interactive cover map -->
     <section id="tab-home" class="panel castle-panel pinable" role="tabpanel">
+      <div class="art-hero" role="img" aria-label="StarSwarm cover: a panther's beam lights a shield under a floating castle in a starfield">
+        <div class="art-hero-copy"><p class="art-kicker">StarSwarm</p><p class="art-line">Agentic Intelligence</p></div>
+      </div>
       <div id="castle-root"></div>
+      <div class="art-swarm" aria-labelledby="art-swarm-title">
+        <h2 id="art-swarm-title">How the swarm protects</h2>
+        <p class="lede">Every wing of the keep, one glyph each. Tap a card to open that deck.</p>
+        <div class="art-cards">
+          <button type="button" class="art-card" data-go="analyze">
+            <picture><source srcset="assets/v2/glyphs/glyph-G03-delta-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G03-delta-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Detect</em><b>Signal Keep</b><span>Analyze and Paste Guard, offline.</span>
+          </button>
+          <button type="button" class="art-card" data-go="threats">
+            <picture><source srcset="assets/v2/glyphs/glyph-G02-crescent-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G02-crescent-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Watch</em><b>Archive Spire</b><span>Threat Index of scams, bots and wallets.</span>
+          </button>
+          <button type="button" class="art-card" data-go="shield">
+            <picture><source srcset="assets/v2/glyphs/glyph-G05-ram-horn-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G05-ram-horn-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Defend</em><b>Honest Shield</b><span>VPN and malware desk, free first.</span>
+          </button>
+          <button type="button" class="art-card" data-go="hive">
+            <picture><source srcset="assets/v2/glyphs/glyph-G12-walker-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G12-walker-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Agents</em><b>Swarm Courtyard</b><span>Defender Hive training map.</span>
+          </button>
+          <button type="button" class="art-card" data-go="swarm">
+            <picture><source srcset="assets/v2/glyphs/glyph-G06-lodestone-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G06-lodestone-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Core</em><b>Barracks</b><span>Swarm Pass membership.</span>
+          </button>
+          <button type="button" class="art-card" data-go="bounty">
+            <picture><source srcset="assets/v2/glyphs/glyph-G09-chevron-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G09-chevron-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Escalate</em><b>Arena</b><span>Bounty board.</span>
+          </button>
+          <button type="button" class="art-card" data-go="redeem">
+            <picture><source srcset="assets/v2/glyphs/glyph-G10-vortex-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G10-vortex-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
+            <em>Portal</em><b>Vault</b><span>Redeem credits.</span>
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- Section overlay from map hotspots -->
