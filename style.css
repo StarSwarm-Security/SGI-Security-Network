@@ -272,7 +272,14 @@ body.wing-open .tabs button.on{box-shadow:0 0 16px rgba(240,192,96,.5)}
 .pg-verdict.suspicious{border-color:rgba(240,192,96,.45);box-shadow:0 0 16px rgba(240,192,96,.12)}
 .pg-verdict.dangerous{border-color:rgba(255,107,122,.5);box-shadow:0 0 18px rgba(255,107,122,.18)}
 .find.suspicious .sev,.find.dangerous .sev{color:var(--r)}
-#pg-desk .row{flex-wrap:wrap;gap:6px}
+#pg-desk .row,#ag-desk .row,#ca-desk .row{flex-wrap:wrap;gap:6px}
+#ag-desk textarea,#ca-desk textarea{min-height:96px}
+.find pre{margin:6px 0 0;font-size:11.5px;white-space:pre-wrap;word-break:break-word;color:var(--cyan);font-family:ui-monospace,Menlo,monospace}
+#tab-threats .ti-item .tag.agent{color:var(--g2)}
+#ca-desk input,#ti-ioc input{border-radius:8px;border:1px solid rgba(160,200,255,.2);background:rgba(0,0,0,.4);color:var(--ink);padding:7px 10px;font-size:12px;font-family:inherit}
+#ca-server,#ti-ioc-q{flex:1;min-width:160px}
+#ti-ioc{margin-top:8px}
+#ti-ioc[hidden]{display:none !important}
 #tab-shield .sp-sub{margin-top:4px}
 
 /* ===== Abyss gate — void black, one warm spotlight, stone card ===== */
