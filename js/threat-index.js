@@ -1,9 +1,38 @@
-// Merge threats + bots + scam wallets into a single A–Z / type index.
+// Merge threats + agent incidents + bots + scam wallets into a single A–Z / type index.
+export function normalizeIoc(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/^hxxps?:\/\//, 'https://')
+    .replace(/^hxxp:\/\//, 'http://')
+    .replace(/\[\.\]/g, '.')
+    .replace(/\[:\]/g, ':')
+    .replace(/[)\].,;]+$/g, '');
+}
+
+/** Known-bad package names and domains from the agent incident list. */
+export function matchAgentIocs(items, query) {
+  const normalized = normalizeIoc(query);
+  if (normalized.length < 4) return [];
+  const token = normalized.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  return (items || []).filter((item) => {
+    if (!item || item.type !== 'agent') return false;
+    return (item.iocs || []).some((ioc) => {
+      const known = normalizeIoc(ioc);
+      if (!known) return false;
+      if (known === normalized || known === token) return true;
+      if (/\s/.test(normalized) || normalized.length < 6) return false;
+      return known.includes(normalized) || (known.length >= 8 && normalized.includes(known));
+    });
+  });
+}
+
 export async function loadThreatIndex() {
-  const [threats, bots, scams] = await Promise.all([
+  const [threats, bots, scams, agents] = await Promise.all([
     fetch('data/threats.json').then(r => r.json()),
     fetch('data/bots.json').then(r => r.json()),
     fetch('data/scam-addresses.json').then(r => r.json()),
+    fetch('data/agent-threats.json').then(r => r.json()),
   ]);
   const items = [];
   for (const e of threats.entries || []) {
@@ -20,6 +49,15 @@ export async function loadThreatIndex() {
       title: e.name, key: e.id || e.name,
       blurb: e.kind || 'bot', detail: e.meaning, fix: e.block?.note || '', source: e.source,
       meta: e.pattern ? 'UA: ' + e.pattern : '',
+    });
+  }
+  for (const e of agents.entries || []) {
+    const name = e.name || e.title || 'Agent incident';
+    items.push({
+      type: 'agent', letter: (name || '?')[0].toUpperCase(),
+      title: name + (e.date ? ' · ' + e.date : ''), key: e.id || name,
+      blurb: e.blurb || '', detail: e.detail || '', fix: e.check || e.fix || '',
+      source: e.source || '', meta: e.date || '', iocs: Array.isArray(e.iocs) ? e.iocs : [],
     });
   }
   for (const e of scams.entries || []) {
@@ -41,5 +79,13 @@ export async function loadThreatIndex() {
     fix: 'Use Analyze on your own device logs.', source: '', meta: 'offline',
   });
   items.sort((a, b) => a.title.localeCompare(b.title));
-  return { items, meta: { threats: threats.updated, bots: bots.updated, scams: scams.updated } };
+  return {
+    items,
+    meta: {
+      threats: threats.updated,
+      bots: bots.updated,
+      scams: scams.updated,
+      agents: agents.updated,
+    },
+  };
 }

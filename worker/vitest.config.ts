@@ -7,6 +7,11 @@ import { TEST_WEBHOOK_SECRET } from "./test/fixture.ts";
 const root = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  server: {
+    fs: {
+      allow: [root, path.resolve(root, "..")],
+    },
+  },
   plugins: [
     cloudflareTest(async () => {
       const migrations = await readD1Migrations(path.join(root, "migrations"));
