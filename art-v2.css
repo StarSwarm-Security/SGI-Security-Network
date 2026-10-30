@@ -1,29 +1,24 @@
 /* Site art v2 (cover v20). Kept in its own file so it layers on style.css without touching it.
    WebP first with PNG fallback: the plain url() line is for browsers without image-set type(). */
 
-/* Page backdrop: cover v20 (text-free) replaces sgi-hero-v1. The castle map itself still uses sgi-hero-v1. */
+/* Page backdrop: cover v20 (text-free) replaces sgi-hero-v1. */
 .cover{background-image:url(assets/v2/hero-cover-v20-textfree-1500x500.png);
   background-image:image-set(url(assets/v2/hero-cover-v20-textfree-1500x500.webp) type("image/webp"),url(assets/v2/hero-cover-v20-textfree-1500x500.png) type("image/png"));
   background-size:cover;background-position:center 60%}
 
-/* Home scrolls: hero banner, then the interactive map (unchanged, full panel height), then glyph cards. */
+/* Home scrolls: the interactive map (full panel height), then glyph cards. */
 #tab-home.castle-panel{display:block;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin}
 #tab-home > #castle-root{height:100%}
 
-.art-hero{position:relative;width:100%;aspect-ratio:3/1;max-height:38vh;min-height:130px;overflow:hidden;
-  border-bottom:1px solid rgba(160,200,255,.22);background-color:#02040d;
-  background-image:url(assets/v2/hero-cover-v20-textfree-1500x500.png);
-  background-image:image-set(url(assets/v2/hero-cover-v20-textfree-1500x500.webp) type("image/webp"),url(assets/v2/hero-cover-v20-textfree-1500x500.png) type("image/png"));
-  background-size:cover;background-position:center 80%;background-repeat:no-repeat}
-/* The banner is capped at 38vh, so it sits lower than the manifest's 60% to keep the panther and the text band in frame. */
-.art-hero::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(0,0,0,.35) 100%)}
-/* Headline sits in the empty bottom band (x 590-910, y 395-490 of 1500x500) where the panther beam points. */
-.art-hero-copy{position:absolute;z-index:1;left:50%;bottom:3%;transform:translateX(-50%);width:min(44%,560px);text-align:center;
-  padding:.35em .6em;border-radius:10px;background:radial-gradient(ellipse at center,rgba(0,0,0,.48),rgba(0,0,0,0) 72%)}
-.art-hero-copy .art-kicker{font-family:Orbitron,sans-serif;font-weight:900;font-size:clamp(13px,2.5vw,30px);letter-spacing:.16em;line-height:1.05;
+/* Home map is cover v20 merged with sgi-hero-v1's blue/purple nebula floor (assets/v2/sgi-map-v20-1500x844, 16:9).
+   Live headline sits in the band the panther's beam points at (x 39-61%, y 47-58% of the map). */
+.castle-map{container-type:inline-size}
+.castle-map > picture{display:block;width:100%;height:100%}
+.castle-headline{position:absolute;z-index:1;left:50%;top:52.4%;transform:translate(-50%,-50%);width:21%;text-align:center;pointer-events:none;
+  padding:.4em 0;background:radial-gradient(ellipse at center,rgba(0,0,0,.42),rgba(0,0,0,0) 70%)}
+.castle-headline .art-kicker{font-family:Orbitron,sans-serif;font-weight:900;font-size:2.35cqw;letter-spacing:.13em;line-height:1.05;
   color:#eef6ff;text-transform:uppercase;text-shadow:0 0 14px rgba(110,200,255,.7),0 0 2px #000,0 2px 6px #000}
-.art-hero-copy .art-line{font-family:Sora,sans-serif;font-weight:600;font-size:clamp(8px,1.05vw,13px);letter-spacing:.34em;margin-top:.35em;
+.castle-headline .art-line{font-family:Sora,sans-serif;font-weight:600;font-size:1.05cqw;letter-spacing:.32em;margin-top:.35em;white-space:nowrap;
   color:#bfe6ff;text-transform:uppercase;text-shadow:0 0 8px rgba(110,200,255,.55),0 1px 3px #000}
 
 /* Glyph feature cards over the galactic swarm, with a dark overlay under the text. */
@@ -55,7 +50,6 @@
   background-image:linear-gradient(rgba(2,6,16,.45),rgba(2,6,16,.5)),image-set(url(assets/v2/section-white-construct-v3b-1200x675.webp) type("image/webp"),url(assets/v2/section-white-construct-v3b-1200x675.png) type("image/png"))}
 
 @media (max-width:760px){
-  .art-hero-copy{width:72%;bottom:2%}
   .art-cards{grid-template-columns:repeat(2,1fr)}
   .art-card img{width:96px;height:96px}
 }
