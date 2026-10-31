@@ -107,6 +107,18 @@ select{border-radius:8px;border:1px solid rgba(160,200,255,.2);background:rgba(0
 #tab-threats .az button{min-width:22px;padding:2px 0;border-radius:5px;border:1px solid rgba(160,200,255,.2);background:rgba(0,0,0,.35);color:var(--mute);cursor:pointer;font-size:9px;font-family:Orbitron,sans-serif}
 #tab-threats .az button.on{background:rgba(160,200,255,.2);color:var(--g)}
 #tab-threats .chip{padding:3px 7px;font-size:9px}
+#swarm-feed{margin:8px 0 10px;padding:8px 8px 6px;border-radius:10px;border:1px solid rgba(160,200,255,.18);background:rgba(0,0,0,.28)}
+#swarm-feed .sf-title{font-family:Orbitron,sans-serif;font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:#eef3fb}
+#swarm-feed .sf-pill{font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:.6px;text-transform:uppercase}
+#swarm-feed .ti-list{display:flex;flex-direction:column;max-height:280px;overflow:auto}
+#swarm-feed .ti-item{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+#swarm-feed .sev,#swarm-feed .tag{white-space:nowrap}
+#swarm-feed .sf-open{flex:1;min-width:0;display:flex;gap:8px;align-items:flex-start;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:0}
+#swarm-feed .sf-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+#swarm-feed .sf-copy b{overflow-wrap:anywhere}
+#swarm-feed .sf-open .sev{flex:0 0 auto;margin-top:1px}
+#swarm-feed a{color:#9fd4ff;font-size:10px;flex:0 0 auto;margin-top:2px}
+#ag-desk #ag-live-alerts{color:#9fd4ff}
 .hive-panel{display:flex;flex-direction:column;padding-bottom:8px;position:relative;overflow:hidden}
 #hive-svg{flex:1;min-height:320px;width:100%;border-radius:12px;border:1px solid rgba(160,200,255,.2);background:rgba(0,0,0,.35)}
 #hive-detail{position:absolute;right:16px;top:64px;width:min(300px,calc(100% - 32px));max-height:70%;overflow:auto;padding:12px;border-radius:12px;z-index:5;background:var(--glass-pin)}

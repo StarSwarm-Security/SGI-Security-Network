@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Socket</title>
+  <entry>
+    <title>Cursor Removes Malicious Claude Code Extension From Its Marketplace</title>
+    <link href="https://socket.dev/blog/cursor-removes-malicious-extension"/>
+    <updated>2026-10-30T15:00:00Z</updated>
+    <summary>A malicious extension targeted Claude Code users.</summary>
+  </entry>
+  <entry>
+    <title>High severity npm worm campaign hits agent CI</title>
+    <link href="https://socket.dev/blog/npm-worm-agent-ci"/>
+    <updated>2026-10-29T15:00:00Z</updated>
+    <summary>An npm worm spread through build agents.</summary>
+  </entry>
+  <entry>
+    <title>Weekly release notes for the dashboard</title>
+    <link href="https://socket.dev/blog/weekly-notes"/>
+    <updated>2026-10-28T15:00:00Z</updated>
+    <summary>Small UI fixes and copy edits.</summary>
+  </entry>
+</feed>

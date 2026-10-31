@@ -1,0 +1,13 @@
+[
+  {
+    "ghsa_id": "GHSA-mcp0-0000-0001",
+    "summary": "Denial of service in @modelcontextprotocol/sdk",
+    "description": "A crafted message can stall the MCP TypeScript SDK.",
+    "severity": "moderate",
+    "published_at": "2026-10-20T00:00:00Z",
+    "html_url": "https://github.com/advisories/GHSA-mcp0-0000-0001",
+    "vulnerabilities": [
+      { "package": { "ecosystem": "npm", "name": "@modelcontextprotocol/sdk" } }
+    ]
+  }
+]

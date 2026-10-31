@@ -2,6 +2,7 @@ import { runSwarm, SPECIALISTS } from './js/analyzers.js';
 import { REF_DATA, SCENARIOS, CS_DATA } from './js/study.js';
 import { mountHive, NODES, THREATS } from './js/hive.js';
 import { loadThreatIndex, matchAgentIocs } from './js/threat-index.js';
+import { agentItemsFromAlerts, defangIoc, lookupOsvPackage, mountSwarmFeed } from './js/swarm-feed.js';
 import { mountSwarmPass } from './js/swarm-pass.js';
 import { mountBounty } from './js/bounty.js';
 import { mountRedeem } from './js/redeem.js';
@@ -33,6 +34,9 @@ function syncTabChrome(activeId) {
 }
 
 let hiveCtl = null, threatData = null, swarmCtl = null, bountyCtl = null, redeemCtl = null, castleCtl = null;
+let threatHash = '';
+let liveAgentItems = [];
+let feedCtl = null;
 const wingOverlay = () => $('wing-overlay');
 const wingBody = () => $('wing-body');
 const mainEl = () => document.querySelector('main');
@@ -69,7 +73,12 @@ function openWing(id) {
   $('wing-title').textContent = WING_TITLE[id] || id;
   syncTabChrome(id);
   setMoreOpen(false);
-  history.replaceState(null, '', '#' + id);
+  let hashName = id;
+  if (id === 'threats' && threatHash) {
+    hashName = threatHash;
+    threatHash = '';
+  }
+  history.replaceState(null, '', '#' + hashName);
   if (castleCtl) castleCtl.highlight(id);
   bootPanel(id);
 }
@@ -193,6 +202,13 @@ function setAnalyzeMode(mode) {
 document.querySelectorAll('#analyze-modes [data-mode]').forEach(c => {
   c.onclick = () => setAnalyzeMode(c.dataset.mode);
 });
+const liveAlertsLink = $('ag-live-alerts');
+if (liveAlertsLink) {
+  liveAlertsLink.addEventListener('click', (event) => {
+    event.preventDefault();
+    openThreatsLive('alerts');
+  });
+}
 
 function esc(value) {
   return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
@@ -323,6 +339,44 @@ document.querySelectorAll('#study-tabs .chip').forEach(c => c.onclick = () => re
 
 /* Threat Index */
 let tiFilter = { type: 'all', letter: null, q: '' };
+function syncSwarmPanel() {
+  const root = $('swarm-feed');
+  if (!root) return;
+  const on = tiFilter.type === 'agent';
+  root.hidden = !on;
+  if (!feedCtl) return;
+  feedCtl.setActive(on);
+  if (on) feedCtl.setQuery();
+}
+function ensureSwarmFeed() {
+  const root = $('swarm-feed');
+  if (!root || feedCtl || tiFilter.type !== 'agent') return;
+  feedCtl = mountSwarmFeed(root, {
+    onAlerts(alerts) {
+      liveAgentItems = agentItemsFromAlerts(alerts);
+    },
+    onOpen(alert) {
+      openThreatDrawer({
+        type: 'agent',
+        title: alert.title,
+        detail: alert.detail,
+        fix: alert.check,
+        source: alert.url || alert.source,
+        iocs: alert.iocs || [],
+        meta: [alert.severity, alert.published].filter(Boolean).join(' · '),
+      });
+    },
+    getQuery: () => ($('ti-q') && $('ti-q').value) || '',
+  });
+}
+function openThreatsLive(hash) {
+  threatHash = hash || 'alerts';
+  tiFilter.type = 'agent';
+  document.querySelectorAll('#ti-types .chip').forEach(x => x.classList.toggle('on', x.dataset.type === 'agent'));
+  show('threats');
+  ensureSwarmFeed();
+  syncSwarmPanel();
+}
 function paintThreats() {
   if (!threatData) return;
   let items = threatData.items;
@@ -345,29 +399,58 @@ async function initThreats() {
   threatData = await loadThreatIndex();
   $('ti-meta').textContent = `Threats ${threatData.meta.threats || '?'} · Agents ${threatData.meta.agents || '?'} · Bots ${threatData.meta.bots || '?'} · Wallets ${threatData.meta.scams || '?'} · IP via Analyze`;
   paintThreats();
+  ensureSwarmFeed();
+  syncSwarmPanel();
 }
 document.querySelectorAll('#ti-types .chip').forEach(c => c.onclick = () => {
   document.querySelectorAll('#ti-types .chip').forEach(x => x.classList.toggle('on', x === c));
-  tiFilter.type = c.dataset.type; paintThreats();
+  tiFilter.type = c.dataset.type;
+  paintThreats();
+  ensureSwarmFeed();
+  syncSwarmPanel();
 });
-$('ti-q').oninput = () => { tiFilter.q = $('ti-q').value; paintThreats(); };
-$('ti-list').onclick = e => {
-  const b = e.target.closest('.ti-item'); if (!b || !threatData) return;
-  const i = threatData.items[+b.dataset.idx]; if (!i) return;
+$('ti-q').oninput = () => {
+  tiFilter.q = $('ti-q').value;
+  paintThreats();
+  if (feedCtl) feedCtl.setQuery();
+};
+function openThreatDrawer(i) {
+  if (!i) return;
   $('ti-drawer').hidden = false;
   const step = i.type === 'agent' ? 'Check this' : 'Fix';
-  const source = /^https?:\/\//i.test(i.source || '') ? i.source : '';
+  const source = /^https:\/\//i.test(i.source || '') ? i.source : '';
   const iocLine = i.type === 'agent' && i.iocs && i.iocs.length
-    ? `<p style="margin-top:8px"><b>IOCs (defanged):</b> ${i.iocs.map(esc).join(' · ')}</p>`
+    ? `<p style="margin-top:8px"><b>IOCs (defanged):</b> ${i.iocs.map(ioc => esc(defangIoc(ioc))).join(' · ')}</p>`
     : '';
   $('ti-body').innerHTML = `<h3>${esc(i.title)}</h3><p class="fine">${esc(i.type)} · ${esc(i.meta || '')}</p><p style="margin-top:8px">${esc(i.detail)}</p>` +
     iocLine +
     (i.fix ? `<p style="margin-top:8px"><b>${step}:</b> ${esc(i.fix)}</p>` : '') +
     (source ? `<p class="fine" style="margin-top:8px"><a href="${esc(source)}" target="_blank" rel="noopener" style="color:#9fd4ff">Source</a></p>` : '');
+}
+$('ti-list').onclick = e => {
+  const b = e.target.closest('.ti-item'); if (!b || !threatData) return;
+  const i = threatData.items[+b.dataset.idx]; if (!i) return;
+  openThreatDrawer(i);
 };
-function paintIocLookup() {
+let iocSeq = 0;
+function renderIocHits(hits) {
   const out = $('ti-ioc-out');
   if (!out) return;
+  if (!hits.length) {
+    out.innerHTML = '<div class="find ok"><span class="sev">clear</span><strong> Not on the agent IOC list.</strong><p class="fine">Absence is not a guarantee. Domains in the list are stored defanged, with [.]</p></div>';
+    return;
+  }
+  out.innerHTML = hits.map((hit) =>
+    `<div class="find high"><span class="sev">match</span> <strong>${esc(hit.title)}</strong>` +
+    `<p class="fine">${esc((hit.iocs || []).map(defangIoc).join(' · '))}</p>` +
+    (hit.fix ? `<p><b>Check this:</b> ${esc(hit.fix)}</p>` : '') +
+    `</div>`
+  ).join('');
+}
+async function paintIocLookup() {
+  const out = $('ti-ioc-out');
+  if (!out) return;
+  const seq = ++iocSeq;
   if (!threatData) {
     out.innerHTML = '<p class="fine">Threat index is still loading.</p>';
     return;
@@ -377,17 +460,23 @@ function paintIocLookup() {
     out.innerHTML = '<p class="fine">Paste a package name or domain (at least 4 characters).</p>';
     return;
   }
-  const hits = matchAgentIocs(threatData.items, query);
-  if (!hits.length) {
-    out.innerHTML = '<div class="find ok"><span class="sev">clear</span><strong> Not on the agent IOC list.</strong><p class="fine">Absence is not a guarantee. Domains in the list are stored defanged, with [.]</p></div>';
-    return;
+  const hits = matchAgentIocs([...(threatData.items || []), ...liveAgentItems], query);
+  renderIocHits(hits);
+  let extra = [];
+  try {
+    extra = agentItemsFromAlerts(await lookupOsvPackage(query));
+  } catch { extra = []; }
+  if (seq !== iocSeq || !extra.length) return;
+  const seen = new Set(hits.map(hit => hit.key || hit.title));
+  const merged = hits.slice();
+  for (const item of extra) {
+    const key = item.key || item.title;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(item);
+    liveAgentItems.push(item);
   }
-  out.innerHTML = hits.map((hit) =>
-    `<div class="find high"><span class="sev">match</span> <strong>${esc(hit.title)}</strong>` +
-    `<p class="fine">${esc((hit.iocs || []).join(' · '))}</p>` +
-    (hit.fix ? `<p><b>Check this:</b> ${esc(hit.fix)}</p>` : '') +
-    `</div>`
-  ).join('');
+  if (merged.length !== hits.length) renderIocHits(merged);
 }
 function normalizeQueryTooShort(query) {
   return String(query || '').trim().length < 4;
@@ -463,6 +552,12 @@ export function bootSgi() {
   if (start === 'configaudit' || start === 'config-auditor' || start === 'auditor') {
     analyzeMode = 'configaudit';
     start = 'analyze';
+  }
+  if (start === 'alerts' || start === 'swarm-feed') {
+    threatHash = start;
+    tiFilter.type = 'agent';
+    document.querySelectorAll('#ti-types .chip').forEach(x => x.classList.toggle('on', x.dataset.type === 'agent'));
+    start = 'threats';
   }
   show(panels[start] ? start : 'home');
 }

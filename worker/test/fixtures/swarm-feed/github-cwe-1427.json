@@ -1,0 +1,26 @@
+[
+  {
+    "ghsa_id": "GHSA-pi00-0000-0001",
+    "summary": "Prompt injection in example-llm-gateway",
+    "description": "Tool output is copied into the model prompt.",
+    "severity": "medium",
+    "published_at": "2026-10-28T00:00:00Z",
+    "html_url": "https://github.com/advisories/GHSA-pi00-0000-0001",
+    "cwes": [{ "cwe_id": "CWE-1427", "name": "Improper Neutralization of Input Used for LLM Prompting" }],
+    "vulnerabilities": [
+      { "package": { "ecosystem": "npm", "name": "example-llm-gateway" } }
+    ]
+  },
+  {
+    "ghsa_id": "GHSA-pi00-0000-0002",
+    "summary": "Library allows prompt injection via tool output",
+    "description": "No CWE-1427 id on this row. The summary itself is the signal.",
+    "severity": "low",
+    "published_at": "2026-10-27T00:00:00Z",
+    "html_url": "https://github.com/advisories/GHSA-pi00-0000-0002",
+    "cwes": [{ "cwe_id": "CWE-77", "name": "Command Injection" }],
+    "vulnerabilities": [
+      { "package": { "ecosystem": "pypi", "name": "example-agent-tools" } }
+    ]
+  }
+]
