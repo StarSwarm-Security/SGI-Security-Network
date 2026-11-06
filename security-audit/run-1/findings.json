@@ -1,0 +1,356 @@
+[
+  {
+    "verdict": "confirmed",
+    "fingerprint": "client.analyze.unescaped-finding-html",
+    "title": "Cisco Analyze assigns unescaped parser captures to innerHTML",
+    "description": "Run offline builds an HTML string from runSwarm summary.headline and finding titles and assigns it to #analyze-out.innerHTML. Those strings include raw parser captures. A username line whose token is an svg onload handler is copied into the headline and the finding title. Headless Chrome parses that markup and the handler sets documentElement data-xss to 1. The same sink embeds an unrestricted DHCP pool name, a BPDU iface token, and an err-disabled Ethernet token. Paste Guard, Agent Guard, and Config Auditor go through paintScan, which calls esc(). The Cisco path does not. index.html and the edge SEC headers define no Content-Security-Policy. Script on this origin can read the gated bearer from localStorage key sgi.session.v1 and from the sgi_session cookie, which includes sessionToken and is not HttpOnly.",
+    "root_cause": "app.js run-analyze concatenates summary.headline and finding title, detail, and fix into HTML and assigns innerHTML. js/analyzers.js copies the username token, DHCP pool name, BPDU iface, and err-disabled iface into those titles, and coordinate copies the top title into headline, with no HTML encoding.",
+    "intended_behavior": "Pasted device output is untrusted data and should be shown as text. The other Analyze modes already encode finding text with esc() inside paintScan before innerHTML.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "app.js",
+        "line": 171,
+        "scope": "run-analyze click",
+        "description": "The click handler reads textarea#paste and passes the text to runSwarm."
+      },
+      {
+        "kind": "propagation",
+        "file": "js/analyzers.js",
+        "line": 1321,
+        "scope": "analyzeSecurity",
+        "description": "The cleartext-username rule stores the raw non-whitespace token in the finding title. DHCP pool, BPDU, and err-disabled rules also copy their captures into titles."
+      },
+      {
+        "kind": "propagation",
+        "file": "js/analyzers.js",
+        "line": 1574,
+        "scope": "coordinate",
+        "description": "summary.headline is the highest-ranked action title, so the raw capture is repeated in the lede."
+      },
+      {
+        "kind": "propagation",
+        "file": "app.js",
+        "line": 178,
+        "scope": "run-analyze click",
+        "description": "The Cisco renderer interpolates summary.headline and each finding title into an HTML string and does not call esc()."
+      },
+      {
+        "kind": "sink",
+        "file": "app.js",
+        "line": 187,
+        "scope": "analyze-out.innerHTML",
+        "description": "The finished string is assigned to #analyze-out.innerHTML, which parses the captured svg and runs its onload handler."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "app.js",
+        "line": 171,
+        "description": "run-analyze takes the trimmed #paste value as the text passed to runSwarm."
+      },
+      {
+        "file": "app.js",
+        "line": 178,
+        "description": "summary.headline is concatenated into the HTML string with no encoding."
+      },
+      {
+        "file": "app.js",
+        "line": 182,
+        "description": "Each finding title is interpolated into a strong element in that same HTML string with no encoding."
+      },
+      {
+        "file": "app.js",
+        "line": 184,
+        "description": "detail, why, message, and summary are also concatenated unescaped. The username rule leaves those fields empty and puts the token in the title."
+      },
+      {
+        "file": "app.js",
+        "line": 187,
+        "description": "The finished string is assigned to analyze-out.innerHTML."
+      },
+      {
+        "file": "app.js",
+        "line": 213,
+        "description": "esc() encodes ampersand, less-than, greater-than, quotes, and apostrophes. The Cisco path never calls it."
+      },
+      {
+        "file": "app.js",
+        "line": 228,
+        "description": "paintScan, used by Paste Guard, Agent Guard, and Config Auditor, wraps titles and other hit fields in esc() before innerHTML."
+      },
+      {
+        "file": "js/analyzers.js",
+        "line": 1315,
+        "description": "A global username password line captures both tokens with a non-whitespace class, which includes the svg payload."
+      },
+      {
+        "file": "js/analyzers.js",
+        "line": 1321,
+        "description": "The cleartext-password finding title is the literal User prefix plus the raw username token."
+      },
+      {
+        "file": "js/analyzers.js",
+        "line": 289,
+        "description": "Config block headers, including ip dhcp pool, capture the rest of the line as the block name with no character restriction."
+      },
+      {
+        "file": "js/analyzers.js",
+        "line": 1216,
+        "description": "A DHCP pool whose default-router is outside the pool network puts that raw block name in the finding title."
+      },
+      {
+        "file": "js/analyzers.js",
+        "line": 808,
+        "description": "A line matching 802.1Q BPDU on non-trunk captures the following non-whitespace token as the iface."
+      },
+      {
+        "file": "js/analyzers.js",
+        "line": 868,
+        "description": "An err-disabled line captures Gi, Fa, Te, Eth, or the long Ethernet names plus the following non-space characters."
+      },
+      {
+        "file": "js/analyzers.js",
+        "line": 330,
+        "description": "Show-interface block names are limited to a letter followed by word characters, dots, slashes, colons, and hyphens, so a header that starts with an svg tag does not match."
+      },
+      {
+        "file": "index.html",
+        "line": 163,
+        "description": "The Cisco paste box is textarea#paste."
+      },
+      {
+        "file": "index.html",
+        "line": 167,
+        "description": "The control is button#run-analyze, labeled Run offline."
+      },
+      {
+        "file": "index.html",
+        "line": 80,
+        "description": "The shell starts inert, so the paste control is not clickable until the gate unlocks it."
+      },
+      {
+        "file": "app.js",
+        "line": 538,
+        "description": "bootSgi removes inert from the shell only after an accepted session."
+      },
+      {
+        "file": "js/auth-client.js",
+        "line": 125,
+        "description": "writeSession stores the session object, including sessionToken, in localStorage under sgi.session.v1."
+      },
+      {
+        "file": "js/auth-client.js",
+        "line": 138,
+        "description": "writeSession sets sgi_session from script with Path, Max-Age, and SameSite=Lax, and Secure only on https. There is no HttpOnly flag."
+      },
+      {
+        "file": "edge/sgi-worker-tail.js",
+        "line": 10,
+        "description": "The documented response headers are nosniff, a referrer policy, X-Frame-Options DENY, and a permissions policy. Content-Security-Policy is not among them."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "user_interaction",
+        "description": "The operator pastes the text into #paste and clicks Run offline. That is the normal Cisco Analyze action. The shell is inert until the gate has opened the page."
+      },
+      {
+        "kind": "authentication_level",
+        "description": "bootSgi runs after the gate accepts a session, which is when this control becomes usable. Reading a bearer requires writeSession to have stored one. The renderer itself does not check the token."
+      },
+      {
+        "kind": "data_state",
+        "description": "The paste must match a capture that copies an unrestricted token into a title. The username line is sufficient. A DHCP pool name, a BPDU iface, or an err-disabled Ethernet token also reaches the sink. A show-interface block name does not, because its character class excludes less-than."
+      },
+      {
+        "kind": "system_configuration",
+        "description": "The local file page had no Content-Security-Policy, and neither index.html nor the edge SEC headers define one. Live Pages response headers were not requested. A policy added outside this repository could still block the handler on the deployed origin."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Supply device text whose captured name is an svg onload handler. When the operator runs Cisco Analyze, the handler runs in that origin and can read the bearer from localStorage and from document.cookie.",
+      "payloads": [
+        "username <svg/onload=document.documentElement.dataset.xss=1> password hunter"
+      ],
+      "instructions": [
+        "Import runSwarm from js/analyzers.js in Node and call it with the payload and deviceType auto.",
+        "Build the result string the same way app.js run-analyze does: findings count, summary.headline, then each finding title, specialist, and fix, with no esc() call.",
+        "Assign that string to an element's innerHTML in a local file page and open it in headless Chrome with no network.",
+        "After the nodes are in the document, read document.documentElement.dataset.xss. Do not load the production site."
+      ],
+      "observed_result": "runSwarm produced the headline and title User followed by the svg onload handler and the cleartext-password sentence. Headless Chrome 156 created two svg elements, one in the lede and one in the finding title. After the assignment, the html element had data-xss=1. Passing the same HTML through esc() created no svg element. No deployed host was contacted."
+    },
+    "remediation": {
+      "strategy": "Encode every value the Cisco Analyze builder inserts into HTML with the existing esc() helper before assigning innerHTML, the same way paintScan already does. Prefer text nodes so a later field cannot skip the encoder.",
+      "code_changes": [
+        {
+          "file_name": "app.js",
+          "fixed_code": "const sev = esc((f.severity || f.level || f.sev || 'info').toString().toLowerCase());\nhtml += `<div class=\"find ${sev}\"><span class=\"sev\">${sev}</span> <strong>${esc(f.title || f.name || f.id || 'Finding')}</strong>` +\n  `<p class=\"fine\">${esc(f.specialist || '')}</p>` +\n  `<p>${esc(f.detail || f.why || f.message || f.summary || '')}</p>` +\n  (f.fix || f.remediation ? `<p><b>Fix:</b> ${esc(f.fix || f.remediation)}</p>` : '') + `</div>`;\n// Also pass summary.headline through esc() in the lede."
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "medium",
+        "reason": "The operator must paste the text and click Run offline. That is the normal use of Cisco Analyze on output from someone else's device, so delivery is realistic, but it is not automatic."
+      },
+      "impact": {
+        "score": "high",
+        "reason": "Chrome ran the handler in the page origin. After the gate opens, the bearer is in localStorage and in a cookie that script can read."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "The titles came from the repository runSwarm, and headless Chrome executed the onload handler after the same innerHTML assignment the click handler performs. The gated page itself was not clicked, and live response headers were not observed."
+    }
+  },
+  {
+    "verdict": "rejected",
+    "fingerprint": "worker.analyze.cache-same-content",
+    "title": "Analyze cache does not return a different user's paste",
+    "description": "A global analyze_cache row was considered as a cross-tenant disclosure because any authenticated caller can hit it. The stored value is the server findings for the hash of the text that caller just submitted.",
+    "claimed_root_cause": "POST /v1/analyze returns another user's pasted content from a cache that is not keyed by user id.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "worker/src/index.ts",
+        "line": 83,
+        "scope": "POST /v1/analyze",
+        "description": "The route is wrapped in authed, so a missing bearer is rejected before handleAnalyze."
+      },
+      {
+        "kind": "propagation",
+        "file": "worker/src/analyze/handler.ts",
+        "line": 62,
+        "scope": "handleAnalyze",
+        "description": "The cache key is the SHA-256 of mode, device type, and the caller's text."
+      },
+      {
+        "kind": "sink",
+        "file": "worker/src/analyze/handler.ts",
+        "line": 99,
+        "scope": "handleAnalyze",
+        "description": "The response returns the parsed result_json for that hash. The row stores findings, not a raw-paste column supplied by another client."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "worker/src/analyze/handler.ts",
+        "line": 62,
+        "description": "contentHash is sha256Hex of mode, deviceType, and text from this request."
+      },
+      {
+        "file": "worker/src/analyze/handler.ts",
+        "line": 91,
+        "description": "The insert stores server-side JSON from runOffline, with ON CONFLICT DO NOTHING."
+      },
+      {
+        "file": "worker/migrations/0001_init.sql",
+        "line": 66,
+        "description": "analyze_cache is keyed by content_hash and has no user_id column. The handler note says cached rows store findings, not a raw paste."
+      }
+    ],
+    "reason": "A second caller receives those findings only by submitting the same mode, device type, and text. The cache does not select another user's different paste, and the client cannot write an arbitrary result blob."
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "worker.redeem.code-state-oracle",
+    "title": "Redeem failures distinguish code state, and a correct guess can grant credit or a promo tier",
+    "description": "After a claim update changes no row, handleRedeemCode returns a different status for an unknown code, an expired code, an exhausted code, and a residual miss. An anonymous device session can submit guesses. A live sc_grant adds bonus credits, and a live tier_trial inserts a promo monthly or yearly entitlement. Whether a search of the stored code space is practical is not visible in source.",
+    "claimed_root_cause": "handleRedeemCode returns 404 code_unknown, 409 code_expired, 409 code_exhausted, or 409 code_unavailable after a failed claim. POST /v1/auth/device mints an anonymous bearer with no attempt limit, and a correct guess of an sc_grant or tier_trial code writes a grant. Exploitability depends on redeem_codes entropy in D1 and on any edge rate limit that is not in this repository.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "worker/src/index.ts",
+        "line": 49,
+        "scope": "POST /v1/auth/device",
+        "description": "An unauthenticated POST with an optional deviceId calls createAnonymousDevice. The route has no attempt counter."
+      },
+      {
+        "kind": "propagation",
+        "file": "worker/src/auth/session.ts",
+        "line": 160,
+        "scope": "createAnonymousDevice",
+        "description": "An omitted deviceId becomes a new UUID. The function inserts an anonymous user, device, and bearer. device_exists is only the unique-conflict path."
+      },
+      {
+        "kind": "propagation",
+        "file": "worker/src/index.ts",
+        "line": 93,
+        "scope": "POST /v1/redeem/codes",
+        "description": "authed accepts any unexpired bearer, including that anonymous session. The analyze daily cap does not apply to this route."
+      },
+      {
+        "kind": "propagation",
+        "file": "worker/src/redeem/handler.ts",
+        "line": 50,
+        "scope": "handleRedeemCode",
+        "description": "The UPDATE increments use_count only when the code is unexpired, still under max_uses, and this device has no redemption. Zero changes writes no redemption."
+      },
+      {
+        "kind": "sink",
+        "file": "worker/src/redeem/handler.ts",
+        "line": 115,
+        "scope": "handleRedeemCode",
+        "description": "The follow-up SELECT returns 404 code_unknown, 409 code_expired, 409 code_exhausted, or 409 code_unavailable. A live sc_grant or tier_trial match instead writes the grant."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "worker/src/redeem/handler.ts",
+        "line": 115,
+        "description": "A missing code is 404 code_unknown. An expired code is 409 code_expired. An exhausted code is 409 code_exhausted. Any other miss is 409 code_unavailable."
+      },
+      {
+        "file": "worker/src/redeem/handler.ts",
+        "line": 6,
+        "description": "Accepted codes are 4 to 64 characters from A-Z, digits, and hyphen. That is the request grammar, not the stored distribution."
+      },
+      {
+        "file": "worker/src/redeem/handler.ts",
+        "line": 73,
+        "description": "sc_grant with a positive amount adds bonus_credits, capped at 1000000 by the snapshot upsert."
+      },
+      {
+        "file": "worker/src/redeem/handler.ts",
+        "line": 85,
+        "description": "tier_trial with monthly or yearly inserts an entitlements row with source promo. tier_days is clamped to 1 through 30."
+      },
+      {
+        "file": "worker/src/auth/session.ts",
+        "line": 23,
+        "description": "requireSession checks a bearer hash and expiry. It does not count calls."
+      },
+      {
+        "file": "worker/migrations/0001_init.sql",
+        "line": 95,
+        "description": "redeem_codes is created with kinds promo, sc_grant, and tier_trial. This migration does not insert codes."
+      },
+      {
+        "file": "worker/wrangler.jsonc",
+        "line": 55,
+        "description": "The Worker config binds D1 and defines no routes and no rate-limit binding."
+      },
+      {
+        "file": "worker/test/api.test.ts",
+        "line": 310,
+        "description": "A second anonymous session posting the already-used one-use code receives HTTP 409. The test does not assert which error string."
+      },
+      {
+        "file": "worker/test/api.test.ts",
+        "line": 340,
+        "description": "A tier_trial fixture becomes entitlement tier yearly with source promo."
+      }
+    ],
+    "blockers": [
+      "Stored redeem_codes length, charset, kind, max_uses, expiry, and whether any live sc_grant or tier_trial row exists are only in D1. The migration creates the table and does not seed it. This run did not query D1.",
+      "worker/wrangler.jsonc has no rate-limit binding. A zone or WAF rule in front of sgi-api would not appear in this repository and decides whether online enumeration is bounded."
+    ],
+    "validation_plan": {
+      "local": "On local D1 only, create one anonymous bearer and insert fixture rows for an expired code, an exhausted code, a live sc_grant, and a live tier_trial. POST each plus one absent code to /v1/redeem/codes. Expect 404 code_unknown, 409 code_expired, 409 code_exhausted, a 200 with bonus credits for sc_grant, and a 200 plus a promo entitlement for tier_trial. Repeat misses and confirm the app still returns those bodies with no 429. Do not send those requests to the deployed worker.",
+      "deployment": "Read-only: inspect sgi-api D1 redeem_codes for code length, charset, kind, max_uses, use_count, and expires_at, and inspect the Cloudflare zone for a limit on POST /v1/redeem/codes and POST /v1/auth/device. Do not submit guessed codes to production."
+    }
+  }
+]

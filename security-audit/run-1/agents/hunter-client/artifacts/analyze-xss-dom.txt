@@ -1,0 +1,4 @@
+local check: headless Chrome parsed Analyze HTML built from runSwarm.
+username paste produced a headline and a finding title containing an svg onload handler.
+After the nodes were in the document, the html element had data-xss="1".
+No production host was contacted. Payload set a dataset flag only.

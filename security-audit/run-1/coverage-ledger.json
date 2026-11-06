@@ -1,0 +1,1199 @@
+[
+  {
+    "coverage_id": ".gitignore%23dev-vars::worker%2F.dev.vars.example::worker::ATTACK-CLASSES.md%23Obvious%20things",
+    "canonical_refs": {
+      "surface": ".gitignore#dev-vars",
+      "boundary": "worker/.dev.vars.example",
+      "subsystem": "worker",
+      "attack_class": "ATTACK-CLASSES.md#Obvious things"
+    },
+    "surface": "Tracked secret files",
+    "boundary": "Live credentials are not committed",
+    "subsystem": "repository hygiene",
+    "attack_class": "Obvious secrets and debug exposure",
+    "starting_paths": [
+      ".gitignore",
+      "worker/.dev.vars.example",
+      "js/auth-config.js",
+      "worker/test/fixture.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Obvious things",
+    "selected_companion_blocks": [
+      "CLOUD-AND-DEPLOYMENT.md#Configuration and secret lifecycle attack classes"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-edge",
+    "reviewed_paths": [
+      ".gitignore",
+      "worker/.dev.vars.example",
+      "js/auth-config.js",
+      "worker/wrangler.jsonc"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-edge",
+        "reviewed_paths": [
+          ".gitignore",
+          "worker/.dev.vars.example",
+          "js/auth-config.js",
+          "worker/wrangler.jsonc"
+        ],
+        "invariant": "Tracked files must not contain a live credential.",
+        "method": "source",
+        "result": ".gitignore covers .env and .dev.vars. The example file has placeholders. Tests use a fake webhook secret. js/auth-config.js holds a public Google client id, which the file itself describes as a public identifier.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": []
+  },
+  {
+    "coverage_id": "app.js%23run-analyze::app.js%23analyze-out.innerHTML::js%2Fanalyzers.js::ATTACK-CLASSES.md%23Injection",
+    "canonical_refs": {
+      "surface": "app.js#run-analyze",
+      "boundary": "app.js#analyze-out.innerHTML",
+      "subsystem": "js/analyzers.js",
+      "attack_class": "ATTACK-CLASSES.md#Injection"
+    },
+    "surface": "Cisco Analyze run button",
+    "boundary": "Untrusted paste must stay text in analyze-out",
+    "subsystem": "Browser Analyze",
+    "attack_class": "Injection into HTML",
+    "starting_paths": [
+      "app.js",
+      "js/analyzers.js",
+      "index.html",
+      "js/auth-client.js"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection",
+    "selected_companion_blocks": [
+      "CLIENT-SIDE.md#Core discipline",
+      "CLIENT-SIDE.md#DOM-based XSS",
+      "CLIENT-SIDE.md#Universal moves",
+      "CLIENT-SIDE.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      },
+      {
+        "block": "CLIENT-SIDE.md#postMessage origin and source trust",
+        "reason": "No postMessage handler exists in the repository."
+      },
+      {
+        "block": "CLIENT-SIDE.md#Service-worker registration and scope takeover",
+        "reason": "No service worker is registered."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-client",
+    "reviewed_paths": [
+      "app.js",
+      "js/analyzers.js"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-client",
+        "reviewed_paths": [
+          "app.js",
+          "js/analyzers.js"
+        ],
+        "invariant": "Pasted captures must not be parsed as HTML.",
+        "method": "source",
+        "result": "run-analyze concatenates summary.headline and finding titles into innerHTML. esc() is not called. Username, DHCP pool name, BPDU iface, and err-disabled iface are copied into titles.",
+        "artifact": null
+      },
+      {
+        "agent_id": "hunter-client",
+        "reviewed_paths": [
+          "js/analyzers.js",
+          "app.js"
+        ],
+        "invariant": "A pasted username token that reaches a finding title must not run a handler.",
+        "method": "local",
+        "result": "Node imported runSwarm. The username paste put an svg onload handler in the headline and the title. Headless Chrome parsed that HTML. The document element ended with data-xss=1. No production host was contacted.",
+        "artifact": "agents/hunter-client/artifacts/analyze-xss-dom.txt"
+      }
+    ],
+    "result_fingerprints": [
+      "client.analyze.unescaped-finding-html"
+    ],
+    "unresolved": [],
+    "hardening_notes": []
+  },
+  {
+    "coverage_id": "edge%2FREADME.md%23generated-bundle::edge%2Fsgi-worker-tail.js%23fetch::edge::CLOUD-AND-DEPLOYMENT.md%23Configuration%20and%20secret%20lifecycle%20attack%20classes",
+    "canonical_refs": {
+      "surface": "edge/README.md#generated-bundle",
+      "boundary": "edge/sgi-worker-tail.js#fetch",
+      "subsystem": "edge",
+      "attack_class": "CLOUD-AND-DEPLOYMENT.md#Configuration and secret lifecycle attack classes"
+    },
+    "surface": "Generated live worker bundle",
+    "boundary": "Deployed script equals this tail",
+    "subsystem": "edge deploy",
+    "attack_class": "Deployment drift",
+    "starting_paths": [
+      "edge/README.md"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+      "CLOUD-AND-DEPLOYMENT.md#Configuration and secret lifecycle attack classes"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "out_of_scope",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "The live sgi worker and Pages _worker.js are generated outside this repository. This run reviewed edge/sgi-worker-tail.js and did not fetch or compare the deployed script."
+    ],
+    "hardening_notes": []
+  },
+  {
+    "coverage_id": "edge%2Fsgi-worker-tail.js%23fetch::edge%2Fsgi-worker-tail.js%23PRETTY::edge::CLOUD-AND-DEPLOYMENT.md%23Ingress%2C%20network%2C%20and%20control-plane%20attack%20classes",
+    "canonical_refs": {
+      "surface": "edge/sgi-worker-tail.js#fetch",
+      "boundary": "edge/sgi-worker-tail.js#PRETTY",
+      "subsystem": "edge",
+      "attack_class": "CLOUD-AND-DEPLOYMENT.md#Ingress, network, and control-plane attack classes"
+    },
+    "surface": "Edge static tail",
+    "boundary": "Path lookup stays inside the bundle map",
+    "subsystem": "edge static",
+    "attack_class": "Ingress path and redirect handling",
+    "starting_paths": [
+      "edge/sgi-worker-tail.js",
+      "_redirects"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Resource and file handling",
+    "selected_companion_blocks": [
+      "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+      "CLOUD-AND-DEPLOYMENT.md#Ingress, network, and control-plane attack classes",
+      "CLOUD-AND-DEPLOYMENT.md#Universal moves",
+      "CLOUD-AND-DEPLOYMENT.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-edge",
+    "reviewed_paths": [
+      "edge/sgi-worker-tail.js",
+      "_redirects"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-edge",
+        "reviewed_paths": [
+          "edge/sgi-worker-tail.js",
+          "_redirects"
+        ],
+        "invariant": "A request path must not read outside F or redirect off origin.",
+        "method": "source",
+        "result": "Lookup uses the URL pathname as a key in F. Pretty redirects are only /privacy.html and /terms.html on the same origin. Methods other than GET and HEAD are 405. SEC sets nosniff and X-Frame-Options DENY. _redirects has no rewrite rules.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": []
+  },
+  {
+    "coverage_id": "edge%2Fswarm-feed.js%23handleSwarmFeed::edge%2Fswarm-feed.js%23queryOsvPackage::edge::ATTACK-CLASSES.md%23Resource%20and%20file%20handling",
+    "canonical_refs": {
+      "surface": "edge/swarm-feed.js#handleSwarmFeed",
+      "boundary": "edge/swarm-feed.js#queryOsvPackage",
+      "subsystem": "edge",
+      "attack_class": "ATTACK-CLASSES.md#Resource and file handling"
+    },
+    "surface": "Edge swarm feed",
+    "boundary": "Upstream URL is not attacker-chosen",
+    "subsystem": "edge feed",
+    "attack_class": "SSRF and cache isolation",
+    "starting_paths": [
+      "edge/swarm-feed.js",
+      "js/swarm-feed.js"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Resource and file handling",
+    "selected_companion_blocks": [
+      "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+      "CLOUD-AND-DEPLOYMENT.md#Managed storage, events, and edge attack classes",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Computational amplification attack classes"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-edge",
+    "reviewed_paths": [
+      "edge/swarm-feed.js",
+      "js/swarm-feed.js"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-edge",
+        "reviewed_paths": [
+          "edge/swarm-feed.js",
+          "js/swarm-feed.js"
+        ],
+        "invariant": "The package query must not choose the fetch URL or poison the shared cache.",
+        "method": "source",
+        "result": "Feed URLs are constants. OSV is a POST to api.osv.dev after isPackageName. The cache key drops the query, and OSV results are attached after store. Alert HTML is escaped in the browser.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": []
+  },
+  {
+    "coverage_id": "index.html%23shell::DESKTOP-MOBILE-AND-LOCAL-IPC.md%23Core%20discipline::js::DESKTOP-MOBILE-AND-LOCAL-IPC.md%23Deep-link%2C%20callback%2C%20and%20navigation%20attack%20classes",
+    "canonical_refs": {
+      "surface": "index.html#shell",
+      "boundary": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+      "subsystem": "js",
+      "attack_class": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Deep-link, callback, and navigation attack classes"
+    },
+    "surface": "Desktop and mobile IPC",
+    "boundary": "No local IPC surface",
+    "subsystem": "repository",
+    "attack_class": "Desktop and mobile",
+    "starting_paths": [
+      "index.html"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [],
+    "excluded_blocks": [
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "not_applicable",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "The product is a browser page and Workers. No deep link, webview bridge, or local IPC handler is present."
+    ],
+    "hardening_notes": []
+  },
+  {
+    "coverage_id": "js%2Fauth-client.js%23writeSession::js%2Fauth-client.js%23SESSION_KEY::js::CLIENT-SIDE.md%23Browser-storage%20disclosure%20and%20stale%20authorization",
+    "canonical_refs": {
+      "surface": "js/auth-client.js#writeSession",
+      "boundary": "js/auth-client.js#SESSION_KEY",
+      "subsystem": "js",
+      "attack_class": "CLIENT-SIDE.md#Browser-storage disclosure and stale authorization"
+    },
+    "surface": "Browser session seal",
+    "boundary": "Bearer readable by same-origin script",
+    "subsystem": "Browser gate",
+    "attack_class": "Browser storage of the session bearer",
+    "starting_paths": [
+      "js/auth-client.js",
+      "js/gate.js",
+      "index.html"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Cryptography and secrets",
+    "selected_companion_blocks": [
+      "CLIENT-SIDE.md#Core discipline",
+      "CLIENT-SIDE.md#Browser-storage disclosure and stale authorization",
+      "CLIENT-SIDE.md#Universal moves",
+      "CLIENT-SIDE.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      },
+      {
+        "block": "CLIENT-SIDE.md#postMessage origin and source trust",
+        "reason": "No postMessage handler exists in the repository."
+      },
+      {
+        "block": "CLIENT-SIDE.md#Service-worker registration and scope takeover",
+        "reason": "No service worker is registered."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-client",
+    "reviewed_paths": [
+      "js/auth-client.js",
+      "js/gate.js",
+      "index.html"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-client",
+        "reviewed_paths": [
+          "js/auth-client.js",
+          "js/gate.js",
+          "index.html"
+        ],
+        "invariant": "Another origin must not read or mint the bearer, and the gate must not open without /v1/me.",
+        "method": "source",
+        "result": "writeSession stores the bearer in localStorage and a non-HttpOnly SameSite=Lax cookie. That is readable by script on this origin only. unlock runs after confirmMe succeeds. No CSP meta is set. Storage alone is not a cross-origin finding.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": [
+      "The bearer is in localStorage and in sgi_session without HttpOnly. Any script that reaches this origin, including the Analyze sink, can read it. There is no server revoke route."
+    ]
+  },
+  {
+    "coverage_id": "js%2Fswarm-feed.js%23renderAlertHtml::app.js%23esc::js::CLIENT-SIDE.md%23DOM-based%20XSS",
+    "canonical_refs": {
+      "surface": "js/swarm-feed.js#renderAlertHtml",
+      "boundary": "app.js#esc",
+      "subsystem": "js",
+      "attack_class": "CLIENT-SIDE.md#DOM-based XSS"
+    },
+    "surface": "Swarm feed, threat drawer, support, Paste Guard",
+    "boundary": "Remote and pasted text must be encoded or textContent",
+    "subsystem": "Browser secondary views",
+    "attack_class": "DOM XSS in other sinks",
+    "starting_paths": [
+      "js/swarm-feed.js",
+      "app.js",
+      "js/support-chat.js",
+      "js/hive.js",
+      "js/study.js"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection",
+    "selected_companion_blocks": [
+      "CLIENT-SIDE.md#Core discipline",
+      "CLIENT-SIDE.md#DOM-based XSS",
+      "CLIENT-SIDE.md#Universal moves",
+      "CLIENT-SIDE.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      },
+      {
+        "block": "CLIENT-SIDE.md#postMessage origin and source trust",
+        "reason": "No postMessage handler exists in the repository."
+      },
+      {
+        "block": "CLIENT-SIDE.md#Service-worker registration and scope takeover",
+        "reason": "No service worker is registered."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-client",
+    "reviewed_paths": [
+      "js/swarm-feed.js",
+      "app.js",
+      "js/support-chat.js",
+      "js/hive.js",
+      "js/study.js"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-client",
+        "reviewed_paths": [
+          "js/swarm-feed.js",
+          "app.js",
+          "js/support-chat.js",
+          "js/hive.js",
+          "js/study.js"
+        ],
+        "invariant": "Other HTML sinks must not execute lower-trust text.",
+        "method": "source",
+        "result": "renderAlertHtml and the threat drawer use esc() and https-only links. Support bubbles use textContent and allow only the fixed sponsors href. paintScan escapes Paste Guard, Agent Guard, and Config Auditor fields. Hive and study strings are constants in this repo.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": [
+      "Hive detail and study drawer use innerHTML on first-party constants. Encode them if those tables become data."
+    ]
+  },
+  {
+    "coverage_id": "tools%2Fart%2Fmake_sgi_map_v3.py::MEMORY-SAFETY-AND-BINARY.md%23Core%20discipline::tools%2Fart::MEMORY-SAFETY-AND-BINARY.md%23Bounds%2C%20integer%2C%20and%20representation%20attack%20classes",
+    "canonical_refs": {
+      "surface": "tools/art/make_sgi_map_v3.py",
+      "boundary": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+      "subsystem": "tools/art",
+      "attack_class": "MEMORY-SAFETY-AND-BINARY.md#Bounds, integer, and representation attack classes"
+    },
+    "surface": "Native and binary code",
+    "boundary": "No memory-unsafe surface",
+    "subsystem": "repository",
+    "attack_class": "Memory safety",
+    "starting_paths": [
+      "tools/art/make_sgi_map_v3.py"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "not_applicable",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "The only non-JS program is an offline image generator. It is not a trust boundary for user content."
+    ],
+    "hardening_notes": []
+  },
+  {
+    "coverage_id": "worker%2Fpackage.json%23dependencies::worker%2Fsrc%2Findex.ts%23imports::worker::SUPPLY-CHAIN-AND-RELEASE.md%23Dependency%20and%20build-input%20attack%20classes",
+    "canonical_refs": {
+      "surface": "worker/package.json#dependencies",
+      "boundary": "worker/src/index.ts#imports",
+      "subsystem": "worker",
+      "attack_class": "SUPPLY-CHAIN-AND-RELEASE.md#Dependency and build-input attack classes"
+    },
+    "surface": "Worker dependency declarations",
+    "boundary": "Declared packages are invoked only from worker/src",
+    "subsystem": "worker supply chain",
+    "attack_class": "Dependency and build input",
+    "starting_paths": [
+      "worker/package.json",
+      "worker/package-lock.json",
+      "worker/src/index.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Obvious things",
+    "selected_companion_blocks": [
+      "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Dependency and build-input attack classes",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Universal moves",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      },
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#CI and automation attack classes",
+        "reason": "No CI workflow is present in this repository."
+      },
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#Release and update attack classes",
+        "reason": "This run does not publish, sign, or deploy. wrangler deploy is documented and was not executed."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-edge",
+    "reviewed_paths": [
+      "worker/package.json",
+      "worker/src/index.ts",
+      "worker/src/support/agent.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-edge",
+        "reviewed_paths": [
+          "worker/package.json",
+          "worker/src/index.ts",
+          "worker/src/support/agent.ts"
+        ],
+        "invariant": "A dependency is a finding only if worker source invokes a vulnerable path.",
+        "method": "source",
+        "result": "worker/src imports agents, @cloudflare/ai-chat, and ai. It does not import @modelcontextprotocol/client. No CVE was assigned from the lockfile without a registry lookup, which this run did not perform.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": [
+      "@modelcontextprotocol/client is a direct dependency and is not called from worker/src. The package body was not installed."
+    ]
+  },
+  {
+    "coverage_id": "worker%2Fsrc%2Fcors.ts%23applyCors::worker%2Fsrc%2Fcors.ts%23ALLOWED_ORIGINS::worker::WEB-PROTOCOL-AND-AUTH.md%23HTTP%20framing%20and%20cache%20attack%20classes",
+    "canonical_refs": {
+      "surface": "worker/src/cors.ts#applyCors",
+      "boundary": "worker/src/cors.ts#ALLOWED_ORIGINS",
+      "subsystem": "worker",
+      "attack_class": "WEB-PROTOCOL-AND-AUTH.md#HTTP framing and cache attack classes"
+    },
+    "surface": "Credentialed CORS",
+    "boundary": "Origin echo only for the allowlist",
+    "subsystem": "sgi-api HTTP",
+    "attack_class": "CORS origin reflection",
+    "starting_paths": [
+      "worker/src/cors.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+      "WEB-PROTOCOL-AND-AUTH.md#HTTP framing and cache attack classes",
+      "CLIENT-SIDE.md#Credentialed CORS trust",
+      "WEB-PROTOCOL-AND-AUTH.md#Universal moves",
+      "WEB-PROTOCOL-AND-AUTH.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-api",
+    "reviewed_paths": [
+      "worker/src/cors.ts",
+      "worker/src/index.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-api",
+        "reviewed_paths": [
+          "worker/src/cors.ts",
+          "worker/src/index.ts"
+        ],
+        "invariant": "Credentialed responses must not reflect an arbitrary Origin.",
+        "method": "source",
+        "result": "Six origins are an exact Set. Other origins get no allow-origin header, and preflight returns 403. The session is a bearer header, not a cookie sent to the API origin.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": []
+  },
+  {
+    "coverage_id": "worker%2Fsrc%2Findex.ts%23POST%20%2Fv1%2Fanalyze::worker%2Fsrc%2Fanalyze%2Fhandler.ts%23handleAnalyze::worker::DATA-ISOLATION-AND-LIFECYCLE.md%23Tenant%20and%20object-isolation%20attack%20classes",
+    "canonical_refs": {
+      "surface": "worker/src/index.ts#POST /v1/analyze",
+      "boundary": "worker/src/analyze/handler.ts#handleAnalyze",
+      "subsystem": "worker",
+      "attack_class": "DATA-ISOLATION-AND-LIFECYCLE.md#Tenant and object-isolation attack classes"
+    },
+    "surface": "Authenticated analyze",
+    "boundary": "Cache returns findings for the submitted text",
+    "subsystem": "sgi-api analyze",
+    "attack_class": "Tenant isolation of analyze cache",
+    "starting_paths": [
+      "worker/src/analyze/handler.ts",
+      "worker/migrations/0001_init.sql"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Tenant and object-isolation attack classes",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-api",
+    "reviewed_paths": [
+      "worker/src/analyze/handler.ts",
+      "worker/src/index.ts",
+      "worker/migrations/0001_init.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-api",
+        "reviewed_paths": [
+          "worker/src/analyze/handler.ts",
+          "worker/src/index.ts",
+          "worker/migrations/0001_init.sql"
+        ],
+        "invariant": "A caller cannot read findings for text they did not submit.",
+        "method": "source",
+        "result": "The route is behind requireSession. The cache key is SHA-256 of mode, device type, and the caller text. Stored JSON is server-side runOffline output. ON CONFLICT DO NOTHING keeps the first writer. Quota is consumed before the lookup.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": []
+  },
+  {
+    "coverage_id": "worker%2Fsrc%2Findex.ts%23POST%20%2Fv1%2Fauth%2Fdevice::worker%2Fsrc%2Fauth%2Fsession.ts%23createAnonymousDevice::worker::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "worker/src/index.ts#POST /v1/auth/device",
+      "boundary": "worker/src/auth/session.ts#createAnonymousDevice",
+      "subsystem": "worker",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "Anonymous device sign-in",
+    "boundary": "One trial per new device id",
+    "subsystem": "sgi-api auth",
+    "attack_class": "Access control on device mint",
+    "starting_paths": [
+      "worker/src/index.ts",
+      "worker/src/auth/session.ts",
+      "worker/src/catalog.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+      "WEB-PROTOCOL-AND-AUTH.md#Universal moves",
+      "WEB-PROTOCOL-AND-AUTH.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      },
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#MFA, passkey, and account-transition attack classes",
+        "reason": "No MFA, passkey, or account-recovery flow is implemented."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-api",
+    "reviewed_paths": [
+      "worker/src/index.ts",
+      "worker/src/auth/session.ts",
+      "worker/migrations/0001_init.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-api",
+        "reviewed_paths": [
+          "worker/src/index.ts",
+          "worker/src/auth/session.ts",
+          "worker/migrations/0001_init.sql"
+        ],
+        "invariant": "Repeating a device id must not mint another session, and the bearer must be stored only as a hash.",
+        "method": "source",
+        "result": "createAnonymousDevice inserts one user, device, free row, trial row, and session. A duplicate device id returns 409. Only the SHA-256 of the bearer is stored. A brand-new UUID receives its own trial by design. There is no app-level rate limit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": [
+      "A new device UUID receives a 3-day trial and its own analyze window. Attest devices before treating that cap as a cap on one person."
+    ]
+  },
+  {
+    "coverage_id": "worker%2Fsrc%2Findex.ts%23POST%20%2Fv1%2Fauth%2Fgoogle::worker%2Fsrc%2Fauth%2Fgoogle-token.ts%23verifyGoogleIdToken::worker::WEB-PROTOCOL-AND-AUTH.md%23Federated-identity%20attack%20classes",
+    "canonical_refs": {
+      "surface": "worker/src/index.ts#POST /v1/auth/google",
+      "boundary": "worker/src/auth/google-token.ts#verifyGoogleIdToken",
+      "subsystem": "worker",
+      "attack_class": "WEB-PROTOCOL-AND-AUTH.md#Federated-identity attack classes"
+    },
+    "surface": "Google sign-in",
+    "boundary": "RS256 ID token bound to this client",
+    "subsystem": "sgi-api auth",
+    "attack_class": "Federated identity verification",
+    "starting_paths": [
+      "worker/src/auth/google-token.ts",
+      "worker/src/auth/providers.ts",
+      "worker/src/auth/session.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+      "WEB-PROTOCOL-AND-AUTH.md#Federated-identity attack classes",
+      "WEB-PROTOCOL-AND-AUTH.md#Universal moves",
+      "WEB-PROTOCOL-AND-AUTH.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-api",
+    "reviewed_paths": [
+      "worker/src/auth/google-token.ts",
+      "worker/src/auth/providers.ts",
+      "worker/src/auth/session.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-api",
+        "reviewed_paths": [
+          "worker/src/auth/google-token.ts",
+          "worker/src/auth/providers.ts",
+          "worker/src/auth/session.ts"
+        ],
+        "invariant": "A Google session is minted only after a local RS256 check, and a device cannot be taken from another user.",
+        "method": "source",
+        "result": "Verification requires alg RS256, a fixed JWKS URL with redirect error, iss, aud or azp, sub, iat, and exp. A foreign device id returns 409. The raw token is not stored. Apple remains a 501 stub.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": []
+  },
+  {
+    "coverage_id": "worker%2Fsrc%2Findex.ts%23POST%20%2Fv1%2Fbreach%2Fcheck::worker%2Fsrc%2Fbreach%2Fstubs.ts%23handleBreachStub::worker::ATTACK-CLASSES.md%23Resource%20and%20file%20handling",
+    "canonical_refs": {
+      "surface": "worker/src/index.ts#POST /v1/breach/check",
+      "boundary": "worker/src/breach/stubs.ts#handleBreachStub",
+      "subsystem": "worker",
+      "attack_class": "ATTACK-CLASSES.md#Resource and file handling"
+    },
+    "surface": "Breach and external scan stubs",
+    "boundary": "No lookup or scanner runs",
+    "subsystem": "sgi-api stubs",
+    "attack_class": "Access control of placeholder scans",
+    "starting_paths": [
+      "worker/src/breach/stubs.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Resource and file handling",
+    "selected_companion_blocks": [
+      "CLOUD-AND-DEPLOYMENT.md#Core discipline"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-api",
+    "reviewed_paths": [
+      "worker/src/breach/stubs.ts",
+      "worker/src/index.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-api",
+        "reviewed_paths": [
+          "worker/src/breach/stubs.ts",
+          "worker/src/index.ts"
+        ],
+        "invariant": "Breach and external scan routes must not perform a lookup.",
+        "method": "source",
+        "result": "handleBreachStub cancels the body and returns 501 not_implemented. The response does not echo the submitted domain.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": []
+  },
+  {
+    "coverage_id": "worker%2Fsrc%2Findex.ts%23POST%20%2Fv1%2Fredeem%2Fcodes::worker%2Fsrc%2Fredeem%2Fhandler.ts%23handleRedeemCode::worker::ATTACK-CLASSES.md%23Feature%20abuse%20and%20data%20leakage",
+    "canonical_refs": {
+      "surface": "worker/src/index.ts#POST /v1/redeem/codes",
+      "boundary": "worker/src/redeem/handler.ts#handleRedeemCode",
+      "subsystem": "worker",
+      "attack_class": "ATTACK-CLASSES.md#Feature abuse and data leakage"
+    },
+    "surface": "Redeem code claim",
+    "boundary": "Failure responses must not distinguish code state for a guess",
+    "subsystem": "sgi-api redeem",
+    "attack_class": "Feature abuse of redeem errors",
+    "starting_paths": [
+      "worker/src/redeem/handler.ts",
+      "worker/migrations/0001_init.sql"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Feature abuse and data leakage",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-api",
+    "reviewed_paths": [
+      "worker/src/redeem/handler.ts",
+      "worker/src/index.ts",
+      "worker/migrations/0001_init.sql",
+      "worker/wrangler.jsonc"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-api",
+        "reviewed_paths": [
+          "worker/src/redeem/handler.ts",
+          "worker/src/index.ts",
+          "worker/migrations/0001_init.sql",
+          "worker/wrangler.jsonc"
+        ],
+        "invariant": "A failed redeem must not tell a guesser whether a code exists, expired, or is exhausted.",
+        "method": "source",
+        "result": "After a zero-change UPDATE the handler returns 404 code_unknown, 409 code_expired, 409 code_exhausted, or 409 code_unavailable. Any anonymous bearer can call it. No attempt counter is in source. Stored code entropy is not in the migration.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "worker.redeem.code-state-oracle"
+    ],
+    "unresolved": [],
+    "hardening_notes": [
+      "The use_count UPDATE commits before the redemption batch. A code with max_uses greater than 1 can lose uses without a matching number of grants. The migration seeds no multi-use row."
+    ]
+  },
+  {
+    "coverage_id": "worker%2Fsrc%2Findex.ts%23POST%20%2Fv1%2Fsupport%2Fchat::worker%2Fsrc%2Fsupport%2Ffaq.ts%23supportLlmEnabled::worker::AI-AND-LLM.md%23Output%20and%20disclosure%20attack%20classes",
+    "canonical_refs": {
+      "surface": "worker/src/index.ts#POST /v1/support/chat",
+      "boundary": "worker/src/support/faq.ts#supportLlmEnabled",
+      "subsystem": "worker",
+      "attack_class": "AI-AND-LLM.md#Output and disclosure attack classes"
+    },
+    "surface": "Support chat and agent route",
+    "boundary": "Model calls stay off unless the flag and binding exist",
+    "subsystem": "sgi-api support",
+    "attack_class": "Model output and spend",
+    "starting_paths": [
+      "worker/src/support/http.ts",
+      "worker/src/support/agent.ts",
+      "worker/wrangler.jsonc"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Core discipline",
+      "AI-AND-LLM.md#Output and disclosure attack classes",
+      "AI-AND-LLM.md#Universal moves",
+      "AI-AND-LLM.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      },
+      {
+        "block": "AI-AND-LLM.md#MCP and sub-agent trust classes",
+        "reason": "worker/src never imports or calls @modelcontextprotocol/client. The support agent does not dispatch MCP tools."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-api",
+    "reviewed_paths": [
+      "worker/src/index.ts",
+      "worker/src/support/http.ts",
+      "worker/src/support/agent.ts",
+      "worker/src/support/faq.ts",
+      "worker/wrangler.jsonc"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-api",
+        "reviewed_paths": [
+          "worker/src/index.ts",
+          "worker/src/support/http.ts",
+          "worker/src/support/agent.ts",
+          "worker/src/support/faq.ts",
+          "worker/wrangler.jsonc"
+        ],
+        "invariant": "Public support may answer from the FAQ, and Workers AI runs only when ENABLE_SUPPORT_LLM is 1 and AI is bound.",
+        "method": "source",
+        "result": "Both handlers stay on the FAQ pack when the flag is not 1, the text looks like a secret, or env.AI is missing. wrangler.jsonc sets the flag to 0 and declares no ai binding. The browser widget renders replies with textContent.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": [
+      "Before setting ENABLE_SUPPORT_LLM to 1, require a caller bound and a quota on POST /v1/support/chat and on /agents/."
+    ]
+  },
+  {
+    "coverage_id": "worker%2Fsrc%2Findex.ts%23POST%20%2Fv1%2Fwebhooks%2Frevenuecat::worker%2Fsrc%2Fwebhooks%2Frevenuecat.ts%23revenueCatAuthorized::worker::ATTACK-CLASSES.md%23Cryptography%20and%20secrets",
+    "canonical_refs": {
+      "surface": "worker/src/index.ts#POST /v1/webhooks/revenuecat",
+      "boundary": "worker/src/webhooks/revenuecat.ts#revenueCatAuthorized",
+      "subsystem": "worker",
+      "attack_class": "ATTACK-CLASSES.md#Cryptography and secrets"
+    },
+    "surface": "RevenueCat webhook",
+    "boundary": "Secret or HMAC before entitlement write",
+    "subsystem": "sgi-api billing",
+    "attack_class": "Webhook authentication",
+    "starting_paths": [
+      "worker/src/webhooks/revenuecat.ts",
+      "worker/src/crypto.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Cryptography and secrets",
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+      "WEB-PROTOCOL-AND-AUTH.md#API-key and mTLS attack classes",
+      "WEB-PROTOCOL-AND-AUTH.md#Universal moves",
+      "WEB-PROTOCOL-AND-AUTH.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-api",
+    "reviewed_paths": [
+      "worker/src/webhooks/revenuecat.ts",
+      "worker/src/crypto.ts",
+      "worker/src/catalog.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-api",
+        "reviewed_paths": [
+          "worker/src/webhooks/revenuecat.ts",
+          "worker/src/crypto.ts",
+          "worker/src/catalog.ts"
+        ],
+        "invariant": "Entitlement grants require the webhook secret and an internal user UUID.",
+        "method": "source",
+        "result": "An empty secret returns 503. Authorization or HMAC is compared with SHA-256 and timingSafeEqual. app_user_id must be a UUID of an existing user. Tier and price come from the catalog. A duplicate applied event does not grant again.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": [
+      "EXPIRATION and BILLING_ISSUE mark the event applied even when zero entitlement rows change, so a later retry of that event id is ignored."
+    ]
+  },
+  {
+    "coverage_id": "worker%2Fsrc%2Findex.ts%23PUT%20%2Fv1%2Fswarm-pass::worker%2Fsrc%2Fswarm%2Fpass.ts%23handlePutPass::worker::ATTACK-CLASSES.md%23Business%20logic",
+    "canonical_refs": {
+      "surface": "worker/src/index.ts#PUT /v1/swarm-pass",
+      "boundary": "worker/src/swarm/pass.ts#handlePutPass",
+      "subsystem": "worker",
+      "attack_class": "ATTACK-CLASSES.md#Business logic"
+    },
+    "surface": "Swarm pass sync",
+    "boundary": "Snapshot writes stay on the session user",
+    "subsystem": "sgi-api swarm pass",
+    "attack_class": "Business logic of client credits",
+    "starting_paths": [
+      "worker/src/swarm/pass.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-api",
+    "reviewed_paths": [
+      "worker/src/swarm/pass.ts",
+      "js/swarm-pass.js"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-api",
+        "reviewed_paths": [
+          "worker/src/swarm/pass.ts",
+          "js/swarm-pass.js"
+        ],
+        "invariant": "A session cannot write another user's snapshot, and client credits are not a wallet.",
+        "method": "source",
+        "result": "PUT requires a session. Credits, badges, and days are range-checked. The upsert updates only when user_id matches. authoritative is false. Gift-card redeem is a 501 stub with no transfer.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "hardening_notes": []
+  },
+  {
+    "coverage_id": "worker%2Fwrangler.jsonc%23d1_databases::worker%2Fwrangler.jsonc%23database_id::worker::CLOUD-AND-DEPLOYMENT.md%23Managed%20storage%2C%20events%2C%20and%20edge%20attack%20classes",
+    "canonical_refs": {
+      "surface": "worker/wrangler.jsonc#d1_databases",
+      "boundary": "worker/wrangler.jsonc#database_id",
+      "subsystem": "worker",
+      "attack_class": "CLOUD-AND-DEPLOYMENT.md#Managed storage, events, and edge attack classes"
+    },
+    "surface": "Live sgi-api and remote D1",
+    "boundary": "No production probe",
+    "subsystem": "sgi-api deploy",
+    "attack_class": "Out of scope live access",
+    "starting_paths": [
+      "worker/wrangler.jsonc"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native, unsafe, or binary parser code is in this repository. tools/art/make_sgi_map_v3.py only writes images."
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "No native app, deep link, webview bridge, or local IPC surface is in this repository."
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "out_of_scope",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "Calling sgi-api, reading its secrets, or querying remote D1 was excluded by the audit request. Source references in this repo were reviewed. No live request was sent."
+    ],
+    "hardening_notes": []
+  }
+]
