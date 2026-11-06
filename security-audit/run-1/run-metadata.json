@@ -1,0 +1,63 @@
+{
+  "run_id": "sgi-security-network-run-1",
+  "repo": "StarSwarm-Security/SGI-Security-Network",
+  "target": "/agent/repos/SGI-Security-Network",
+  "source_ref": {
+    "commit": "0a55100e821ce45c820aedbd32448722b4c7a377",
+    "branch_reviewed": "main",
+    "dirty": false,
+    "note": "Audit files were added after this commit on cursor/security-audit-run-1-4ade. The reviewed product source is that commit."
+  },
+  "profile": "standard",
+  "scope_paths": [
+    "index.html",
+    "app.js",
+    "js",
+    "edge",
+    "worker/src",
+    "worker/migrations",
+    "worker/wrangler.jsonc",
+    "worker/package.json",
+    "data",
+    "_redirects"
+  ],
+  "budget": null,
+  "execution_policy": "sandboxed-source-and-local-only",
+  "selected_companion_files": [
+    "AI-AND-LLM.md",
+    "CLOUD-AND-DEPLOYMENT.md",
+    "CLIENT-SIDE.md",
+    "WEB-PROTOCOL-AND-AUTH.md",
+    "SUPPLY-CHAIN-AND-RELEASE.md",
+    "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md",
+    "DATA-ISOLATION-AND-LIFECYCLE.md"
+  ],
+  "skipped_companion_files": [
+    "MEMORY-SAFETY-AND-BINARY.md",
+    "DESKTOP-MOBILE-AND-LOCAL-IPC.md"
+  ],
+  "prior_run_paths": [],
+  "prior_run_note": "No compatible prior coverage-ledger.json or findings.json was present.",
+  "shared_file_owners": {
+    "run-metadata.json": "parent",
+    "architecture.md": "parent",
+    "coverage-ledger.json": "parent",
+    "findings.json": "parent",
+    "REPORT.md": "parent",
+    "FINDINGS-DETAIL.md": "parent",
+    "NEEDS-VALIDATION.md": "parent"
+  },
+  "output_directory_note": "The operator required security-audit/run-1 inside the repository and a draft pull request. The skill default is an external or gitignored directory. That override is recorded here. Validators were run from the cloned skill and were not copied into the repository.",
+  "agents": {
+    "reconnaissance": ["agent-1a", "agent-1b", "agent-1c", "agent-1d"],
+    "hunters": ["hunter-client", "hunter-api", "hunter-edge"],
+    "critics": ["post-wave-critic", "final-clean-critic"],
+    "verifiers": ["verifier-analyze", "verifier-redeem", "phase5-analyze", "phase5-redeem"]
+  },
+  "local_execution": {
+    "analyze_render": "Node import of js/analyzers.js plus headless Chrome on a file page. unshare -Urn was used for the first Node import. Chrome was not given a production URL.",
+    "worker_tests": "Not run. worker/node_modules is absent and npm install was not performed.",
+    "production": "No request was sent to pages.dev, workers.dev, Google, OSV, GitHub, RevenueCat, or D1."
+  },
+  "run_status": "complete"
+}
