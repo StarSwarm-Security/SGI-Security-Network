@@ -1,0 +1,14 @@
+{
+  "tools": [
+    {
+      "name": "lab_status",
+      "description": "Returns whether the Thursday lab notes are ready.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "topic": { "type": "string", "description": "Lab topic name" }
+        }
+      }
+    }
+  ]
+}

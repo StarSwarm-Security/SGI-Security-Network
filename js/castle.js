@@ -19,6 +19,10 @@ export function mountCastle(root, { onWing } = {}) {
       <div class="castle-chrome">
         <h2 class="hero-title">StarSwarm Agentic Intelligence</h2>
         <p class="lede castle-lede">Tap a label to open that deck. Dog spotlight still follows you.</p>
+        <div class="castle-tools">
+          <button type="button" class="chip" data-go="analyze" data-mode="injection">Injection scan</button>
+          <button type="button" class="chip" data-go="analyze" data-mode="mcppoison">MCP poison</button>
+        </div>
       </div>
       <div class="castle-stage" id="castle-stage">
         <div class="castle-map" id="castle-map" role="img" aria-label="StarSwarm Agentic Intelligence interactive map">
@@ -38,6 +42,12 @@ export function mountCastle(root, { onWing } = {}) {
           <button type="button" class="castle-li" data-go="${w.id}">
             <b>${w.name}</b><span>${w.sub}</span>
           </button>`).join('')}
+          <button type="button" class="castle-li" data-go="analyze" data-mode="injection">
+            <b>Injection scan</b><span>Prompt injection, on this device</span>
+          </button>
+          <button type="button" class="castle-li" data-go="analyze" data-mode="mcppoison">
+            <b>MCP poison</b><span>Servers, tools, and skills</span>
+          </button>
       </div>
       <p class="fine castle-fine">Interactive map · clickable labels · list fallback on small screens. No trackers.</p>
     </div>`;
@@ -46,7 +56,7 @@ export function mountCastle(root, { onWing } = {}) {
     const id = el.getAttribute('data-go');
     if (id && onWing) onWing(id, el);
   };
-  root.querySelectorAll('.castle-hot, .castle-li').forEach(el => {
+  root.querySelectorAll('.castle-hot, .castle-li, .castle-tools button').forEach(el => {
     el.addEventListener('click', () => open(el));
     el.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {

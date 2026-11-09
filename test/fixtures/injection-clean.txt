@@ -1,0 +1,4 @@
+Meeting notes for Thursday.
+
+Ship the lab write-up. The docs live on the internal wiki.
+No commands and no links.
