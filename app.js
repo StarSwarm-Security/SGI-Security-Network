@@ -12,6 +12,9 @@ import { mountCastle, WINGS } from './js/castle.js';
 import { scanPaste, samplePaste } from './js/paste-guard.js';
 import { scanAgent, sampleAgent } from './js/agent-guard.js';
 import { scanConfig, sampleConfig, toolListFingerprint } from './js/agent-audit.js';
+import { sampleInjection, scanInjection } from './js/injection-scan.js';
+import { samplePoison, scanPoison } from './js/mcp-poison.js';
+import { bindCleanedCopy, renderInjectionReport, renderPoisonReport } from './js/scan-render.js';
 
 const $ = id => document.getElementById(id);
 const tabs = [...document.querySelectorAll('.tabs [role="tab"]')];
@@ -25,9 +28,17 @@ function setMoreOpen(open) {
   moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
 }
 
+function tabIsOn(t, activeId) {
+  if (t.dataset.tab !== activeId) return false;
+  const mode = t.dataset.mode || '';
+  if (activeId !== 'analyze') return mode === '';
+  if (mode === 'injection' || mode === 'mcppoison') return mode === analyzeMode;
+  return analyzeMode !== 'injection' && analyzeMode !== 'mcppoison';
+}
+
 function syncTabChrome(activeId) {
   tabs.forEach(t => {
-    const on = t.dataset.tab === activeId;
+    const on = tabIsOn(t, activeId);
     t.classList.toggle('on', on);
     t.setAttribute('aria-selected', on ? 'true' : 'false');
   });
@@ -50,7 +61,11 @@ function parkPanel(el) {
 
 function ensureCastle() {
   if (!castleCtl && $('castle-root')) {
-    castleCtl = mountCastle($('castle-root'), { onWing: (wid) => openWing(wid) });
+    castleCtl = mountCastle($('castle-root'), { onWing: (wid, el) => {
+      const mode = el && el.getAttribute('data-mode');
+      if (wid === 'analyze') analyzeMode = mode || 'cisco';
+      openWing(wid);
+    } });
   }
   return castleCtl;
 }
@@ -71,7 +86,7 @@ function openWing(id) {
   if (panels.home) panels.home.hidden = false;
   wingOverlay().hidden = false;
   document.body.classList.add('wing-open');
-  $('wing-title').textContent = WING_TITLE[id] || id;
+  $('wing-title').textContent = wingTitle(id);
   syncTabChrome(id);
   setMoreOpen(false);
   let hashName = id;
@@ -141,8 +156,15 @@ function show(id) {
 }
 
 
-tabs.forEach(t => t.addEventListener('click', () => { setMoreOpen(false); show(t.dataset.tab); }));
-document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
+tabs.forEach(t => t.addEventListener('click', () => {
+  setMoreOpen(false);
+  if (t.dataset.tab === 'analyze') analyzeMode = t.dataset.mode || 'cisco';
+  show(t.dataset.tab);
+}));
+document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => {
+  if (b.dataset.go === 'analyze') analyzeMode = b.dataset.mode || 'cisco';
+  show(b.dataset.go);
+}));
 
 if (moreBtn && moreMenu) {
   moreBtn.addEventListener('click', e => {
@@ -176,16 +198,43 @@ $('run-analyze').onclick = () => {
   out.innerHTML = renderCiscoAnalyze(res, SPECIALISTS.length);
 };
 
-/* Analyze modes: Cisco | Paste Guard | Agent Guard | Config Auditor */
-const ANALYZE_MODES = ['cisco', 'pasteguard', 'agentguard', 'configaudit'];
+/* Analyze modes: Cisco | Paste Guard | Agent Guard | Config Auditor | Injection | MCP poison */
+const ANALYZE_MODES = ['cisco', 'pasteguard', 'agentguard', 'configaudit', 'injection', 'mcppoison'];
+const MODE_HASH = {
+  cisco: 'analyze',
+  pasteguard: 'pasteguard',
+  agentguard: 'agentguard',
+  configaudit: 'configaudit',
+  injection: 'injection',
+  mcppoison: 'mcp-poison',
+};
 let analyzeMode = 'cisco';
+function wingTitle(id) {
+  if (id === 'analyze' && analyzeMode === 'injection') return 'Signal Keep · Injection scan';
+  if (id === 'analyze' && analyzeMode === 'mcppoison') return 'Signal Keep · MCP poison';
+  return WING_TITLE[id] || id;
+}
 function setAnalyzeMode(mode) {
   analyzeMode = ANALYZE_MODES.includes(mode) ? mode : 'cisco';
   document.querySelectorAll('#analyze-modes [data-mode]').forEach(c => c.classList.toggle('on', c.dataset.mode === analyzeMode));
-  const desks = { cisco: 'cisco-desk', pasteguard: 'pg-desk', agentguard: 'ag-desk', configaudit: 'ca-desk' };
+  const desks = {
+    cisco: 'cisco-desk',
+    pasteguard: 'pg-desk',
+    agentguard: 'ag-desk',
+    configaudit: 'ca-desk',
+    injection: 'inj-desk',
+    mcppoison: 'mp-desk',
+  };
   for (const [name, id] of Object.entries(desks)) {
     const el = $(id);
     if (el) el.hidden = analyzeMode !== name;
+  }
+  const panel = $('tab-analyze');
+  if (panel && !panel.hidden && document.body.classList.contains('wing-open')) {
+    const title = $('wing-title');
+    if (title) title.textContent = wingTitle('analyze');
+    history.replaceState(null, '', '#' + (MODE_HASH[analyzeMode] || 'analyze'));
+    syncTabChrome('analyze');
   }
 }
 document.querySelectorAll('#analyze-modes [data-mode]').forEach(c => {
@@ -258,6 +307,104 @@ $('run-ca').onclick = () => runConfigAudit();
     if ($('ca-type')) $('ca-type').value = 'auto';
     runConfigAudit();
   };
+});
+
+const LOCAL_EXT = /\.(txt|md|markdown|html|htm|json)$/i;
+const LOCAL_MAX = 400000;
+function readLocalText(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      reject(new Error('Choose a file.'));
+      return;
+    }
+    const typeOk = /^(text\/|application\/json)/i.test(file.type || '');
+    if (!LOCAL_EXT.test(file.name || '') && !typeOk) {
+      reject(new Error('This desk only reads .txt, .md, .html, and .json files.'));
+      return;
+    }
+    if (file.size > LOCAL_MAX) {
+      reject(new Error('That file is over 400 KB. Paste a smaller excerpt.'));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('The file could not be read on this device.'));
+    reader.readAsText(file);
+  });
+}
+function wireDrop(zoneId, inputId, noteId, onText) {
+  const zone = $(zoneId);
+  const input = $(inputId);
+  const note = $(noteId);
+  if (!input) return;
+  const take = (file) => {
+    readLocalText(file).then((text) => {
+      if (note) note.textContent = `Loaded ${file.name} on this device.`;
+      onText(text);
+    }).catch((err) => {
+      if (note) note.textContent = err.message || 'The file could not be read.';
+    });
+  };
+  input.addEventListener('change', () => {
+    const file = input.files && input.files[0];
+    if (file) take(file);
+    input.value = '';
+  });
+  if (!zone) return;
+  ['dragover', 'dragenter'].forEach((type) => {
+    zone.addEventListener(type, (event) => {
+      event.preventDefault();
+      zone.classList.add('drag');
+    });
+  });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', (event) => {
+    event.preventDefault();
+    zone.classList.remove('drag');
+    const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+    if (file) take(file);
+  });
+}
+
+function runInjection() {
+  const out = $('inj-out');
+  if (!out) return;
+  out.innerHTML = renderInjectionReport(scanInjection($('inj-paste').value));
+  bindCleanedCopy(out);
+}
+const runInj = $('run-inj');
+if (runInj) runInj.onclick = () => runInjection();
+['inj-sample-safe', 'inj-sample-bad'].forEach((id) => {
+  const el = $(id);
+  if (!el) return;
+  el.onclick = () => {
+    $('inj-paste').value = sampleInjection(el.dataset.inj);
+    runInjection();
+  };
+});
+wireDrop('inj-drop', 'inj-file', 'inj-file-note', (text) => {
+  $('inj-paste').value = text;
+  runInjection();
+});
+
+function runPoison() {
+  const out = $('mp-out');
+  if (!out) return;
+  out.innerHTML = renderPoisonReport(scanPoison($('mp-paste').value));
+}
+const runMp = $('run-mp');
+if (runMp) runMp.onclick = () => runPoison();
+['mp-sample-clean', 'mp-sample-bad', 'mp-sample-tools', 'mp-sample-skill'].forEach((id) => {
+  const el = $(id);
+  if (!el) return;
+  el.onclick = () => {
+    $('mp-paste').value = samplePoison(el.dataset.mp);
+    runPoison();
+  };
+});
+wireDrop('mp-drop', 'mp-file', 'mp-file-note', (text) => {
+  $('mp-paste').value = text;
+  runPoison();
 });
 
 const FP_KEY = 'sgi.mcp.fingerprint.v1';
@@ -534,6 +681,14 @@ export function bootSgi() {
   }
   if (start === 'configaudit' || start === 'config-auditor' || start === 'auditor') {
     analyzeMode = 'configaudit';
+    start = 'analyze';
+  }
+  if (start === 'injection' || start === 'prompt-injection' || start === 'injection-scan') {
+    analyzeMode = 'injection';
+    start = 'analyze';
+  }
+  if (start === 'mcp-poison' || start === 'mcppoison' || start === 'mcp-poison-check') {
+    analyzeMode = 'mcppoison';
     start = 'analyze';
   }
   if (start === 'alerts' || start === 'swarm-feed') {

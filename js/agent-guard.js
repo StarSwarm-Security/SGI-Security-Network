@@ -38,6 +38,11 @@ function invisibleName(cp) {
   return '';
 }
 
+export function invisibleLabel(ch) {
+  if (!ch) return '';
+  return invisibleName(ch.codePointAt(0));
+}
+
 function revealInvisible(text) {
   let cleaned = '';
   const positions = [];
@@ -57,7 +62,7 @@ function revealInvisible(text) {
   return { cleaned, positions, counts, count: positions.length };
 }
 
-function stripInvisible(text) {
+export function stripInvisible(text) {
   let out = '';
   for (const ch of text) {
     if (!invisibleName(ch.codePointAt(0))) out += ch;

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>StarSwarm Agentic Intelligence</title>
-<meta name="description" content="StarSwarm Agentic Intelligence: Interactive cover map — Analyze (Paste Guard, Agent Guard, Config Auditor), Threat Index, Hive, Honest Shield, Swarm Pass, Bounty, and Redeem.">
+<meta name="description" content="StarSwarm Agentic Intelligence: Interactive cover map — Analyze (Paste Guard, Agent Guard, Config Auditor, injection scan, MCP poison check), Threat Index, Hive, Honest Shield, Swarm Pass, Bounty, and Redeem.">
 <meta name="theme-color" content="#000000">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="StarSwarm Agentic Intelligence">
@@ -91,6 +91,8 @@
         <button type="button" class="more-btn" id="more-btn" aria-haspopup="true" aria-expanded="false" aria-controls="more-menu">More ▾</button>
         <div class="more-menu" id="more-menu" role="menu" hidden>
           <button role="tab" data-tab="analyze" aria-selected="false">Analyze</button>
+          <button role="tab" data-tab="analyze" data-mode="injection" aria-selected="false">Injection scan</button>
+          <button role="tab" data-tab="analyze" data-mode="mcppoison" aria-selected="false">MCP poison</button>
           <button role="tab" data-tab="threats" aria-selected="false">Threat Index</button>
           <button role="tab" data-tab="hive" aria-selected="false">Hive</button>
           <button role="tab" data-tab="swarm" aria-selected="false">Swarm Pass</button>
@@ -113,7 +115,7 @@
         <div class="art-cards">
           <button type="button" class="art-card" data-go="analyze">
             <picture><source srcset="assets/v2/glyphs/glyph-G03-delta-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G03-delta-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
-            <em>Detect</em><b>Signal Keep</b><span>Analyze and Paste Guard, offline.</span>
+            <em>Detect</em><b>Signal Keep</b><span>Paste Guard, injection scan, and MCP poison. On this device.</span>
           </button>
           <button type="button" class="art-card" data-go="threats">
             <picture><source srcset="assets/v2/glyphs/glyph-G02-crescent-256.webp" type="image/webp"><img src="assets/v2/glyphs/glyph-G02-crescent-256.png" width="112" height="112" alt="" loading="lazy" decoding="async"></picture>
@@ -154,6 +156,8 @@
           <button type="button" class="chip" data-mode="pasteguard">Paste Guard</button>
           <button type="button" class="chip" data-mode="agentguard">Agent Guard</button>
           <button type="button" class="chip" data-mode="configaudit">Config Auditor</button>
+          <button type="button" class="chip" data-mode="injection">Injection scan</button>
+          <button type="button" class="chip" data-mode="mcppoison">MCP poison</button>
           <button type="button" class="chip" id="study-open">Study cards</button>
         </div>
       </div>
@@ -227,6 +231,44 @@
           <div id="ca-fp-out" class="out"></div>
         </div>
         <p class="fine">Share tip: tell people the verdict and rule names only — never forward the raw config.</p>
+      </div>
+      <div id="inj-desk" hidden>
+        <h3 class="scan-title">Injection scan</h3>
+        <p class="lede">Paste text, a page’s HTML, Markdown, or a document. The check runs in this browser. Nothing you paste leaves this device. No upload, no tracker. Heuristic only.</p>
+        <label class="lbl" for="inj-paste">Text, HTML, Markdown, or document text</label>
+        <textarea id="inj-paste" rows="8" spellcheck="false" placeholder="Paste a page, a prompt, Markdown, or tool text…"></textarea>
+        <label class="scan-drop" id="inj-drop">
+          Drop a .txt, .md, .html, or .json file, or choose one. The file is read on this device.
+          <input id="inj-file" type="file" accept=".txt,.md,.html,.htm,.json,text/plain,text/markdown,text/html,application/json">
+        </label>
+        <p id="inj-file-note" class="fine" role="status"></p>
+        <div class="row">
+          <button type="button" class="chip" id="inj-sample-safe" data-inj="safe">Sample safe</button>
+          <button type="button" class="chip" id="inj-sample-bad" data-inj="dangerous">Sample malicious</button>
+          <button class="cta" id="run-inj" type="button">Scan offline</button>
+        </div>
+        <div id="inj-out" class="out" role="region" aria-live="polite" aria-label="Injection scan results"></div>
+        <p class="fine">Share the verdict and the rule names only. Do not forward the raw paste.</p>
+      </div>
+      <div id="mp-desk" hidden>
+        <h3 class="scan-title">MCP poison check</h3>
+        <p class="lede">Paste an MCP config (mcp.json, Claude desktop, or Cursor), a tools/list JSON, or a SKILL.md / rules file. The check runs in this browser. Nothing you paste leaves this device. No upload, no tracker. Heuristic only.</p>
+        <label class="lbl" for="mp-paste">MCP config, tool list, or skill</label>
+        <textarea id="mp-paste" rows="8" spellcheck="false" placeholder="Paste mcp.json, a tools/list payload, or SKILL.md…"></textarea>
+        <label class="scan-drop" id="mp-drop">
+          Drop a .txt, .md, .html, or .json file, or choose one. The file is read on this device.
+          <input id="mp-file" type="file" accept=".txt,.md,.html,.htm,.json,text/plain,text/markdown,text/html,application/json">
+        </label>
+        <p id="mp-file-note" class="fine" role="status"></p>
+        <div class="row">
+          <button type="button" class="chip" id="mp-sample-clean" data-mp="clean-config">Sample clean</button>
+          <button type="button" class="chip" id="mp-sample-bad" data-mp="bad-config">Sample poisoned config</button>
+          <button type="button" class="chip" id="mp-sample-tools" data-mp="bad-tools">Sample poisoned tools</button>
+          <button type="button" class="chip" id="mp-sample-skill" data-mp="bad-skill">Sample poisoned skill</button>
+          <button class="cta" id="run-mp" type="button">Scan offline</button>
+        </div>
+        <div id="mp-out" class="out" role="region" aria-live="polite" aria-label="MCP poison check results"></div>
+        <p class="fine">Share the verdict and the rule names only. Do not forward the raw config.</p>
       </div>
     </section>
 

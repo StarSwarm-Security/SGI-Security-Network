@@ -1,6 +1,6 @@
 # StarSwarm Agentic Intelligence
 
-StarSwarm Agentic Intelligence is a native merge of offline Analyze (**Paste Guard** Safe/Suspicious/Dangerous), Threat Index, Defender Hive, **Swarm Pass**, **Bounty board**, **Redeem** (Coming soon), and **Honest Shield** (VPN + Protect) under one cover-map shell.
+StarSwarm Agentic Intelligence is a native merge of offline Analyze (**Paste Guard**, **injection scan**, **MCP poison check** — Safe/Suspicious/Dangerous), Threat Index, Defender Hive, **Swarm Pass**, **Bounty board**, **Redeem** (Coming soon), and **Honest Shield** (VPN + Protect) under one cover-map shell.
 
 **Live:** https://starswarm-sgi.pages.dev/ · https://sgi.starswarm.workers.dev/
 
@@ -12,10 +12,13 @@ Interactive cover map. Clickable labels sit on the art and open that deck direct
 
 ## Tabs
 
-Home · Analyze (+ Paste Guard) · Threat Index · Hive · **Swarm Pass** · **Bounty** · **Redeem** · **Honest Shield**
+Home · Analyze (+ Paste Guard, injection scan, MCP poison check) · Threat Index · Hive · **Swarm Pass** · **Bounty** · **Redeem** · **Honest Shield**
 
 ### Paste Guard (Phase 0)
 Offline rules in Analyze → Paste Guard mode. Verdicts: Safe / Suspicious / Dangerous. Paste never leaves the device. Heuristic only.
+
+### Injection scan and MCP poison check
+On-device desks in Analyze, also linked from the castle and the More menu. The injection scan reads pasted text, HTML, Markdown, or a dropped `.txt` / `.md` / `.html` / `.json` file. The MCP poison check reads an MCP config, a tools/list JSON, or a skill / rules file. Both reuse the Agent Guard and Config Auditor rules. Nothing pasted is uploaded. Heuristic only.
 
 ### Honest Shield
 Merged free VPN desk + malware/spyware link-outs. Affiliate slots stay placeholders until you sign up.
@@ -53,6 +56,7 @@ Standalone documents, not the app shell. After this tree is published, paste the
 
 ```bash
 python3 -m http.server 8000
+node --experimental-default-type=module --test test/on-device-scanners.test.mjs
 ```
 
 Open http://localhost:8000. The gate calls `https://sgi-api.starswarm.workers.dev` (that origin allows `http://localhost:8000`). No trackers. No invented live numbers.
