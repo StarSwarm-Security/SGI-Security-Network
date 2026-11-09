@@ -12,3 +12,6 @@ APPLE_PRIVATE_KEY=
 # Set them later with `wrangler secret put`. Do not commit real values.
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
+# TURNSTILE_SECRET is already set on the deployed sgi-api Worker.
+# Do not copy it here and do not commit it. Local tests leave it unset.
+# TURNSTILE_ENFORCE in wrangler.jsonc defaults to 0 (log and allow).

@@ -7,6 +7,8 @@ export const MAX_ALERTS = 100;
 export const MAX_BODY_BYTES = 150 * 1024;
 export const UPSTREAM_TIMEOUT_MS = 4000;
 export const USER_AGENT = 'StarSwarm-SGI-SwarmFeed/1.0 (+https://starswarm-sgi.pages.dev)';
+export const OSV_MEMO_MAX = 100;
+export const OSV_MEMO_TTL_MS = 10 * 60 * 1000;
 
 const SEVERITIES = ['critical', 'high', 'medium', 'low', 'unknown'];
 const SEVERITY_RANK = { critical: 4, high: 3, medium: 2, low: 1, unknown: 0 };
@@ -63,10 +65,11 @@ export const SOCKET_SOURCE = {
 /** At most four GitHub calls, plus the Socket Atom feed. OSV is on demand only. */
 export const FEED_SOURCES = [...GITHUB_SOURCES, SOCKET_SOURCE];
 
-const memory = { memo: null };
+const memory = { memo: null, osv: null };
 
 export function resetSwarmFeedState() {
   memory.memo = null;
+  memory.osv = null;
 }
 
 function slotOf(deps) {
@@ -115,6 +118,34 @@ export function isPackageName(value) {
   const text = String(value || '').trim();
   if (text.length < 2 || text.length > 214) return false;
   return /^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/i.test(text);
+}
+
+const NPM_BLACKLIST = new Set(['node_modules', 'favicon.ico']);
+
+function npmSegment(segment) {
+  if (!segment) return false;
+  if (segment.startsWith('.') || segment.startsWith('_')) return false;
+  if (!/[a-z0-9]/.test(segment)) return false;
+  return /^[a-z0-9._-]+$/.test(segment);
+}
+
+/** npm name rules for ?package=: lowercase, URL-safe, one optional scope, length cap 214. */
+export function isNpmPackageQuery(value) {
+  if (typeof value !== 'string') return false;
+  if (!value || value.length > 214) return false;
+  if (value !== value.trim() || value !== value.toLowerCase()) return false;
+  if (NPM_BLACKLIST.has(value)) return false;
+  let name = value;
+  if (value.startsWith('@')) {
+    const slash = value.indexOf('/');
+    if (slash <= 1 || slash !== value.lastIndexOf('/')) return false;
+    const scope = value.slice(1, slash);
+    name = value.slice(slash + 1);
+    if (!npmSegment(scope) || NPM_BLACKLIST.has(scope)) return false;
+  } else if (value.includes('/')) {
+    return false;
+  }
+  return npmSegment(name) && !NPM_BLACKLIST.has(name);
 }
 
 export function cleanIoc(value) {
@@ -649,6 +680,79 @@ function jsonResponse(body) {
   });
 }
 
+function errorResponse(status, body, extra) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      ...SEC_HEADERS,
+      ...extra,
+    },
+  });
+}
+
+function feedAddress(request) {
+  const raw = request.headers.get('CF-Connecting-IP');
+  if (!raw) return '';
+  const ip = String(raw).trim();
+  if (!ip || ip.length > 128 || /[\r\n]/.test(ip)) return '';
+  return ip;
+}
+
+async function takeLimit(binding, key) {
+  if (!binding || typeof binding.limit !== 'function') return null;
+  try {
+    const result = await binding.limit({ key });
+    if (!result || result.success !== false) return null;
+    return errorResponse(429, { error: 'rate_limited' }, { 'Retry-After': '60' });
+  } catch {
+    return null;
+  }
+}
+
+/** Optional FEED_LIMITER (60/min) and FEED_PACKAGE_LIMITER (10/min). Absent bindings no-op. */
+async function limitFeed(env, request, hasPackage) {
+  const ip = feedAddress(request);
+  if (!ip || !env) return null;
+  const general = await takeLimit(env.FEED_LIMITER, `feed:${ip}`);
+  if (general) return general;
+  if (!hasPackage) return null;
+  return takeLimit(env.FEED_PACKAGE_LIMITER, `pkg:${ip}`);
+}
+
+function osvMap(state) {
+  if (!state.osv) state.osv = new Map();
+  return state.osv;
+}
+
+function cloneAlerts(alerts) {
+  return (alerts || []).map((alert) => ({ ...alert, iocs: [...(alert.iocs || [])] }));
+}
+
+function readOsvMemo(state, name, now) {
+  const map = state && state.osv;
+  if (!map || !map.has(name)) return null;
+  const hit = map.get(name);
+  if (!hit || !Number.isFinite(hit.at) || now - hit.at >= OSV_MEMO_TTL_MS || now < hit.at) {
+    map.delete(name);
+    return null;
+  }
+  map.delete(name);
+  map.set(name, hit);
+  return cloneAlerts(hit.alerts);
+}
+
+function writeOsvMemo(state, name, alerts, now) {
+  const map = osvMap(state);
+  if (map.has(name)) map.delete(name);
+  map.set(name, { at: now, alerts: cloneAlerts(alerts) });
+  while (map.size > OSV_MEMO_MAX) {
+    const oldest = map.keys().next().value;
+    map.delete(oldest);
+  }
+}
+
 async function readCached(request, cache, now, state) {
   const memoEnv = state.memo && state.memo.envelope;
   if (memoEnv && Array.isArray(memoEnv.alerts)) {
@@ -684,10 +788,22 @@ function cloneEnvelope(envelope) {
   return JSON.parse(JSON.stringify(envelope));
 }
 
-async function attachOsv(envelope, packageName, fetchImpl) {
+async function attachOsv(envelope, packageName, fetchImpl, state, now) {
   const sources = envelope.sources.slice();
+  const cached = readOsvMemo(state, packageName, now);
+  if (cached) {
+    sources.push({ name: 'OSV.dev', ok: true, count: cached.length });
+    if (!cached.length) return { ...envelope, sources };
+    const alerts = capAlerts(dedupeAlerts([...cached, ...envelope.alerts])).map((alert) => {
+      const next = { ...alert };
+      delete next.fromBundled;
+      return next;
+    });
+    return { ...envelope, sources, alerts };
+  }
   try {
     const extra = await queryOsvPackage(packageName, fetchImpl);
+    writeOsvMemo(state, packageName, extra, now);
     sources.push({ name: 'OSV.dev', ok: true, count: extra.length });
     if (!extra.length) return { ...envelope, sources };
     const alerts = capAlerts(dedupeAlerts([...extra, ...envelope.alerts])).map((alert) => {
@@ -708,7 +824,13 @@ export async function handleSwarmFeed(request, deps = {}) {
   const cache = deps.cache === undefined ? null : deps.cache;
   const bundledFeed = deps.bundled || null;
   const state = slotOf(deps);
-  const packageName = new URL(request.url).searchParams.get('package') || '';
+  const rawPackage = new URL(request.url).searchParams.get('package');
+  const packageName = rawPackage == null ? '' : rawPackage.trim();
+  const limited = await limitFeed(deps.env, request, packageName.length > 0);
+  if (limited) return limited;
+  if (packageName && !isNpmPackageQuery(packageName)) {
+    return errorResponse(400, { error: 'invalid_package' });
+  }
   const hit = await readCached(request, cache, now, state);
 
   let envelope;
@@ -733,6 +855,6 @@ export async function handleSwarmFeed(request, deps = {}) {
   }
 
   if (store) await storeCached(request, cache, envelope, state);
-  if (packageName.trim()) envelope = await attachOsv(envelope, packageName, fetchImpl);
+  if (packageName) envelope = await attachOsv(envelope, packageName, fetchImpl, state, now);
   return jsonResponse(envelope);
 }

@@ -2,15 +2,17 @@ import { routeAgentRequest } from "agents";
 import { CATALOG_NOTE, PRODUCTS } from "./catalog";
 import { applyCors, preflight } from "./cors";
 import { handleAnalyze } from "./analyze/handler";
+import { handleDeviceAuth } from "./auth/device";
 import { handleAppleSignIn, handleGoogleSignIn, handleProviders } from "./auth/providers";
-import { createAnonymousDevice, requireSession } from "./auth/session";
+import { requireSession } from "./auth/session";
 import { handleBreachStub } from "./breach/stubs";
 import { loadEntitlement } from "./entitlements/load";
-import { asRecord, json, readJson } from "./http";
+import { json } from "./http";
 import { llmStatus } from "./analyze/llm";
 import { supportLlmEnabled } from "./support/faq";
 import { handleSupportChat, handleSupportFaq } from "./support/http";
 import { logError, logInfo } from "./log";
+import { limitIp, limitSession } from "./protect";
 import { handleGiftCard, handleRedeemCode } from "./redeem/handler";
 import { handleGetPass, handlePutPass } from "./swarm/pass";
 import { handleRevenueCat } from "./webhooks/revenuecat";
@@ -47,15 +49,7 @@ const routes: Record<string, Partial<Record<string, Handler>>> = {
     }),
   },
   "/v1/auth/device": {
-    POST: async (request, env) => {
-      const body = await readJson(request, 4096);
-      if (!body.ok) return body.response;
-      const record = asRecord(body.value);
-      if (!record) return json({ error: "invalid_json" }, 400);
-      const requested = record.deviceId;
-      if (requested !== undefined && typeof requested !== "string") return json({ error: "invalid_device_id" }, 400);
-      return createAnonymousDevice(env, requested);
-    },
+    POST: (request, env) => handleDeviceAuth(request, env),
   },
   "/v1/auth/providers": {
     GET: async (_request, env) => handleProviders(env),
@@ -90,7 +84,15 @@ const routes: Record<string, Partial<Record<string, Handler>>> = {
     PUT: authed((request, env, session) => handlePutPass(request, env, session)),
   },
   "/v1/redeem/codes": {
-    POST: authed((request, env, session) => handleRedeemCode(request, env, session)),
+    POST: async (request, env) => {
+      const ipLimited = await limitIp(request, env.REDEEM_LIMITER, "redeem");
+      if (ipLimited) return ipLimited;
+      const session = await requireSession(request, env);
+      if (!session.ok) return session.response;
+      const sessionLimited = await limitSession(env.REDEEM_LIMITER, session.session.deviceId);
+      if (sessionLimited) return sessionLimited;
+      return handleRedeemCode(request, env, session.session);
+    },
   },
   "/v1/redeem/gift-card": {
     POST: authed((request) => handleGiftCard(request)),
@@ -108,7 +110,11 @@ const routes: Record<string, Partial<Record<string, Handler>>> = {
     GET: async () => handleSupportFaq(),
   },
   "/v1/support/chat": {
-    POST: (request, env) => handleSupportChat(request, env),
+    POST: async (request, env) => {
+      const limited = await limitIp(request, env.SUPPORT_LIMITER, "chat");
+      if (limited) return limited;
+      return handleSupportChat(request, env);
+    },
   },
 };
 
@@ -143,6 +149,12 @@ export default {
     }
     try {
       if (path.startsWith("/agents/")) {
+        const limited = await limitIp(request, env.SUPPORT_LIMITER, "agents");
+        if (limited) {
+          const response = applyCors(request, limited);
+          logInfo("request", { method: request.method, path, status: response.status, ms: Date.now() - started });
+          return response;
+        }
         const routed = await routeAgentRequest(request, env);
         const response = !routed
           ? applyCors(request, json({ error: "not_found" }, 404))

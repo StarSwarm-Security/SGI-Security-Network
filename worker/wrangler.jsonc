@@ -26,8 +26,40 @@
     "ENABLE_LLM": "0",
     // Support chat answers from the FAQ pack unless this is "1".
     // "1" calls Workers AI (binding AI) and spends quota. Default is off.
-    "ENABLE_SUPPORT_LLM": "0"
+    "ENABLE_SUPPORT_LLM": "0",
+    // Turnstile Siteverify runs on device and Google sign-in.
+    // "0" logs the result and allows the request. "1" rejects failures with 403.
+    // Fail closed only when this is "1". TURNSTILE_SECRET is already a Worker
+    // secret. Do not put it in this file.
+    "TURNSTILE_ENFORCE": "0",
+    "TURNSTILE_HOSTNAMES": "starswarm-sgi.pages.dev,sgi.starswarm.workers.dev"
   },
+  // Free Workers rate limiting. Counters stay at the edge and are keyed in
+  // code by CF-Connecting-IP. They are not written to D1. namespace_id values
+  // must be unique in the Cloudflare account; change them if they collide.
+  // Period must be 10 or 60 seconds. Limits are per location and approximate.
+  "ratelimits": [
+    {
+      "name": "AUTH_DEVICE_LIMITER",
+      "namespace_id": "841001",
+      "simple": { "limit": 5, "period": 60 }
+    },
+    {
+      "name": "AUTH_GOOGLE_LIMITER",
+      "namespace_id": "841002",
+      "simple": { "limit": 10, "period": 60 }
+    },
+    {
+      "name": "REDEEM_LIMITER",
+      "namespace_id": "841003",
+      "simple": { "limit": 5, "period": 60 }
+    },
+    {
+      "name": "SUPPORT_LIMITER",
+      "namespace_id": "841004",
+      "simple": { "limit": 20, "period": 60 }
+    }
+  ],
   // Workers AI has no local simulator in this Wrangler, so an `ai` binding
   // always opens a remote session. Leave it out of this draft so `wrangler dev`
   // and tests stay offline. When a spend yes exists, add:

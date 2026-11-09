@@ -74,9 +74,11 @@ async function newSessionMaterial(): Promise<SessionMaterial> {
  * limits as monthly) and a free entitlement with no expiry. When the trial
  * expires, loadEntitlement falls back to that free row. The trial is not a charge.
  *
- * Analyze rate limits stay per device and UTC day for every session minted here,
- * anonymous or Google. Do not key limits on IP addresses.
- * TODO(Phase 1): Play Integrity / App Attest before raising rate limits.
+ * Analyze quotas stay per device and UTC day for every session minted here,
+ * anonymous or Google. Do not key Analyze quotas on IP addresses. That rule
+ * applies only to Analyze. Sign-in, redeem, and support use Workers rate
+ * limiting keyed by CF-Connecting-IP and do not write the address to D1.
+ * TODO(Phase 1): Play Integrity / App Attest before raising Analyze quotas.
  */
 function newAccountStatements(
   env: Env,

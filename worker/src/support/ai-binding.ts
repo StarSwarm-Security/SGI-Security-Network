@@ -15,5 +15,7 @@ declare global {
     APPLE_PRIVATE_KEY?: string;
     GOOGLE_CLIENT_ID?: string;
     GOOGLE_CLIENT_SECRET?: string;
+    // Already set on the deployed Worker. Never commit the value.
+    TURNSTILE_SECRET?: string;
   }
 }

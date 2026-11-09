@@ -25,11 +25,14 @@ import {
   FRESH_MS,
   GITHUB_SOURCES,
   MAX_ALERTS,
+  OSV_MEMO_MAX,
+  OSV_MEMO_TTL_MS,
   alertsFromBundled,
   capAlerts,
   dedupeAlerts,
   handleSwarmFeed,
   inferBundledCategory,
+  isNpmPackageQuery,
   normalizeGithubAdvisory,
   normalizeGithubPayload,
   normalizeOsvVuln,
@@ -376,6 +379,159 @@ describe("swarm feed handler", () => {
     expect(direct.map((alert) => alert.id)).toEqual(["MAL-2026-4242"]);
     expect(await queryOsvPackage("not a package name", fetchImpl)).toEqual([]);
   });
+
+  it("rejects package names that break npm rules", async () => {
+    expect(isNpmPackageQuery("hostile-pkg")).toBe(true);
+    expect(isNpmPackageQuery("@scope/name")).toBe(true);
+    expect(isNpmPackageQuery("NotAPackage")).toBe(false);
+    expect(isNpmPackageQuery("a".repeat(215))).toBe(false);
+    expect(isNpmPackageQuery("../etc")).toBe(false);
+    expect(isNpmPackageQuery("https://evil.example/pkg")).toBe(false);
+    expect(isNpmPackageQuery("node_modules")).toBe(false);
+    expect(isNpmPackageQuery("favicon.ico")).toBe(false);
+    expect(isNpmPackageQuery(".hidden")).toBe(false);
+    expect(isNpmPackageQuery("@scope")).toBe(false);
+    expect(isNpmPackageQuery("bad name")).toBe(false);
+
+    const fetchImpl = vi.fn(async () => {
+      throw new Error("should not fetch");
+    });
+    const res = await handleSwarmFeed(request("/api/swarm-feed?package=NotAPackage"), {
+      fetchImpl,
+      now: () => NOW,
+      cache: null,
+      bundled: feed,
+      state: { memo: null },
+    });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "invalid_package" });
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("memoizes OSV lookups for 10 minutes and evicts the oldest past 100", async () => {
+    expect(OSV_MEMO_MAX).toBe(100);
+    expect(OSV_MEMO_TTL_MS).toBe(600_000);
+    const state = {
+      memo: {
+        envelope: {
+          updated: "2026-10-30",
+          fetchedAt: new Date(NOW).toISOString(),
+          status: "live",
+          sources: [],
+          alerts: [],
+        },
+      },
+    };
+    let hits = 0;
+    const fetchImpl = vi.fn(async (url: string) => {
+      if (String(url).includes("api.osv.dev")) {
+        hits += 1;
+        return new Response(JSON.stringify({ vulns: [] }), { status: 200 });
+      }
+      throw new Error("offline");
+    });
+    const once = await handleSwarmFeed(request("/api/swarm-feed?package=hostile-pkg"), {
+      fetchImpl, now: () => NOW, cache: null, bundled: feed, state,
+    });
+    expect(once.status).toBe(200);
+    const again = await handleSwarmFeed(request("/api/swarm-feed?package=hostile-pkg"), {
+      fetchImpl, now: () => NOW + 60_000, cache: null, bundled: feed, state,
+    });
+    expect(again.status).toBe(200);
+    expect(hits).toBe(1);
+    const later = await handleSwarmFeed(request("/api/swarm-feed?package=hostile-pkg"), {
+      fetchImpl, now: () => NOW + OSV_MEMO_TTL_MS, cache: null, bundled: feed, state,
+    });
+    expect(later.status).toBe(200);
+    expect(hits).toBe(2);
+
+    const crowded = {
+      memo: {
+        envelope: {
+          updated: "2026-10-30",
+          fetchedAt: new Date(NOW).toISOString(),
+          status: "live",
+          sources: [],
+          alerts: [],
+        },
+      },
+    };
+    const names = Array.from({ length: OSV_MEMO_MAX + 1 }, (_, index) => `pkg${index}`);
+    for (const name of names) {
+      const res = await handleSwarmFeed(request(`/api/swarm-feed?package=${name}`), {
+        fetchImpl, now: () => NOW, cache: null, bundled: feed, state: crowded,
+      });
+      expect(res.status).toBe(200);
+    }
+    const before = hits;
+    await handleSwarmFeed(request("/api/swarm-feed?package=pkg0"), {
+      fetchImpl, now: () => NOW, cache: null, bundled: feed, state: crowded,
+    });
+    expect(hits).toBe(before + 1);
+    await handleSwarmFeed(request(`/api/swarm-feed?package=pkg${OSV_MEMO_MAX}`), {
+      fetchImpl, now: () => NOW, cache: null, bundled: feed, state: crowded,
+    });
+    expect(hits).toBe(before + 1);
+  });
+
+  it("uses optional feed limiters and ignores a missing binding", async () => {
+    const blocked = { limit: vi.fn(async () => ({ success: false })) };
+    const denied = await handleSwarmFeed(new Request(`${ORIGIN}/api/swarm-feed`, {
+      headers: { "CF-Connecting-IP": "192.0.2.80" },
+    }), {
+      fetchImpl: vi.fn(async () => { throw new Error("should not fetch"); }),
+      now: () => NOW,
+      cache: null,
+      bundled: feed,
+      state: { memo: null },
+      env: { FEED_LIMITER: blocked },
+    });
+    expect(denied.status).toBe(429);
+    expect(denied.headers.get("Retry-After")).toBe("60");
+    expect(blocked.limit).toHaveBeenCalledTimes(1);
+
+    const pkgBlocked = { limit: vi.fn(async () => ({ success: false })) };
+    const general = { limit: vi.fn(async () => ({ success: true })) };
+    const packageDenied = await handleSwarmFeed(new Request(`${ORIGIN}/api/swarm-feed?package=hostile-pkg`, {
+      headers: { "CF-Connecting-IP": "192.0.2.81" },
+    }), {
+      fetchImpl: vi.fn(async () => { throw new Error("should not fetch"); }),
+      now: () => NOW,
+      cache: null,
+      bundled: feed,
+      state: { memo: null },
+      env: { FEED_LIMITER: general, FEED_PACKAGE_LIMITER: pkgBlocked },
+    });
+    expect(packageDenied.status).toBe(429);
+    expect(general.limit).toHaveBeenCalledTimes(1);
+    expect(pkgBlocked.limit).toHaveBeenCalledTimes(1);
+
+    const down = { limit: vi.fn(async () => { throw new Error("binding down"); }) };
+    const open = await handleSwarmFeed(new Request(`${ORIGIN}/api/swarm-feed`, {
+      headers: { "CF-Connecting-IP": "192.0.2.82" },
+    }), {
+      fetchImpl: vi.fn(async () => { throw new Error("offline"); }),
+      now: () => NOW,
+      cache: null,
+      bundled: feed,
+      state: { memo: null },
+      env: { FEED_LIMITER: down },
+    });
+    expect(open.status).toBe(200);
+
+    const skipped = { limit: vi.fn(async () => ({ success: false })) };
+    const noIp = await handleSwarmFeed(request(), {
+      fetchImpl: vi.fn(async () => { throw new Error("offline"); }),
+      now: () => NOW,
+      cache: null,
+      bundled: feed,
+      state: { memo: null },
+      env: { FEED_LIMITER: skipped },
+    });
+    expect(noIp.status).toBe(200);
+    expect(skipped.limit).not.toHaveBeenCalled();
+  });
 });
 
 describe("swarm feed client", () => {
@@ -557,6 +713,14 @@ describe("sgi worker tail", () => {
       const pretty = await worker.fetch(request("/privacy.html"));
       expect(pretty.status).toBe(308);
       expect(pretty.headers.get("Location")).toBe(ORIGIN + "/privacy");
+
+      const limited = await worker.fetch(new Request(ORIGIN + "/api/swarm-feed", {
+        headers: { "CF-Connecting-IP": "192.0.2.90" },
+      }), {
+        FEED_LIMITER: { async limit() { return { success: false }; } },
+      });
+      expect(limited.status).toBe(429);
+      expect(limited.headers.get("Retry-After")).toBe("60");
 
       const denied = await worker.fetch(new Request(ORIGIN + "/index.html", { method: "POST" }));
       expect(denied.status).toBe(405);

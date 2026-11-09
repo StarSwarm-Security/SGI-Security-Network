@@ -360,6 +360,15 @@ html.sgi-open .abyss-restore{display:none !important}
 .abyss-lede{margin:10px 0 18px; color:#d9d0c3; font-size:14.5px; line-height:1.45; max-width:36ch}
 .abyss-google{display:flex; justify-content:center; min-height:44px; margin-bottom:8px}
 .abyss-google[hidden]{display:none !important}
+.abyss-turnstile{
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  width:100%; margin:0 0 12px}
+.abyss-turnstile[hidden]{display:none !important}
+.abyss-turnstile-label{
+  margin:0; color:#b7aa96; font-size:11px; letter-spacing:.14em;
+  text-transform:uppercase; text-align:center}
+.abyss-turnstile-slot{width:100%; display:flex; justify-content:center}
+.abyss-turnstile-slot iframe{max-width:100%}
 .abyss-note, .abyss-fine{color:#9c9286; font-size:12px; line-height:1.45; margin:8px 0 0}
 .abyss-legal{display:flex; justify-content:center; flex-wrap:wrap; gap:8px 16px; margin:16px 0 0; font-size:12.5px; line-height:1.4}
 .abyss-legal a{color:#e7d7c4; text-underline-offset:3px}

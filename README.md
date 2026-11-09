@@ -93,6 +93,12 @@ Copy `worker/.dev.vars.example` to `worker/.dev.vars` for local secrets. Never c
 
 CORS allows `https://starswarm-sgi.pages.dev`, `https://sgi.starswarm.workers.dev`, and local `localhost` / `127.0.0.1` ports 8000 and 8787. Other origins are refused.
 
+Bot checks on `POST /v1/auth/device` and `POST /v1/auth/google` call Turnstile Siteverify (`TURNSTILE_SECRET`, already set on the Worker; do not commit it). `TURNSTILE_ENFORCE` defaults to `0`: the Worker logs the result and allows the request. Set it to `1` to reject a failed check with `403` `{ "error": "turnstile_failed" }`. The hostname must be in `TURNSTILE_HOSTNAMES` (`starswarm-sgi.pages.dev,sgi.starswarm.workers.dev`) and the action must be `device` or `google`. The token and the secret are not logged. A signed Google nonce needs a new secret and is not part of this change.
+
+Workers rate limiting (`ratelimits` in `worker/wrangler.jsonc`) keys on `CF-Connecting-IP` and does not write that address to D1. Missing bindings are skipped. Approximate per-minute caps: device 5, Google 10, redeem 5 per address and 5 per device session, support chat 20, and `/agents/*` 20. A hit is `429` with `Retry-After: 60`. Analyze quotas stay per device and UTC day. The gate shows a short message for 403 and 429. If the Turnstile script does not load, the gate still posts, which succeeds while enforce is `0`.
+
+The static `sgi` Worker is published outside this repo. `edge/README.md` has the optional `FEED_LIMITER` (60/min) and `FEED_PACKAGE_LIMITER` (10/min) bindings for `/api/swarm-feed`. `?package=` must be an npm name. OSV lookups are memoized in the isolate for about 10 minutes, up to about 100 names.
+
 Skeleton routes:
 
 - `POST /v1/auth/device` — anonymous device. Session tokens are stored as hashes. The first session starts a 3-day Pro trial (same daily analyze limit as the paid plans) and also keeps a free entitlement with no expiry. After the trial timestamp passes, the active plan falls back to free. The trial is not a charge.

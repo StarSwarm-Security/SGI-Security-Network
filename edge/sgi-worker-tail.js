@@ -42,13 +42,13 @@ function cacheBinding() {
 
 const PRETTY = { '/privacy.html': '/privacy', '/terms.html': '/terms' };
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD', ...SEC } });
     }
     const u = new URL(request.url);
     if (request.method === 'GET' && (u.pathname === '/api/swarm-feed' || u.pathname === '/api/swarm-feed/')) {
-      return handleSwarmFeed(request, { bundled: readBundled(), cache: cacheBinding() });
+      return handleSwarmFeed(request, { bundled: readBundled(), cache: cacheBinding(), env });
     }
     let path = u.pathname;
     if (path === '' || path === '/') path = '/index.html';

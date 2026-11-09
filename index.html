@@ -50,6 +50,19 @@
   } catch (e) {}
 })();
 </script>
+<script>
+/* Local preview only. A localhost API base, or Cloudflare's always-pass test sitekey. */
+(function () {
+  try {
+    var params = new URLSearchParams(location.search);
+    var api = params.get('apiBase') || '';
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(api)) window.SGI_API_BASE = api;
+    if (params.get('turnstileSitekey') === '1x00000000000000000000AA') {
+      window.SGI_TURNSTILE_SITEKEY = '1x00000000000000000000AA';
+    }
+  } catch (e) {}
+})();
+</script>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="art-v2.css">
 </head>
@@ -64,9 +77,17 @@
     <h2 id="abyss-title">The gate is shut</h2>
     <p class="abyss-lede">The keep stays dark until a session is accepted.</p>
     <div id="abyss-google" class="abyss-google" hidden></div>
+    <div id="abyss-turnstile-google-wrap" class="abyss-turnstile" hidden>
+      <p id="abyss-turnstile-google-label" class="abyss-turnstile-label">Human check for Google</p>
+      <div id="abyss-turnstile-google" class="abyss-turnstile-slot" role="group" aria-labelledby="abyss-turnstile-google-label"></div>
+    </div>
     <button type="button" class="abyss-btn abyss-btn-google" id="abyss-google-fallback" disabled>Sign in with Google</button>
     <p id="abyss-google-note" class="abyss-note">Google Sign-In lights when a public client id is published. No secret is kept in this page.</p>
     <div class="abyss-or" id="abyss-or"><span>or</span></div>
+    <div id="abyss-turnstile-wrap" class="abyss-turnstile" hidden>
+      <p id="abyss-turnstile-label" class="abyss-turnstile-label">Human check</p>
+      <div id="abyss-turnstile" class="abyss-turnstile-slot" role="group" aria-labelledby="abyss-turnstile-label"></div>
+    </div>
     <button type="button" class="abyss-btn abyss-btn-device" id="abyss-device">Continue with this device</button>
     <p id="abyss-status" class="abyss-status" role="status" aria-live="polite"></p>
     <p class="abyss-fine">A device session is the anonymous fallback while that seal is open. Apple stays unlit.</p>
