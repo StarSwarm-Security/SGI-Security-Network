@@ -1,5 +1,7 @@
 import { asRecord, json, readJson } from "../http";
 import { presentSecret } from "../crypto";
+import { limitIp } from "../protect";
+import { verifyTurnstile } from "./turnstile";
 import { verifyGoogleIdToken } from "./google-token";
 import { createOrLinkGoogleSession } from "./session";
 
@@ -64,19 +66,24 @@ function googleError(error: string, status: number): Response {
 
 /**
  * POST /v1/auth/google. Accepts `{ id_token }` or GIS `{ credential }`.
- * Does not log or store the token. CORS and analyze limits stay on the shared
- * session path; this handler does not add a separate limiter.
+ * Does not log or store the token. A signed GIS nonce needs a new secret, so
+ * that check is left as future work and this handler stays stateless.
+ * About 10 requests a minute per CF-Connecting-IP, then Turnstile action "google".
  */
 export async function handleGoogleSignIn(
   request: Request,
   env: Env,
   fetcher: typeof fetch = globalThis.fetch,
 ): Promise<Response> {
+  const limited = await limitIp(request, env.AUTH_GOOGLE_LIMITER, "google");
+  if (limited) return limited;
   const missing = GOOGLE_NAMES.filter((name) => !filled(env[name]));
   const body = await readJson(request, 16 * 1024);
   if (!body.ok) return body.response;
   const record = asRecord(body.value);
   if (!record) return json({ error: "invalid_json" }, 400);
+  const turnstile = await verifyTurnstile(env, record.turnstileToken, "google", fetcher);
+  if (!turnstile.ok) return json({ error: "turnstile_failed" }, 403);
   if (missing.length > 0) {
     return json({ error: "not_configured", provider: "google", missing, todo: GOOGLE_TODO }, 501);
   }

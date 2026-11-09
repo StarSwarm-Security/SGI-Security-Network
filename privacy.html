@@ -31,7 +31,7 @@
 
   <p class="legal-kicker">StarSwarm Agentic Intelligence</p>
   <h1>Privacy Policy</h1>
-  <p class="legal-date">Effective 29 October 2026</p>
+  <p class="legal-date">Effective 9 November 2026</p>
 
   <p>StarSwarm Agentic Security publishes StarSwarm Agentic Intelligence at <a href="https://starswarm-sgi.pages.dev/">starswarm-sgi.pages.dev</a>. StarSwarm Agentic Intelligence is a browser security desk: a cover map, Analyze, Paste Guard, a threat index, study notes, and the other tools on that site. This page is the privacy policy for that site and for Google Sign-In on it.</p>
 
@@ -40,6 +40,9 @@
 
   <h2>Device session</h2>
   <p>“Continue with this device” asks the StarSwarm Agentic Intelligence API for an anonymous session. This browser keeps a bearer session token in <code>localStorage</code> under the key <code>sgi.session.v1</code> so a session that is still in date can skip the gate. The server stores a hash of that token, a device id, and an internal user id. That path does not ask for your name, email, or a password. The first device session also records a free plan and a 3-day Pro trial. The trial is not a charge.</p>
+
+  <h2>Human check</h2>
+  <p>The gate loads Cloudflare Turnstile before “Continue with this device” and before Google sign-in. That widget is a bot check. The API confirms the result with Cloudflare and does not store the token. Sign-in, redeem, and support also use a short-lived rate limit at the edge. That limit is not written into the database. Analyze quotas stay per device and day.</p>
 
   <h2>Google Sign-In</h2>
   <p>If you choose Google Sign-In, Google sends an ID token. That token includes your Google account subject (<code>sub</code>) and, when Google includes it, your email address. We use the subject so the same Google account can sign in again. If an email is in the token, we accept the sign-in only when Google marks that email as verified. We do not write the email address into our database. We do not store the raw ID token. We never receive your Google password.</p>

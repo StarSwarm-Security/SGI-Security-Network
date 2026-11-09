@@ -14,4 +14,10 @@ export const AUTH_CONFIG = {
   apiBase: 'https://sgi-api.starswarm.workers.dev',
   /** @type {string} Placeholder. Empty on purpose. */
   googleClientId: '550016428729-3uep68gu42rkhp65ihno7b4e9li44cqp.apps.googleusercontent.com',
+  /**
+   * Public Turnstile sitekey. Not a secret.
+   * A local preview may set window.SGI_TURNSTILE_SITEKEY to Cloudflare's
+   * always-pass test sitekey 1x00000000000000000000AA. Any other override is ignored.
+   */
+  turnstileSitekey: '0x4AAAAAAF6V6mq9mv4hSqWu',
 };

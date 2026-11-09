@@ -111,6 +111,16 @@ function mount(host) {
           headers: { "Content-Type": "application/json", Accept: "application/json" },
           body: JSON.stringify({ message }),
         });
+        if (response.status === 429 || response.status === 403) {
+          const note = response.status === 429
+            ? "Support is busy. The on-device FAQ still answers."
+            : "Support refused that message. The on-device FAQ still answers.";
+          if (!pack) pack = await loadPack();
+          const local = matchFaq(pack, message);
+          addBubble("bot", local.reply, local.links);
+          status.textContent = note;
+          return;
+        }
         if (!response.ok) throw new Error("offline");
         const body = await response.json();
         status.textContent = body.llm ? "Connected · model on" : "Connected · FAQ";

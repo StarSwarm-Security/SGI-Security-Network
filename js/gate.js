@@ -7,6 +7,7 @@
  * still offer it (or when the providers call cannot be read).
  */
 import { bootSgi, bootSpotlight } from '../app.js';
+import { AUTH_CONFIG } from './auth-config.js';
 import {
   api,
   readSession,
@@ -31,6 +32,126 @@ let opened = false;
 let busy = false;
 let stopDust = () => {};
 
+const TEST_SITEKEY = '1x00000000000000000000AA';
+const widgets = {
+  device: { id: null, token: '', failed: false, action: 'device', wrap: 'abyss-turnstile-wrap', slot: 'abyss-turnstile' },
+  google: { id: null, token: '', failed: false, action: 'google', wrap: 'abyss-turnstile-google-wrap', slot: 'abyss-turnstile-google' },
+};
+let turnstileScript = null;
+
+function turnstileSitekey() {
+  const override = typeof window !== 'undefined' ? String(window.SGI_TURNSTILE_SITEKEY || '') : '';
+  if (override === TEST_SITEKEY) return TEST_SITEKEY;
+  return String(AUTH_CONFIG.turnstileSitekey || '').trim();
+}
+
+function delay(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function loadTurnstileScript() {
+  if (window.turnstile) return Promise.resolve(true);
+  if (turnstileScript) return turnstileScript;
+  turnstileScript = new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve(Boolean(window.turnstile));
+    script.onerror = () => resolve(false);
+    document.head.appendChild(script);
+  });
+  return turnstileScript;
+}
+
+function widgetSize(slot) {
+  const card = slot.closest('.abyss-card');
+  const width = card ? card.clientWidth : window.innerWidth;
+  return width < 360 ? 'compact' : 'flexible';
+}
+
+function readWidgetToken(which) {
+  const widget = widgets[which];
+  if (!widget) return '';
+  if (widget.token) return widget.token;
+  if (window.turnstile && widget.id != null) {
+    try {
+      const value = window.turnstile.getResponse(widget.id);
+      if (typeof value === 'string' && value) return value;
+    } catch { /* not ready */ }
+  }
+  return '';
+}
+
+function resetWidget(which) {
+  const widget = widgets[which];
+  if (!widget) return;
+  widget.token = '';
+  if (window.turnstile && widget.id != null) {
+    try { window.turnstile.reset(widget.id); } catch { /* the gate still posts */ }
+  }
+}
+
+async function takeToken(which) {
+  const widget = widgets[which];
+  if (!widget || widget.failed) return '';
+  const start = Date.now();
+  while (Date.now() - start < 2500) {
+    if (widget.failed) return '';
+    const token = readWidgetToken(which);
+    if (token) return token;
+    await delay(80);
+  }
+  return widget.failed ? '' : readWidgetToken(which);
+}
+
+async function mountTurnstile(which) {
+  const widget = widgets[which];
+  const wrap = document.getElementById(widget.wrap);
+  const slot = document.getElementById(widget.slot);
+  const sitekey = turnstileSitekey();
+  if (!wrap || !slot || !sitekey || opened) {
+    widget.failed = true;
+    if (wrap) wrap.hidden = true;
+    return;
+  }
+  if (widget.id != null) {
+    wrap.hidden = false;
+    return;
+  }
+  const loaded = await loadTurnstileScript();
+  if (opened) return;
+  if (!loaded || !window.turnstile) {
+    widget.failed = true;
+    wrap.hidden = true;
+    return;
+  }
+  try {
+    wrap.hidden = false;
+    widget.id = window.turnstile.render(slot, {
+      sitekey,
+      action: widget.action,
+      theme: 'dark',
+      size: widgetSize(slot),
+      appearance: 'always',
+      callback: (token) => {
+        widget.token = typeof token === 'string' ? token : '';
+        widget.failed = false;
+      },
+      'error-callback': () => {
+        widget.token = '';
+        widget.failed = true;
+      },
+      'expired-callback': () => { widget.token = ''; },
+      'timeout-callback': () => { widget.token = ''; },
+    });
+  } catch {
+    widget.failed = true;
+    widget.id = null;
+    wrap.hidden = true;
+  }
+}
+
 function setStatus(text) {
   if (statusEl) statusEl.textContent = text || '';
 }
@@ -42,6 +163,8 @@ function setState(state) {
 function explainFailure(res) {
   if (!res || res.status === 0) return 'The network could not be reached. The keep stays shut.';
   const err = res.data && res.data.error;
+  if (res.status === 429) return 'The gate is busy from this network. Wait about a minute, then try again.';
+  if (res.status === 403 && err === 'turnstile_failed') return 'The human check did not pass. Give it a moment, then try again.';
   if (err === 'not_configured') return 'Google sign-in is not lit on the network yet. Continue with this device.';
   if (err === 'device_exists') return 'This device already has a seal, and the old one is not on this browser.';
   if (res.status === 401 || res.status === 403) return 'The network refused this session.';
@@ -128,23 +251,34 @@ function unlock(opts = {}) {
   else window.setTimeout(finish, 980);
 }
 
+function deviceBody(token) {
+  return token ? { turnstileToken: token } : {};
+}
+
 async function signInWithDevice() {
   if (busy || opened || !deviceBtn || deviceBtn.hidden) return;
   busy = true;
   deviceBtn.disabled = true;
   setStatus('Asking the gate…');
-  const timed = withTimeout(12000);
-  let res = await api('/v1/auth/device', { method: 'POST', body: {}, signal: timed.signal });
-  if (res.status === 409 || (res.data && res.data.error === 'device_exists')) {
-    clearSession();
-    res = await api('/v1/auth/device', { method: 'POST', body: {}, signal: timed.signal });
+  const timed = withTimeout(15000);
+  try {
+    let token = await takeToken('device');
+    let res = await api('/v1/auth/device', { method: 'POST', body: deviceBody(token), signal: timed.signal });
+    resetWidget('device');
+    if (res.status === 409 || (res.data && res.data.error === 'device_exists')) {
+      clearSession();
+      token = await takeToken('device');
+      res = await api('/v1/auth/device', { method: 'POST', body: deviceBody(token), signal: timed.signal });
+      resetWidget('device');
+    }
+    const result = await acceptAuth(res, 'device');
+    if (result.ok) unlock();
+    else setStatus(result.message);
+  } finally {
+    timed.done();
+    busy = false;
+    if (!opened && deviceBtn) deviceBtn.disabled = false;
   }
-  timed.done();
-  const result = await acceptAuth(res, 'device');
-  busy = false;
-  if (!opened) deviceBtn.disabled = false;
-  if (result.ok) unlock();
-  else setStatus(result.message);
 }
 
 async function signInWithGoogleCredential(credential) {
@@ -155,17 +289,24 @@ async function signInWithGoogleCredential(credential) {
   }
   busy = true;
   setStatus('Checking the Google seal…');
-  const timed = withTimeout(12000);
-  const res = await api('/v1/auth/google', {
-    method: 'POST',
-    signal: timed.signal,
-    body: { idToken: credential, credential, provider: 'google' },
-  });
-  timed.done();
-  const result = await acceptAuth(res, 'google');
-  busy = false;
-  if (result.ok) unlock();
-  else setStatus(result.message);
+  const timed = withTimeout(15000);
+  try {
+    const token = await takeToken('google');
+    const body = { idToken: credential, credential, provider: 'google' };
+    if (token) body.turnstileToken = token;
+    const res = await api('/v1/auth/google', {
+      method: 'POST',
+      signal: timed.signal,
+      body,
+    });
+    const result = await acceptAuth(res, 'google');
+    if (result.ok) unlock();
+    else setStatus(result.message);
+  } finally {
+    timed.done();
+    resetWidget('google');
+    busy = false;
+  }
 }
 
 function loadGis() {
@@ -208,6 +349,7 @@ async function mountGoogle(clientId) {
     });
     googleFallback.hidden = true;
     if (googleNote) googleNote.hidden = true;
+    void mountTurnstile('google');
   } catch {
     googleSlot.hidden = true;
     googleFallback.hidden = false;
@@ -224,6 +366,9 @@ function applyProviders(providers) {
   const anon = anonymousOffered(providers);
   if (deviceBtn) deviceBtn.hidden = !anon;
   if (orEl) orEl.hidden = !anon;
+  const deviceCheck = document.getElementById('abyss-turnstile-wrap');
+  if (!anon && deviceCheck) deviceCheck.hidden = true;
+  if (anon) void mountTurnstile('device');
   const fine = gate && gate.querySelector('.abyss-fine');
   if (fine) fine.hidden = !anon;
 
@@ -364,4 +509,5 @@ function mountDust() {
 
 bind();
 mountDust();
+void mountTurnstile('device');
 restoreOrShow();
