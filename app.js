@@ -1,4 +1,5 @@
 import { runSwarm, SPECIALISTS } from './js/analyzers.js';
+import { esc, renderCiscoAnalyze } from './js/analyze-render.js';
 import { REF_DATA, SCENARIOS, CS_DATA } from './js/study.js';
 import { mountHive, NODES, THREATS } from './js/hive.js';
 import { loadThreatIndex, matchAgentIocs } from './js/threat-index.js';
@@ -172,19 +173,7 @@ $('run-analyze').onclick = () => {
   const out = $('analyze-out');
   if (!text) { out.innerHTML = '<p class="fine">Paste something first.</p>'; return; }
   const res = runSwarm(text, { deviceType: $('device').value });
-  const findings = (res.reports || []).flatMap(r => (r.findings || []).map(f => ({ ...f, specialist: r.name })));
-  const summary = res.summary || {};
-  let html = `<p class="lede"><b>${findings.length}</b> findings · ${SPECIALISTS.length} specialists offline` +
-    (summary.headline ? ` · ${summary.headline}` : '') + `</p>`;
-  if (!findings.length) html += '<div class="find ok"><span class="sev">clear</span><strong> No rule hits on this paste.</strong><p class="fine">Try the sample or a fuller show run.</p></div>';
-  for (const f of findings.slice(0, 40)) {
-    const sev = (f.severity || f.level || f.sev || 'info').toString().toLowerCase();
-    html += `<div class="find ${sev}"><span class="sev">${sev}</span> <strong>${f.title || f.name || f.id || 'Finding'}</strong>` +
-      `<p class="fine">${f.specialist || ''} · ${f.confidence != null ? 'confidence ' + f.confidence : ''}</p>` +
-      `<p>${f.detail || f.why || f.message || f.summary || ''}</p>` +
-      (f.fix || f.remediation ? `<p><b>Fix:</b> ${f.fix || f.remediation}</p>` : '') + `</div>`;
-  }
-  out.innerHTML = html;
+  out.innerHTML = renderCiscoAnalyze(res, SPECIALISTS.length);
 };
 
 /* Analyze modes: Cisco | Paste Guard | Agent Guard | Config Auditor */
@@ -208,12 +197,6 @@ if (liveAlertsLink) {
     event.preventDefault();
     openThreatsLive('alerts');
   });
-}
-
-function esc(value) {
-  return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  }[ch]));
 }
 
 function paintScan(out, res, kind) {
