@@ -7,6 +7,12 @@ const DEFAULT_HOSTS = "starswarm-sgi.pages.dev,sgi.starswarm.workers.dev";
 
 export type TurnstileAction = "device" | "google";
 
+/**
+ * The gate renders one shared widget with action "gate" and sends its token to
+ * whichever sign-in button is clicked. Per-button actions are still accepted.
+ */
+export const SHARED_GATE_ACTION = "gate";
+
 export interface TurnstileDecision {
   ok: boolean;
   enforce: boolean;
@@ -90,7 +96,7 @@ export async function verifyTurnstile(
     }
     const hosts = allowedHosts(env);
     const hostname = typeof body.hostname === "string" ? body.hostname.trim().toLowerCase() : "";
-    const actionOk = body.action === action;
+    const actionOk = body.action === action || body.action === SHARED_GATE_ACTION;
     const hostOk = hostname.length > 0 && hosts.has(hostname);
     const success = body.success === true && actionOk && hostOk;
     const reason = body.success !== true
