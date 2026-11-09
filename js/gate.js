@@ -33,10 +33,11 @@ let busy = false;
 let stopDust = () => {};
 
 const TEST_SITEKEY = '1x00000000000000000000AA';
-const widgets = {
-  device: { id: null, token: '', failed: false, action: 'device', wrap: 'abyss-turnstile-wrap', slot: 'abyss-turnstile' },
-  google: { id: null, token: '', failed: false, action: 'google', wrap: 'abyss-turnstile-google-wrap', slot: 'abyss-turnstile-google' },
-};
+// One shared Turnstile widget for the whole gate. Its token goes to whichever
+// button is clicked (Google or this device), then the widget is reset so the
+// next click gets a fresh single-use token. Action "gate" is accepted by both
+// /v1/auth/google and /v1/auth/device.
+const widget = { id: null, token: '', failed: false, action: 'gate', wrap: 'abyss-turnstile-wrap', slot: 'abyss-turnstile' };
 let turnstileScript = null;
 
 function turnstileSitekey() {
@@ -70,9 +71,7 @@ function widgetSize(slot) {
   return width < 360 ? 'compact' : 'flexible';
 }
 
-function readWidgetToken(which) {
-  const widget = widgets[which];
-  if (!widget) return '';
+function readWidgetToken() {
   if (widget.token) return widget.token;
   if (window.turnstile && widget.id != null) {
     try {
@@ -83,30 +82,26 @@ function readWidgetToken(which) {
   return '';
 }
 
-function resetWidget(which) {
-  const widget = widgets[which];
-  if (!widget) return;
+function resetWidget() {
   widget.token = '';
   if (window.turnstile && widget.id != null) {
     try { window.turnstile.reset(widget.id); } catch { /* the gate still posts */ }
   }
 }
 
-async function takeToken(which) {
-  const widget = widgets[which];
-  if (!widget || widget.failed) return '';
+async function takeToken() {
+  if (widget.failed) return '';
   const start = Date.now();
   while (Date.now() - start < 2500) {
     if (widget.failed) return '';
-    const token = readWidgetToken(which);
+    const token = readWidgetToken();
     if (token) return token;
     await delay(80);
   }
-  return widget.failed ? '' : readWidgetToken(which);
+  return widget.failed ? '' : readWidgetToken();
 }
 
-async function mountTurnstile(which) {
-  const widget = widgets[which];
+async function mountTurnstile() {
   const wrap = document.getElementById(widget.wrap);
   const slot = document.getElementById(widget.slot);
   const sitekey = turnstileSitekey();
@@ -262,14 +257,14 @@ async function signInWithDevice() {
   setStatus('Asking the gate…');
   const timed = withTimeout(15000);
   try {
-    let token = await takeToken('device');
+    let token = await takeToken();
     let res = await api('/v1/auth/device', { method: 'POST', body: deviceBody(token), signal: timed.signal });
-    resetWidget('device');
+    resetWidget();
     if (res.status === 409 || (res.data && res.data.error === 'device_exists')) {
       clearSession();
-      token = await takeToken('device');
+      token = await takeToken();
       res = await api('/v1/auth/device', { method: 'POST', body: deviceBody(token), signal: timed.signal });
-      resetWidget('device');
+      resetWidget();
     }
     const result = await acceptAuth(res, 'device');
     if (result.ok) unlock();
@@ -291,7 +286,7 @@ async function signInWithGoogleCredential(credential) {
   setStatus('Checking the Google seal…');
   const timed = withTimeout(15000);
   try {
-    const token = await takeToken('google');
+    const token = await takeToken();
     const body = { idToken: credential, credential, provider: 'google' };
     if (token) body.turnstileToken = token;
     const res = await api('/v1/auth/google', {
@@ -304,7 +299,7 @@ async function signInWithGoogleCredential(credential) {
     else setStatus(result.message);
   } finally {
     timed.done();
-    resetWidget('google');
+    resetWidget();
     busy = false;
   }
 }
@@ -349,7 +344,6 @@ async function mountGoogle(clientId) {
     });
     googleFallback.hidden = true;
     if (googleNote) googleNote.hidden = true;
-    void mountTurnstile('google');
   } catch {
     googleSlot.hidden = true;
     googleFallback.hidden = false;
@@ -366,9 +360,7 @@ function applyProviders(providers) {
   const anon = anonymousOffered(providers);
   if (deviceBtn) deviceBtn.hidden = !anon;
   if (orEl) orEl.hidden = !anon;
-  const deviceCheck = document.getElementById('abyss-turnstile-wrap');
-  if (!anon && deviceCheck) deviceCheck.hidden = true;
-  if (anon) void mountTurnstile('device');
+  void mountTurnstile();
   const fine = gate && gate.querySelector('.abyss-fine');
   if (fine) fine.hidden = !anon;
 
@@ -509,5 +501,5 @@ function mountDust() {
 
 bind();
 mountDust();
-void mountTurnstile('device');
+void mountTurnstile();
 restoreOrShow();

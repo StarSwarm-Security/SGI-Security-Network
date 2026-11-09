@@ -359,6 +359,44 @@ describe("Google ID token sign-in", () => {
     expect((await unknownKid.json() as { error: string }).error).toBe("invalid_id_token");
   });
 
+  it("fetches Google certs with a request init the Workers runtime accepts", async () => {
+    // Regression: redirect "error" throws in workerd ("Invalid redirect value"),
+    // so every live Google sign-in returned 503 google_certs_unavailable.
+    expect(() => new Request(GOOGLE_JWKS_URL, { redirect: "error" })).toThrow(/redirect/i);
+    resetGoogleCertCache();
+    const inits: RequestInit[] = [];
+    const inner = jwksFetcher("test-kid", []);
+    const recording = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (init) inits.push(init);
+      // Build a real runtime Request from the same init, as globalThis.fetch would.
+      new Request(typeof input === "string" ? input : String(input), init);
+      return inner(input, init);
+    }) as typeof fetch;
+    const created = await handleGoogleSignIn(
+      googleRequest({ credential: await signToken(claims({ email_verified: true })) }),
+      googleEnv(),
+      recording,
+    );
+    expect(created.status).toBe(201);
+    expect(inits).toHaveLength(1);
+    expect(inits[0]?.redirect).toBe("manual");
+  });
+
+  it("fails closed when the Google cert endpoint redirects", async () => {
+    resetGoogleCertCache();
+    const redirecting = (async () => new Response(null, {
+      status: 302,
+      headers: { Location: "https://evil.example/certs" },
+    })) as typeof fetch;
+    const response = await handleGoogleSignIn(
+      googleRequest({ credential: await signToken(claims({ email_verified: true })) }),
+      googleEnv(),
+      redirecting,
+    );
+    expect(response.status).toBe(503);
+    expect((await response.json() as { error: string }).error).toBe("google_certs_unavailable");
+  });
+
   it("leaves Apple unimplemented when its secrets exist", async () => {
     const ready = await handleAppleSignIn(
       new Request("https://sgi-api.test/v1/auth/apple", {

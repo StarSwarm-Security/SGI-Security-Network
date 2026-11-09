@@ -183,14 +183,18 @@ async function fetchCerts(fetcher: typeof fetch, force: boolean): Promise<Cached
   const request: CertRequestInit = force
     ? {
         method: "GET",
-        redirect: "error",
+        // Workers fetch rejects redirect "error". "manual" plus the response.ok
+        // check below still fails closed on any 3xx.
+        redirect: "manual",
         headers: { Accept: "application/json" },
         cache: "no-store",
         signal: AbortSignal.timeout(5_000),
       }
     : {
         method: "GET",
-        redirect: "error",
+        // Workers fetch rejects redirect "error". "manual" plus the response.ok
+        // check below still fails closed on any 3xx.
+        redirect: "manual",
         headers: { Accept: "application/json" },
         signal: AbortSignal.timeout(5_000),
         cf: { cacheTtl: 600, cacheEverything: true },

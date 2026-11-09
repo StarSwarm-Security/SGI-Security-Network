@@ -108,6 +108,14 @@ describe("Turnstile siteverify", () => {
     expect(ok).toMatchObject({ ok: true, reason: "ok" });
   });
 
+  it("accepts the shared gate widget action on both routes when enforce is on", async () => {
+    const shared = siteverify({ success: true, action: "gate", hostname: "sgi.starswarm.workers.dev" });
+    const device = await verifyTurnstile(turnstileEnv("1"), TOKEN, "device", shared);
+    expect(device).toMatchObject({ ok: true, enforce: true, reason: "ok" });
+    const google = await verifyTurnstile(turnstileEnv("1"), TOKEN, "google", shared);
+    expect(google).toMatchObject({ ok: true, enforce: true, reason: "ok" });
+  });
+
   it("times out the Siteverify fetch and fails closed only when enforce is on", async () => {
     const open = await verifyTurnstile(turnstileEnv("0"), TOKEN, "device", hang(), 20);
     expect(open).toMatchObject({ ok: true, reason: "timeout" });
