@@ -1,6 +1,6 @@
-# StarSwarm SGI (StarSwarm Agentic Intelligence) Security Network
+# StarSwarm Agentic Intelligence
 
-SGI is StarSwarm Agentic Intelligence. Native merge of offline Analyze (**Paste Guard** Safe/Suspicious/Dangerous), Threat Index, Defender Hive, **Swarm Pass**, **Bounty board**, **Redeem** (Coming soon), and **Honest Shield** (VPN + Protect) under one cover-map shell.
+StarSwarm Agentic Intelligence is a native merge of offline Analyze (**Paste Guard** Safe/Suspicious/Dangerous), Threat Index, Defender Hive, **Swarm Pass**, **Bounty board**, **Redeem** (Coming soon), and **Honest Shield** (VPN + Protect) under one cover-map shell.
 
 **Live:** https://starswarm-sgi.pages.dev/ · https://sgi.starswarm.workers.dev/
 

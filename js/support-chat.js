@@ -96,7 +96,7 @@ function mount(host) {
     try {
       const response = await fetch(`${base}/v1/support/faq`, { headers: { Accept: "application/json" } });
       if (!response.ok) throw new Error("offline");
-      status.textContent = "Connected to SGI support";
+      status.textContent = "Connected to StarSwarm Agentic Intelligence";
     } catch {
       status.textContent = "Support offline — on-device FAQ";
     }

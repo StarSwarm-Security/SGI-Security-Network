@@ -2,7 +2,7 @@
 const KEY = 'sgi.swarmPass.v1';
 
 const BADGES = [
-  { id: 'scout', name: 'Scout', need: 0, blurb: 'Opened SGI' },
+  { id: 'scout', name: 'Scout', need: 0, blurb: 'Opened StarSwarm Agentic Intelligence' },
   { id: 'sentinel', name: 'Sentinel', need: 100, blurb: '100 Swarm Credits' },
   { id: 'swarm-lead', name: 'Swarm Lead', need: 500, blurb: '500 Swarm Credits' },
   { id: 'tour', name: 'Tour Complete', need: 'tour', blurb: 'Finished first-run tour' },
