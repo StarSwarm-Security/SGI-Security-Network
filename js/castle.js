@@ -21,7 +21,7 @@ export function mountCastle(root, { onWing } = {}) {
         <p class="lede castle-lede">Tap a label to open that deck. Dog spotlight still follows you.</p>
       </div>
       <div class="castle-stage" id="castle-stage">
-        <div class="castle-map" id="castle-map" role="img" aria-label="StarSwarm SGI interactive map">
+        <div class="castle-map" id="castle-map" role="img" aria-label="StarSwarm SGI (StarSwarm Agentic Intelligence) interactive map">
           <picture><source srcset="assets/v2/sgi-map-v20-1500x844.webp" type="image/webp"><img class="castle-photo" src="assets/v2/sgi-map-v20-1500x844.png" alt="StarSwarm map: a panther's beam lights a shield under a floating castle over a blue and purple nebula" width="1500" height="844" decoding="async"></picture>
           <div class="castle-headline" aria-hidden="true"><p class="art-kicker">StarSwarm</p><p class="art-line">Agentic Intelligence</p></div>
           ${WINGS.map(w => `
